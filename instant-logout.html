@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Processing Logout...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #020617; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .loader { border: 8px solid #1e293b; border-top: 8px solid #ef4444; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="text-center">
+        <div class="loader mx-auto mb-6"></div>
+        <h1 class="text-3xl font-black uppercase tracking-tighter text-red-500">Securing System...</h1>
+        <p class="text-slate-400 mt-2 font-bold uppercase text-xs tracking-widest">Ending Session for <span id="sysId-display">...</span></p>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbworz63t_h5Y90GfiH3kQVQX3H77om2PT7c8UDIKVufWj5YwNK71Ik5q0C7588Db64s/exec";
+        const params = new URLSearchParams(window.location.search);
+        const sysId = params.get('sysId');
+        const mac = params.get('mac');
+
+        document.getElementById('sysId-display').innerText = sysId;
+
+        async function performAutoLogout() {
+            if (!sysId || !mac) {
+                alert("Missing Device Handshake. Please use the Desktop Shortcut.");
+                return;
+            }
+
+            const payload = {
+                year: "---", sem: "---", name: "DESKTOP-SHORTCUT", roll: "AUTO-EXIT",
+                sysId: sysId, mac: mac,
+                time: new Date().toLocaleTimeString('en-US', { hour12: true }),
+                type: "Logout"
+            };
+
+            try {
+                // Send the logout signal
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                // The PowerShell script will detect this row in ~2 seconds and kill this browser window
+            } catch (e) {
+                console.error("Sync Error");
+            }
+        }
+
+        window.onload = performAutoLogout;
+    </script>
+</body>
+</html>
