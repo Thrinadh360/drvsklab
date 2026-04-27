@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LabConnect Master | Dr. V.S. Krishna GDC (A)</title>
+    <title>LabConnect | Dr. V.S. Krishna GDC (A)</title>
     <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -11,41 +11,44 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: white; margin: 0; overflow: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: white; margin: 0; padding: 0; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .cyber-border { border-top: 8px solid #4f46e5; box-shadow: 0 20px 50px rgba(79, 70, 229, 0.2); }
+        .cyber-border { border-top: 6px solid #4f46e5; box-shadow: 0 10px 40px rgba(79, 70, 229, 0.2); }
         
+        /* Form Buttons */
         .role-btn, .sub-btn { padding: 12px; border-radius: 12px; font-weight: 800; text-transform: uppercase; font-size: 10px; border: 2px solid #1e293b; transition: 0.3s; width: 100%; color: #94a3b8; text-align: center; }
         .role-btn.active, .sub-btn.active { background: #4f46e5; border-color: #6366f1; color: white; box-shadow: 0 0 15px rgba(79, 70, 229, 0.3); }
         
         .input-vivid { background: rgba(15, 23, 42, 0.8); border: 2px solid #1e293b; padding: 14px; border-radius: 12px; width: 100%; outline: none; font-weight: 700; color: white; font-size: 14px; }
         
-        /* State Control */
-        #view-desktop, #view-mobile, #view-welcome, #view-manual { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
+        /* Main View Containers */
+        #view-desktop, #view-mobile, #view-manual, #view-welcome { display: none; min-height: 100vh; width: 100vw; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .active-view { display: flex !important; }
         
         #qrcode img { border: 10px solid white; border-radius: 20px; margin: 0 auto; }
+        footer a { color: #6366f1; text-decoration: underline; font-weight: 800; }
     </style>
 </head>
 <body>
 
-    <!-- 1. PC MONITOR VIEW (QR CODE) -->
-    <div id="view-desktop" class="p-10 space-y-10">
+    <!-- 1. PC KIOSK: THE QR SCREEN -->
+    <div id="view-desktop" class="p-10 space-y-12">
         <header>
             <p class="text-indigo-400 font-bold uppercase tracking-[0.6em] text-xs mb-3">Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
             <h1 class="text-7xl font-black tracking-tighter uppercase italic">CS Connect</h1>
+            <p class="text-slate-500 font-bold uppercase text-sm mt-2 tracking-widest">Dept. of Computer Science & AI</p>
         </header>
 
         <div class="flex items-center justify-center gap-16">
             <div class="glass p-12 rounded-[4.5rem] cyber-border w-[450px]">
-                <h2 id="pc-id-display" class="text-7xl font-black text-white mb-4 tracking-tighter">CS-XX</h2>
-                <p class="text-slate-500 font-bold uppercase text-[10px] tracking-[0.3em] mb-10">Scan with Mobile to Unlock</p>
+                <h2 id="pc-id-text" class="text-7xl font-black text-white mb-4">CS-XX</h2>
+                <p class="text-slate-500 font-bold uppercase text-[10px] tracking-[0.3em] mb-10">Scan QR with Mobile to Sync</p>
                 <div id="qrcode"></div>
             </div>
 
             <div class="space-y-6">
                 <div class="w-px h-32 bg-gradient-to-b from-transparent via-indigo-500 to-transparent mx-auto"></div>
-                <button onclick="showManualView()" class="group flex flex-col items-center gap-4 hover:scale-105 transition-all">
+                <button onclick="showManual()" class="group flex flex-col items-center gap-4 hover:scale-105 transition-all">
                     <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10 group-hover:bg-indigo-600 transition-colors">
                         <i data-lucide="keyboard" class="w-10 h-10 text-indigo-400 group-hover:text-white"></i>
                     </div>
@@ -53,58 +56,58 @@
                 </button>
             </div>
         </div>
-        <div class="text-3xl font-light text-slate-600 font-mono tracking-widest" id="clock-pc">00:00:00 AM</div>
+        <div class="text-3xl font-light text-slate-600 font-mono tracking-widest" id="clock-display">00:00:00 AM</div>
     </div>
 
-    <!-- 2. MOBILE VIEW (Shows only on phone scan) -->
+    <!-- 2. MOBILE VIEW (Visible only on phone scan) -->
     <div id="view-mobile" class="p-6 overflow-y-auto">
-        <h1 class="text-5xl font-black mb-2 tracking-tighter" id="mob-pc-id">CS-XX</h1>
-        <p class="text-indigo-400 font-bold uppercase text-[10px] tracking-widest mb-8">Candidate Authentication</p>
-        <div id="form-mount-mobile" class="w-full max-w-sm"></div>
+        <h1 class="text-5xl font-black mb-2 tracking-tighter" id="mob-pc-title">CS-XX</h1>
+        <p class="text-indigo-400 font-bold uppercase text-[10px] tracking-widest mb-8">Workstation Sign-In</p>
+        <div id="mobile-form-anchor" class="w-full max-w-sm"></div>
     </div>
 
-    <!-- 3. DESKTOP MANUAL VIEW -->
+    <!-- 3. DESKTOP MANUAL FORM -->
     <div id="view-manual" class="p-10">
         <div class="w-full max-w-2xl glass p-16 rounded-[4rem] cyber-border text-left relative">
-            <button onclick="showDesktopView()" class="absolute top-10 right-10 text-slate-500 hover:text-white"><i data-lucide="arrow-left-circle" class="w-8 h-8"></i></button>
-            <h3 class="text-3xl font-black uppercase italic mb-10 tracking-tighter">Station Sign-In</h3>
-            <div id="form-mount-desktop"></div>
+            <button onclick="showQR()" class="absolute top-10 right-10 text-slate-500 hover:text-white transition-colors">
+                <i data-lucide="x-circle" class="w-10 h-10"></i>
+            </button>
+            <h3 class="text-3xl font-black uppercase italic mb-10 tracking-tighter">Station Login</h3>
+            <div id="desktop-form-anchor"></div>
         </div>
     </div>
 
-    <!-- 4. SHARED FORM COMPONENT (Hidden initially) -->
+    <!-- 4. HIDDEN MASTER FORM (Injected into Mobile/Manual views) -->
     <div id="master-form-container" class="hidden">
         <div class="grid grid-cols-3 gap-2 mb-8">
-            <button onclick="setRole('Student')" id="btn-Student" class="role-btn active">Student</button>
-            <button onclick="setRole('Lecturer')" id="btn-Lecturer" class="role-btn">Lecturer</button>
-            <button onclick="setRole('Guest')" id="btn-Guest" class="role-btn">Guest</button>
+            <button onclick="setRole('Student')" id="r-Student" class="role-btn active">Student</button>
+            <button onclick="setRole('Lecturer')" id="r-Lecturer" class="role-btn">Lecturer</button>
+            <button onclick="setRole('Guest')" id="r-Guest" class="role-btn">Guest</button>
         </div>
 
-        <form onsubmit="handleFinalSubmit(event)" class="space-y-4">
-            <input type="text" id="inp-name" placeholder="Full Name" required class="input-vivid">
+        <form onsubmit="handleHandshake(event)" class="space-y-4">
+            <input type="text" id="m-name" placeholder="Full Name" required class="input-vivid">
 
-            <!-- Student Fields -->
-            <div id="group-student" class="space-y-4">
+            <div id="student-branch" class="space-y-4">
                 <div class="grid grid-cols-2 gap-2">
-                    <button type="button" onclick="setMode('Major')" id="mode-Major" class="sub-btn active">Major</button>
-                    <button type="button" onclick="setMode('Minor')" id="mode-Minor" class="sub-btn">Minor</button>
+                    <button type="button" onclick="setSub('Major')" id="s-Major" class="sub-btn active">Major</button>
+                    <button type="button" onclick="setSub('Minor')" id="s-Minor" class="sub-btn">Minor</button>
                 </div>
-                <select id="inp-subject" class="input-vivid text-indigo-400 font-bold">
+                <select id="m-subject" class="input-vivid font-bold text-indigo-400">
                     <option>Computer Science</option><option>Artificial Intelligence</option>
                 </select>
                 <div class="grid grid-cols-2 gap-2">
-                    <select id="inp-year" class="input-vivid"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
-                    <select id="inp-sem" class="input-vivid"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option>Sem 4</option><option>Sem 5</option><option>Sem 6</option><option>Sem 7</option><option>Sem 8</option></select>
+                    <select id="m-year" class="input-vivid"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+                    <select id="m-sem" class="input-vivid"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option>Sem 4</option><option>Sem 5</option><option>Sem 6</option><option>Sem 7</option><option>Sem 8</option></select>
                 </div>
-                <input type="text" id="inp-roll" placeholder="Registration Number" class="input-vivid uppercase">
+                <input type="text" id="m-roll" placeholder="Registration Number" class="input-vivid uppercase">
             </div>
 
-            <!-- Guest/Staff Fields -->
-            <div id="group-extra" class="hidden">
-                <input type="text" id="inp-org" placeholder="Department Name" class="input-vivid">
+            <div id="guest-branch" class="hidden">
+                <input type="text" id="m-org" placeholder="Department / Organization" class="input-vivid">
             </div>
 
-            <button type="submit" class="w-full bg-indigo-600 py-6 rounded-2xl font-black text-xl uppercase shadow-2xl mt-6">Sign In & Unlock</button>
+            <button type="submit" class="w-full bg-indigo-600 py-6 rounded-2xl font-black text-xl uppercase shadow-xl mt-6 active:scale-95 transition tracking-widest">Sign In & Unlock</button>
         </form>
     </div>
 
@@ -114,12 +117,13 @@
             <i data-lucide="check" class="w-16 h-16"></i>
         </div>
         <h1 class="text-7xl font-black uppercase italic tracking-tighter">Welcome</h1>
-        <h2 id="display-name" class="text-4xl font-bold text-indigo-400 uppercase mt-4 italic">Candidate</h2>
-        <p class="mt-12 text-slate-700 font-black uppercase text-[10px] tracking-[0.5em] animate-pulse">Establishing Secure Session...</p>
+        <h2 id="welcome-user-name" class="text-4xl font-bold text-indigo-400 uppercase mt-4 italic">User</h2>
+        <p class="mt-12 text-slate-700 font-black uppercase text-[10px] tracking-[0.5em] animate-pulse">Launching Desktop Environment...</p>
     </div>
 
+    <!-- FOOTER -->
     <footer class="fixed bottom-6 w-full text-center text-[10px] font-bold text-slate-700 uppercase tracking-widest">
-        Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna GDC (A) | Dev: <a href="https://linkedin.com/in/m3nadh" target="_blank" class="text-indigo-500 underline">M.Thrinadh</a>
+        Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna GDC (A) | Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank">M.Thrinadh</a>
     </footer>
 
     <script>
@@ -128,89 +132,91 @@
         const SystemID = params.get('sysId') || "CS-01";
         const MAC = params.get('mac') || "000000000000";
         
-        let currentRole = 'Student';
+        let role = 'Student';
 
-        function setView(id) {
-            document.querySelectorAll('#view-desktop, #view-mobile, #view-welcome, #view-manual').forEach(v => v.classList.remove('active-view'));
+        function showQR() { switchView('view-desktop'); }
+        function showManual() {
+            document.getElementById('desktop-form-anchor').appendChild(document.getElementById('master-form-container'));
+            document.getElementById('master-form-container').classList.remove('hidden');
+            switchView('view-manual');
+        }
+
+        function switchView(id) {
+            document.querySelectorAll('#view-desktop, #view-mobile, #view-manual, #view-welcome').forEach(v => v.classList.remove('active-view'));
             document.getElementById(id).classList.add('active-view');
         }
-
-        function showManualView() {
-            document.getElementById('form-mount-desktop').appendChild(document.getElementById('master-form-container'));
-            document.getElementById('master-form-container').classList.remove('hidden');
-            setView('view-manual');
-        }
-
-        function showDesktopView() { setView('view-desktop'); }
 
         function init() {
             lucide.createIcons();
             if (params.get('mode') === 'mobile') {
-                document.getElementById('mob-pc-id').innerText = SystemID;
-                document.getElementById('form-mount-mobile').appendChild(document.getElementById('master-form-container'));
+                document.getElementById('mob-pc-title').innerText = SystemID;
+                document.getElementById('mobile-form-anchor').appendChild(document.getElementById('master-form-container'));
                 document.getElementById('master-form-container').classList.remove('hidden');
-                setView('view-mobile');
+                switchView('view-mobile');
             } else {
-                document.getElementById('pc-id-display').innerText = SystemID;
+                document.getElementById('pc-id-text').innerText = SystemID;
                 new QRCode(document.getElementById("qrcode"), { 
                     text: `${window.location.origin}${window.location.pathname}?mode=mobile&sysId=${SystemID}&mac=${MAC}`,
                     width: 250, height: 250 
                 });
-                setView('view-desktop');
-                setInterval(pollBackend, 2000);
+                switchView('view-desktop');
+                setInterval(pollCloud, 2000);
             }
-            setInterval(() => { document.getElementById('clock-pc').innerText = new Date().toLocaleTimeString(); }, 1000);
+            setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString(); }, 1000);
         }
 
         function setRole(r) {
-            currentRole = r;
+            role = r;
             document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-${r}`).classList.add('active');
-            document.getElementById('group-student').classList.toggle('hidden', r !== 'Student');
-            document.getElementById('group-extra').classList.toggle('hidden', r === 'Student');
-            document.getElementById('inp-org').placeholder = (r === 'Lecturer') ? "Department Name" : "Organization / Purpose";
+            document.getElementById(`r-${r}`).classList.add('active');
+            document.getElementById('student-branch').classList.toggle('hidden', r !== 'Student');
+            document.getElementById('guest-branch').classList.toggle('hidden', r === 'Student');
+            document.getElementById('m-org').placeholder = (r === 'Lecturer') ? "Department Name" : "Organization / Purpose";
         }
 
-        function setMode(m) {
+        function setSub(m) {
             document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`mode-${m}`).classList.add('active');
-            document.getElementById('inp-subject').innerHTML = (m === 'Major') 
+            document.getElementById(`s-${m}`).classList.add('active');
+            document.getElementById('m-subject').innerHTML = (m === 'Major') 
                 ? '<option>Computer Science</option><option>Artificial Intelligence</option>'
                 : '<option>Mathematics</option><option>Electronics</option>';
         }
 
-        async function handleFinalSubmit(e) {
+        async function handleHandshake(e) {
             e.preventDefault();
-            const name = document.getElementById('inp-name').value;
-            const payload = {
-                action: "lab_unlock", sysId: SystemID, mac: MAC, role: currentRole, name: name,
-                roll: (currentRole === 'Student') ? document.getElementById('inp-roll').value : 'STAFF',
-                year: (currentRole === 'Student') ? document.getElementById('inp-year').value : 'N/A',
-                sem: (currentRole === 'Student') ? document.getElementById('inp-sem').value : 'N/A'
+            const name = document.getElementById('m-name').value;
+            const data = {
+                action: "lab_unlock", sysId: SystemID, mac: MAC, role: role,
+                name: name,
+                roll: (role === 'Student') ? document.getElementById('m-roll').value : 'STAFF',
+                course: (role === 'Student') ? document.getElementById('m-subject').value : 'N/A',
+                year: (role === 'Student') ? document.getElementById('m-year').value : 'N/A',
+                sem: (role === 'Student') ? document.getElementById('m-sem').value : 'N/A'
             };
 
             if(params.get('mode') === 'mobile') {
-                document.body.innerHTML = `<div class="full-center"><h1 class="text-2xl font-black">Sync Sent</h1><p class="text-indigo-400">PC ${SystemID} Unlocking...</p></div>`;
+                document.body.innerHTML = `<div class="active-view" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh;"><h1>Handshake Sent!</h1><p class="text-indigo-400 mt-2">PC ${SystemID} unlocking...</p></div>`;
             } else {
-                document.getElementById('display-name').innerText = name;
-                setView('view-welcome');
+                document.getElementById('welcome-user-name').innerText = name;
+                switchView('view-welcome');
             }
-            await fetch(BACKEND, { method: 'POST', body: JSON.stringify(payload) });
+            await fetch(BACKEND, { method: 'POST', body: JSON.stringify(data) });
         }
 
-        async function pollBackend() {
+        async function pollCloud() {
             try {
                 const res = await fetch(`${BACKEND}?action=lab`);
-                const data = await res.json();
-                const myStatus = data.find(p => p.SystemID === SystemID);
+                const logs = await res.json();
+                const myStatus = logs.find(p => p.SystemID === SystemID);
                 if (myStatus && myStatus.Command === "UNLOCK" && myStatus.Status !== "Available") {
-                    document.getElementById('display-name').innerText = myStatus.Status;
-                    setView('view-welcome');
+                    document.getElementById('welcome-user-name').innerText = myStatus.Status;
+                    switchView('view-welcome');
                 }
             } catch(e) {}
         }
 
         window.onload = init;
+        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>
