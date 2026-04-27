@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sovereign Station | CSync v1.0</title>
+    <title>Sovereign Node | CSync v25.0</title>
     
-    <!-- Dependencies -->
+    <!-- Ultra-High Resolution Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --accent: #00f2ff; --bg: #020617; --primary: #4f46e5; }
+        :root { --accent: #00f2ff; --bg: #020617; --primary: #6366f1; }
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background: var(--bg); 
@@ -21,170 +21,243 @@
             overflow: hidden; user-select: none;
         }
 
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        /* Background Glows */
-        .glow { position: absolute; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.2; }
-        .glow-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; left: -100px; }
-        .glow-2 { width: 300px; height: 300px; background: var(--accent); bottom: -50px; right: -50px; }
-
-        /* Welcome Card Animation */
-        .welcome-anim { animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
-        @keyframes slideUp { 
-            from { opacity: 0; transform: translateY(40px) scale(0.95); } 
-            to { opacity: 1; transform: translateY(0) scale(1); } 
+        /* 1. FUTURISTIC BACKGROUND */
+        .cyber-grid {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
         }
 
-        #qrcode img { border: 12px solid white; border-radius: 24px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-        
-        .photo-frame {
-            width: 180px; height: 180px;
-            border-radius: 50%; border: 6px solid var(--primary);
-            box-shadow: 0 0 40px rgba(79, 70, 229, 0.4);
-            object-fit: cover; margin: 0 auto 25px;
+        .glow-sphere {
+            position: absolute; border-radius: 50%; filter: blur(120px);
+            z-index: -1; opacity: 0.3; animation: pulseGlow 10s infinite alternate;
         }
+        @keyframes pulseGlow { from { transform: scale(1); opacity: 0.2; } to { transform: scale(1.5); opacity: 0.4; } }
 
-        footer { letter-spacing: 1px; color: #334155; }
-        .hidden-view { display: none !important; }
+        /* 2. GLASSMORPHISM */
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .cyber-card { border-top: 4px solid var(--accent); box-shadow: 0 0 50px rgba(0, 242, 255, 0.15); }
+        
+        /* 3. TYPOGRAPHY */
+        .text-neon { color: var(--accent); text-shadow: 0 0 15px rgba(0, 242, 255, 0.5); }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+
+        /* 4. FORM ELEMENTS */
+        .input-hud { background: rgba(0, 0, 0, 0.4); border: 1px solid #1e293b; padding: 16px; border-radius: 16px; width: 100%; outline: none; transition: 0.3s; color: white; font-weight: 600; }
+        .input-hud:focus { border-color: var(--accent); background: rgba(99, 102, 241, 0.1); }
+        
+        .role-btn { @apply p-4 rounded-2xl font-black text-[10px] uppercase border-2 border-slate-800 transition-all text-slate-400; }
+        .role-btn.active { @apply border-cyan-400 text-white; background: rgba(0, 242, 255, 0.1); box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); }
+
+        /* 5. COMPONENTS */
+        #qrcode img { border: 12px solid white; border-radius: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); margin: 0 auto; }
+        .avatar-frame { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--primary); object-fit: cover; box-shadow: 0 0 50px rgba(99, 102, 241, 0.5); }
+
+        /* 6. VIEW TRANSITIONS */
+        .view { @apply hidden min-h-screen w-screen flex-col items-center justify-center text-center p-10 animate-in fade-in zoom-in duration-700; }
+        .active-view { @apply flex !important; }
+        
+        .shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); background-size: 200% 100%; animation: shimmer 3s infinite; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
     </style>
 </head>
-<body class="flex items-center justify-center p-10">
+<body class="relative">
 
-    <div class="glow glow-1"></div>
-    <div class="glow glow-2"></div>
+    <!-- HUD BACKGROUND ENGINE -->
+    <div class="cyber-grid"></div>
+    <div class="glow-sphere w-[600px] h-[600px] bg-indigo-600 top-[-200px] left-[-200px]"></div>
+    <div class="glow-sphere w-[500px] h-[500px] bg-cyan-600 bottom-[-150px] right-[-150px]"></div>
 
-    <!-- 1. THE LOCK SCREEN (QR VIEW) -->
-    <div id="lock-view" class="flex flex-col items-center space-y-10">
-        <header class="text-center">
-            <p class="text-indigo-400 font-bold uppercase tracking-[0.6em] text-xs mb-3">Dr. V.S. Krishna Govt. Degree College (Autonomous)</p>
-            <h1 style="font-family: 'Orbitron';" class="text-6xl font-black tracking-tighter uppercase italic">CSYNC</h1>
-            <p class="text-slate-500 font-medium text-lg mt-2">Department of Computer Science & AI</p>
+    <!-- 1. LOCK VIEW (THE GATE) -->
+    <div id="view-lock" class="view active-view space-y-12">
+        <header class="space-y-2">
+            <div class="inline-block px-4 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 font-bold uppercase tracking-[0.4em] text-[10px] shimmer">Dr. V.S. Krishna Govt. Degree College (Autonomous)</div>
+            <h1 class="orbitron text-7xl font-black tracking-tighter italic">CSYNC <span class="text-neon">PRO</span></h1>
+            <p class="text-slate-500 font-bold uppercase tracking-widest text-sm">Station Integrity Protocol v25.0</p>
         </header>
 
-        <div class="glass p-16 rounded-[4rem] shadow-2xl border-t-8 border-indigo-600 relative">
-            <h2 id="display-sys-id" class="text-8xl font-black text-white mb-6 tracking-tighter">CS-XX</h2>
-            <div id="qrcode"></div>
-            <p class="text-slate-500 font-black uppercase text-[10px] tracking-[0.4em] mt-10">Scan QR with CSync Native App to Unlock</p>
+        <div class="flex items-center gap-20">
+            <div class="glass p-12 rounded-[5rem] cyber-card w-[480px]">
+                <div class="flex justify-between items-center mb-8">
+                    <span class="px-4 py-1 bg-white/5 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-widest">Active Station</span>
+                    <h2 id="sys-id-lock" class="orbitron text-4xl font-black text-white">CS-XX</h2>
+                </div>
+                <div id="qrcode"></div>
+                <p class="text-slate-500 font-bold uppercase text-[10px] mt-10 tracking-[0.3em]">Scan QR with CSync Native App</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="w-[2px] h-32 bg-gradient-to-b from-transparent via-indigo-500/50 to-transparent mx-auto"></div>
+                <button onclick="showView('view-manual')" class="group flex flex-col items-center gap-4 transition-all hover:scale-105">
+                    <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10 group-hover:bg-indigo-600 transition-all shadow-2xl">
+                        <i data-lucide="keyboard" class="w-10 h-10 text-indigo-400 group-hover:text-white"></i>
+                    </div>
+                    <p class="text-indigo-400 font-black uppercase text-xs tracking-[0.2em] group-hover:text-white">Manual Sign-In</p>
+                </button>
+            </div>
+        </div>
+
+        <div id="clock" class="orbitron text-4xl font-medium text-slate-700 tracking-tighter">00:00:00 AM</div>
+    </div>
+
+    <!-- 2. MANUAL VIEW (CANDIDATE BRANCHING) -->
+    <div id="view-manual" class="view">
+        <div class="w-full max-w-3xl glass p-16 rounded-[4.5rem] cyber-card relative text-left">
+            <button onclick="showView('view-lock')" class="absolute top-12 right-12 text-slate-500 hover:text-cyan-400 transition-colors">
+                <i data-lucide="arrow-left-circle" class="w-10 h-10"></i>
+            </button>
             
-            <!-- Connection Status -->
-            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[#020617] px-6 py-2 rounded-full border border-white/10 flex items-center gap-2">
-                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                <span class="text-[9px] font-bold uppercase text-emerald-500 tracking-widest">Sovereign Cloud Active</span>
+            <h3 class="orbitron text-4xl font-black uppercase italic mb-10 tracking-tighter">Identity Node <span class="text-indigo-500">Access</span></h3>
+            
+            <div class="grid grid-cols-3 gap-3 mb-10">
+                <button onclick="setRole('Student')" id="r-Student" class="role-btn active">Student Node</button>
+                <button onclick="setRole('Lecturer')" id="r-Lecturer" class="role-btn">Lecturer Node</button>
+                <button onclick="setRole('Guest')" id="r-Guest" class="role-btn">Visitor Node</button>
             </div>
-        </div>
 
-        <div class="text-3xl font-light text-slate-500 font-mono tracking-widest" id="clock">00:00:00 AM</div>
-    </div>
+            <form onsubmit="handleManualSubmit(event)" class="grid grid-cols-2 gap-6">
+                <input type="text" id="m-name" placeholder="Full Identity Name" required class="col-span-2 input-hud">
 
-    <!-- 2. THE WELCOME SCREEN (HANDSHAKE SUCCESS) -->
-    <div id="welcome-view" class="hidden-view text-center welcome-anim">
-        <div class="relative inline-block">
-            <img id="u-photo" src="" class="photo-frame">
-            <div class="absolute bottom-6 right-2 bg-emerald-500 p-2 rounded-full border-4 border-[#020617] shadow-xl">
-                <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
-            </div>
-        </div>
-        
-        <h1 class="text-7xl font-black uppercase italic tracking-tighter leading-none mb-4">Welcome</h1>
-        <h2 id="u-name" class="text-3xl font-bold text-indigo-400 uppercase tracking-[0.1em] italic">Student Name</h2>
-        
-        <!-- PERSONALIZED AI GREETING -->
-        <div class="mt-10 max-w-lg mx-auto glass p-6 rounded-2xl border-indigo-500/20">
-            <p id="ai-greeting" class="text-slate-400 italic font-medium leading-relaxed">"Initializing your high-performance environment. Great things happen in this lab."</p>
-        </div>
+                <!-- Student Fields -->
+                <div id="branch-student" class="contents">
+                    <select id="m-major" class="input-hud">
+                        <option>Computer Science</option><option>Artificial Intelligence</option>
+                        <option>Mathematics</option><option>Electronics</option>
+                    </select>
+                    <select id="m-year" class="input-hud"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+                    <input type="text" id="m-roll" placeholder="Registration Number (Ex: 23CS001)" class="col-span-2 input-hud uppercase">
+                </div>
 
-        <div class="mt-16 flex flex-col items-center">
-            <div class="px-8 py-3 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center gap-3">
-                <div class="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div>
-                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400">Restoring Desktop Shell...</p>
-            </div>
+                <!-- Guest Fields -->
+                <div id="branch-guest" class="hidden col-span-2">
+                    <input type="text" id="m-org" placeholder="Department / Home Organization" class="input-hud">
+                </div>
+
+                <button type="submit" class="col-span-2 bg-indigo-600 py-6 rounded-3xl font-black text-xl uppercase shadow-2xl active:scale-95 transition-all mt-6 tracking-widest italic">Request Session Authorization</button>
+            </form>
         </div>
     </div>
 
-    <!-- INSTITUTIONAL FOOTER -->
-    <footer class="fixed bottom-8 w-full text-center text-[10px] font-bold uppercase tracking-widest">
-        Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna GDC (A) <br>
-        Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank" class="text-indigo-500 underline">M.Thrinadh</a>
+    <!-- 3. PENDING VIEW (APPROVAL PIPELINE) -->
+    <div id="view-pending" class="view space-y-10">
+        <div class="relative">
+            <div class="w-32 h-32 border-4 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin mx-auto"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <i data-lucide="shield-check" class="text-yellow-500 w-12 h-12"></i>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h1 class="orbitron text-6xl font-black uppercase italic tracking-tighter">Awaiting <span class="text-yellow-500">Lecturer</span></h1>
+            <div class="glass p-8 rounded-[3rem] max-w-lg mx-auto border-l-8 border-yellow-500">
+                <p class="text-slate-300 font-bold">Roll <span id="pending-roll" class="text-yellow-400">---</span>: Identity verification request broadcast to Department Faculty.</p>
+            </div>
+        </div>
+        <button onclick="showView('view-lock')" class="text-slate-600 uppercase font-black text-[10px] tracking-[0.5em] hover:text-white transition">Terminate Request</button>
+    </div>
+
+    <!-- 4. WELCOME VIEW (HANDSHAKE SUCCESS) -->
+    <div id="view-welcome" class="view">
+        <div class="relative inline-block mb-8">
+            <img id="u-photo" src="" class="avatar-frame">
+            <div class="absolute bottom-6 right-2 bg-emerald-500 p-3 rounded-full border-8 border-[#020617] shadow-2xl">
+                <i data-lucide="verified" class="w-8 h-8 text-white"></i>
+            </div>
+        </div>
+        
+        <h1 class="orbitron text-8xl font-black uppercase italic tracking-tighter mb-4">Welcome</h1>
+        <h2 id="u-name" class="orbitron text-4xl font-bold text-indigo-400 uppercase italic tracking-widest">Candidate</h2>
+        
+        <div class="mt-12 max-w-2xl mx-auto glass p-8 rounded-[2.5rem] border-emerald-500/20 relative overflow-hidden shimmer">
+            <p id="ai-greeting" class="text-slate-400 italic font-bold leading-relaxed text-lg">"Establishing highly secure workstation session. Welcome back to the Department of CS & AI."</p>
+        </div>
+
+        <div class="mt-20 px-10 py-4 bg-indigo-600/10 border border-indigo-500/20 rounded-3xl inline-flex items-center gap-4">
+            <div class="w-3 h-3 bg-indigo-400 rounded-full animate-ping"></div>
+            <p class="orbitron text-xs font-black uppercase tracking-[0.4em] text-indigo-400">Loading Native Desktop Enforcer...</p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="fixed bottom-10 w-full text-center text-[10px] font-bold text-slate-800 uppercase tracking-[0.5em] italic">
+        © 2026 | Dept of Computer Science | Dr. V.S. Krishna GDC (A) | Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank" class="text-indigo-600 underline">M.Thrinadh</a>
     </footer>
 
     <script>
         const BACKEND = "https://script.google.com/macros/s/AKfycbzuCEHK3h92DIpPwB89dxQdXnfkGyRTm2oOpT-5p2503vsLylptMdzCJfwpXk6Z7O2U/exec";
-        
-        // Parse PC Identity from URL Params (passed by PowerShell)
         const params = new URLSearchParams(window.location.search);
         const SystemID = params.get('sysId') || "CS-01";
-        const MAC = params.get('mac') || "00-00-00-00-00-00";
+        const MAC = params.get('mac') || "000000000000";
+        let currentRole = 'Student';
 
-        document.getElementById('display-sys-id').innerText = SystemID;
-
-        // 1. GENERATE STATION QR CODE
-        function generateQR() {
-            const origin = window.location.origin + window.location.pathname;
-            const qrData = `${origin}?mode=mobile&sysId=${SystemID}&mac=${MAC}`;
-            
-            new QRCode(document.getElementById("qrcode"), {
-                text: qrData,
-                width: 250, height: 250,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
+        function showView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(id).classList.add('active-view');
+            lucide.createIcons();
         }
 
-        // 2. POLL SOVEREIGN CLOUD FOR HANDSHAKE
-        async function pollHandshake() {
+        function setRole(r) {
+            currentRole = r;
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('r-' + r).classList.add('active');
+            document.getElementById('branch-student').classList.toggle('hidden', r !== 'Student');
+            document.getElementById('branch-guest').classList.toggle('hidden', r === 'Student');
+            document.getElementById('m-org').placeholder = (r === 'Lecturer') ? "Confirm Department" : "Organization / Home Institution";
+        }
+
+        async function handleManualSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('m-name').value;
+            const roll = document.getElementById('m-roll').value || 'GUEST-ACCESS';
+            
+            if (currentRole === 'Student') {
+                document.getElementById('pending-roll').innerText = roll;
+                showView('view-pending');
+                await fetch(BACKEND, { method: 'POST', body: JSON.stringify({
+                    action: "manual_request", id: roll, name: name, sysId: SystemID, role: currentRole
+                })});
+            } else {
+                document.getElementById('u-name').innerText = name;
+                showView('view-welcome');
+                await fetch(BACKEND, { method: 'POST', body: JSON.stringify({
+                    action: "lab_unlock", id: roll, name: name, sysId: SystemID, role: currentRole, mac: MAC
+                })});
+            }
+        }
+
+        async function pollStatus() {
             try {
                 const res = await fetch(`${BACKEND}?action=lab`);
                 const data = await res.json();
-                
-                // Find the command for THIS system
                 const pc = data.find(p => p.SystemID === SystemID);
-
-                if (pc && pc.Command === "UNLOCK") {
-                    handleUnlockTransition(pc);
+                
+                if (pc && pc.Command === "UNLOCK" && pc.Status !== "Available") {
+                    const parts = pc.Status.split('|');
+                    document.getElementById('u-name').innerText = parts[0];
+                    document.getElementById('ai-greeting').innerText = parts[1] || "Building the Future through CSync.";
+                    document.getElementById('u-photo').src = pc.PhotoBase64 || "https://ui-avatars.com/api/?background=4f46e5&color=fff&name=" + parts[0];
+                    showView('view-welcome');
                 }
-            } catch (e) {
-                console.log("CSync Syncing...");
-            }
-        }
-
-        function handleUnlockTransition(pc) {
-            // Status field contains "Name | AI Greeting" from Engine v25.0
-            const parts = pc.Status.split('|');
-            document.getElementById('u-name').innerText = parts[0];
-            document.getElementById('ai-greeting').innerText = parts[1] || "Work hard, code better.";
-            
-            // PhotoBase64 contains the registered face
-            if (pc.PhotoBase64 && pc.PhotoBase64.length > 100) {
-                document.getElementById('u-photo').src = pc.PhotoBase64;
-            } else {
-                document.getElementById('u-photo').src = "https://ui-avatars.com/api/?background=4f46e5&color=fff&name=" + parts[0];
-            }
-
-            document.getElementById('lock-view').classList.add('hidden-view');
-            document.getElementById('welcome-view').classList.remove('hidden-view');
-            
-            lucide.createIcons();
-            // Transition signals PowerShell to kill browser and start Explorer.exe
-        }
-
-        // 3. UI UTILITIES
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB', { hour12: true });
+                if (pc && pc.Command === "LOCK" && document.getElementById('view-welcome').classList.contains('active-view')) location.reload();
+            } catch (e) {}
         }
 
         window.onload = () => {
-            generateQR();
+            document.getElementById('sys-id-lock').innerText = SystemID;
+            new QRCode(document.getElementById("qrcode"), { 
+                text: `${window.location.origin}${window.location.pathname}?mode=mobile&sysId=${SystemID}&mac=${MAC}`, 
+                width: 250, height: 250 
+            });
+            setInterval(pollStatus, 2000);
+            setInterval(() => { 
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB', { hour12: true }); 
+            }, 1000);
             lucide.createIcons();
-            setInterval(updateClock, 1000);
-            setInterval(pollHandshake, 2000); // 2 second polling interval
-
-            // Kiosk Lockdown Logic: Disable Right Click & F12
+            
+            // Kiosk Integrity Logic
             document.addEventListener('contextmenu', e => e.preventDefault());
-            document.onkeydown = e => {
-                if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false;
-            };
+            document.onkeydown = e => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false; };
         };
     </script>
 </body>
