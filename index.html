@@ -2,244 +2,212 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CS Connect | Dr. V.S. Krishna GDC (A)</title>
-    
-    <!-- PWA & Mobile Optimization -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LabConnect Master | Dr. V.S. Krishna GDC (A)</title>
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --accent: #00f2ff; --bg: #020617; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: white; margin: 0; overflow: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .cyber-border { border-top: 8px solid #4f46e5; box-shadow: 0 20px 50px rgba(79, 70, 229, 0.2); }
         
-        /* Desktop Blocker */
-        @media (min-width: 1024px) { #desktop-blocker { display: flex !important; } #app-shell { display: none; } }
-
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .cyber-card { border-top: 4px solid var(--accent); box-shadow: 0 15px 40px rgba(0, 242, 255, 0.1); }
-        .video-wrap { width: 220px; height: 220px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); margin: 0 auto; box-shadow: 0 0 30px var(--accent); }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        .role-btn, .sub-btn { padding: 12px; border-radius: 12px; font-weight: 800; text-transform: uppercase; font-size: 10px; border: 2px solid #1e293b; transition: 0.3s; width: 100%; color: #94a3b8; text-align: center; }
+        .role-btn.active, .sub-btn.active { background: #4f46e5; border-color: #6366f1; color: white; box-shadow: 0 0 15px rgba(79, 70, 229, 0.3); }
         
-        .ann-glow { border-left: 4px solid #ff4d4d; animation: ann-pulse 2s infinite alternate; }
-        @keyframes ann-pulse { from { border-color: rgba(255,77,77,0.3); } to { border-color: #ff4d4d; box-shadow: 0 0 15px rgba(255,77,77,0.2); } }
-
-        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 10px calc(15px + env(safe-area-inset-bottom)); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100; font-size: 10px; font-weight: 700; text-align: center; color: #64748b; border-top: 1px solid #1e293b; }
-        .main-scroll { padding-bottom: 140px; }
-        a { color: var(--accent); text-decoration: underline; }
+        .input-vivid { background: rgba(15, 23, 42, 0.8); border: 2px solid #1e293b; padding: 14px; border-radius: 12px; width: 100%; outline: none; font-weight: 700; color: white; font-size: 14px; }
+        
+        /* State Control */
+        #view-desktop, #view-mobile, #view-welcome, #view-manual { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
+        .active-view { display: flex !important; }
+        
+        #qrcode img { border: 10px solid white; border-radius: 20px; margin: 0 auto; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
-    <!-- 1. DESKTOP ACCESS BLOCKER -->
-    <div id="desktop-blocker" class="hidden fixed inset-0 bg-black z-[9999] flex-col items-center justify-center p-10 text-center">
-        <i data-lucide="smartphone" class="w-20 h-20 text-cyan-400 mb-6"></i>
-        <h1 class="text-3xl font-black uppercase">Mobile Access Only</h1>
-        <p class="text-slate-400 mt-2">CS Connect requires a mobile device for biometric hardware binding.</p>
-    </div>
-
-    <!-- 2. MAIN APP SHELL -->
-    <div id="app-shell" class="flex-1 flex flex-col p-5 main-scroll">
-        
-        <header class="text-center mb-6 pt-4">
-            <p class="text-[9px] font-bold text-cyan-400 uppercase tracking-[0.4em] mb-1">Dr. V.S. Krishna Govt. Degree College (A)</p>
-            <h1 style="font-family: 'Orbitron', sans-serif;" class="text-2xl font-bold tracking-tighter">CS CONNECT</h1>
+    <!-- 1. PC MONITOR VIEW (QR CODE) -->
+    <div id="view-desktop" class="p-10 space-y-10">
+        <header>
+            <p class="text-indigo-400 font-bold uppercase tracking-[0.6em] text-xs mb-3">Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
+            <h1 class="text-7xl font-black tracking-tighter uppercase italic">CS Connect</h1>
         </header>
 
-        <!-- ANNOUNCEMENT BLOCK -->
-        <div id="ann-card" class="hidden glass p-4 rounded-2xl mb-6 ann-glow">
-            <audio id="notif-ding" src="https://www.soundjay.com/buttons/beep-07.mp3"></audio>
-            <div class="flex items-center gap-2 mb-2">
-                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                <span id="ann-sender" class="text-[10px] font-black uppercase text-red-500">OFFICE NOTICE</span>
-            </div>
-            <div id="ann-media"></div>
-            <p id="ann-body" class="text-sm font-semibold text-slate-100 leading-relaxed"></p>
-        </div>
-
-        <div id="status-pill" class="glass py-3 px-6 rounded-full text-center text-[10px] font-black uppercase tracking-widest mb-8 text-slate-500 border-slate-800">
-            Initialising Cloud Sync...
-        </div>
-
-        <main id="view-container" class="flex-1">
-            
-            <!-- VIEW: ROLE SELECTION -->
-            <div id="view-roles" class="hidden space-y-4">
-                <h3 class="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Verify Your Identity</h3>
-                <button onclick="pickRole('Student')" class="w-full glass p-6 rounded-3xl text-left border-l-4 border-cyan-500 active:scale-95 transition">
-                    <h4 class="font-black text-xl uppercase">Student</h4>
-                    <p class="text-[10px] text-slate-400">Computer Science & AI Majors</p>
-                </button>
-                <button onclick="pickRole('Lecturer')" class="w-full glass p-6 rounded-3xl text-left border-l-4 border-indigo-500 active:scale-95 transition">
-                    <h4 class="font-black text-xl uppercase">Lecturer</h4>
-                    <p class="text-[10px] text-slate-400">Department Faculty</p>
-                </button>
-            </button>
+        <div class="flex items-center justify-center gap-16">
+            <div class="glass p-12 rounded-[4.5rem] cyber-border w-[450px]">
+                <h2 id="pc-id-display" class="text-7xl font-black text-white mb-4 tracking-tighter">CS-XX</h2>
+                <p class="text-slate-500 font-bold uppercase text-[10px] tracking-[0.3em] mb-10">Scan with Mobile to Unlock</p>
+                <div id="qrcode"></div>
             </div>
 
-            <!-- VIEW: REGISTRATION -->
-            <div id="view-reg" class="hidden space-y-4">
-                <div class="glass p-8 rounded-[2.5rem] cyber-card">
-                    <h3 id="reg-title" class="text-xl font-black uppercase text-cyan-400 mb-6">Enrollment</h3>
-                    <div class="space-y-4">
-                        <input id="reg-id" type="text" placeholder="Roll No / Employee ID" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none">
-                        <input id="reg-name" type="text" placeholder="Full Name" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none">
-                        <div id="stu-fields" class="hidden space-y-4">
-                            <select id="reg-major" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10">
-                                <option>Computer Science</option><option>Artificial Intelligence</option>
-                            </select>
-                            <select id="reg-year" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10">
-                                <option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option>
-                            </select>
-                        </div>
-                        <button onclick="submitRegistration()" class="w-full bg-cyan-500 text-black font-black py-5 rounded-xl uppercase mt-4 tracking-widest shadow-lg shadow-cyan-500/20">Register Device</button>
+            <div class="space-y-6">
+                <div class="w-px h-32 bg-gradient-to-b from-transparent via-indigo-500 to-transparent mx-auto"></div>
+                <button onclick="showManualView()" class="group flex flex-col items-center gap-4 hover:scale-105 transition-all">
+                    <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10 group-hover:bg-indigo-600 transition-colors">
+                        <i data-lucide="keyboard" class="w-10 h-10 text-indigo-400 group-hover:text-white"></i>
                     </div>
-                </div>
+                    <p class="text-indigo-400 font-black uppercase text-xs tracking-widest">Manual Login</p>
+                </button>
             </div>
-
-            <!-- VIEW: AUTHENTICATION -->
-            <div id="view-auth" class="hidden space-y-6">
-                <div id="step-fp" class="glass p-10 rounded-[3.5rem] text-center cyber-card">
-                    <i data-lucide="fingerprint" class="w-16 h-16 mx-auto mb-6 text-cyan-400"></i>
-                    <h3 class="text-white font-black uppercase mb-8 tracking-tighter">Hardware Verify</h3>
-                    <button onclick="verifyFP()" class="w-full bg-cyan-500 text-black font-black py-5 rounded-2xl uppercase tracking-widest active:scale-95 transition">Authenticate</button>
-                </div>
-
-                <div id="step-face" class="hidden glass p-10 rounded-[3.5rem] text-center cyber-card">
-                    <div class="video-wrap mb-6"><video id="video" autoplay muted playsinline></video></div>
-                    <h3 id="face-status" class="text-lg font-black uppercase text-cyan-400 animate-pulse">Scanning Liveness...</h3>
-                </div>
-
-                <div id="step-lab" class="hidden glass p-10 rounded-[3.5rem] text-center border-t-4 border-emerald-500">
-                    <h2 class="text-2xl font-black text-emerald-400 uppercase">Verified</h2>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-8 tracking-widest">Attendance Recorded Successfully</p>
-                    <button onclick="openLabQR()" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase tracking-widest shadow-xl">Scan Lab PC QR</button>
-                    <div id="qr-reader" class="mt-4 rounded-3xl overflow-hidden"></div>
-                </div>
-            </div>
-        </main>
-
-        <footer class="app-footer">
-            <p>Copyright © 2026 | Dept of Computer Science</p>
-            <p>Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
-            <p class="mt-1">Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank">M.Thrinadh</a></p>
-        </footer>
+        </div>
+        <div class="text-3xl font-light text-slate-600 font-mono tracking-widest" id="clock-pc">00:00:00 AM</div>
     </div>
 
+    <!-- 2. MOBILE VIEW (Shows only on phone scan) -->
+    <div id="view-mobile" class="p-6 overflow-y-auto">
+        <h1 class="text-5xl font-black mb-2 tracking-tighter" id="mob-pc-id">CS-XX</h1>
+        <p class="text-indigo-400 font-bold uppercase text-[10px] tracking-widest mb-8">Candidate Authentication</p>
+        <div id="form-mount-mobile" class="w-full max-w-sm"></div>
+    </div>
+
+    <!-- 3. DESKTOP MANUAL VIEW -->
+    <div id="view-manual" class="p-10">
+        <div class="w-full max-w-2xl glass p-16 rounded-[4rem] cyber-border text-left relative">
+            <button onclick="showDesktopView()" class="absolute top-10 right-10 text-slate-500 hover:text-white"><i data-lucide="arrow-left-circle" class="w-8 h-8"></i></button>
+            <h3 class="text-3xl font-black uppercase italic mb-10 tracking-tighter">Station Sign-In</h3>
+            <div id="form-mount-desktop"></div>
+        </div>
+    </div>
+
+    <!-- 4. SHARED FORM COMPONENT (Hidden initially) -->
+    <div id="master-form-container" class="hidden">
+        <div class="grid grid-cols-3 gap-2 mb-8">
+            <button onclick="setRole('Student')" id="btn-Student" class="role-btn active">Student</button>
+            <button onclick="setRole('Lecturer')" id="btn-Lecturer" class="role-btn">Lecturer</button>
+            <button onclick="setRole('Guest')" id="btn-Guest" class="role-btn">Guest</button>
+        </div>
+
+        <form onsubmit="handleFinalSubmit(event)" class="space-y-4">
+            <input type="text" id="inp-name" placeholder="Full Name" required class="input-vivid">
+
+            <!-- Student Fields -->
+            <div id="group-student" class="space-y-4">
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="setMode('Major')" id="mode-Major" class="sub-btn active">Major</button>
+                    <button type="button" onclick="setMode('Minor')" id="mode-Minor" class="sub-btn">Minor</button>
+                </div>
+                <select id="inp-subject" class="input-vivid text-indigo-400 font-bold">
+                    <option>Computer Science</option><option>Artificial Intelligence</option>
+                </select>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="inp-year" class="input-vivid"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+                    <select id="inp-sem" class="input-vivid"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option>Sem 4</option><option>Sem 5</option><option>Sem 6</option><option>Sem 7</option><option>Sem 8</option></select>
+                </div>
+                <input type="text" id="inp-roll" placeholder="Registration Number" class="input-vivid uppercase">
+            </div>
+
+            <!-- Guest/Staff Fields -->
+            <div id="group-extra" class="hidden">
+                <input type="text" id="inp-org" placeholder="Department Name" class="input-vivid">
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 py-6 rounded-2xl font-black text-xl uppercase shadow-2xl mt-6">Sign In & Unlock</button>
+        </form>
+    </div>
+
+    <!-- 5. WELCOME SCREEN -->
+    <div id="view-welcome" class="fixed inset-0 bg-[#020617] z-[5000]">
+        <div class="w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center mb-8 shadow-2xl animate-pulse">
+            <i data-lucide="check" class="w-16 h-16"></i>
+        </div>
+        <h1 class="text-7xl font-black uppercase italic tracking-tighter">Welcome</h1>
+        <h2 id="display-name" class="text-4xl font-bold text-indigo-400 uppercase mt-4 italic">Candidate</h2>
+        <p class="mt-12 text-slate-700 font-black uppercase text-[10px] tracking-[0.5em] animate-pulse">Establishing Secure Session...</p>
+    </div>
+
+    <footer class="fixed bottom-6 w-full text-center text-[10px] font-bold text-slate-700 uppercase tracking-widest">
+        Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna GDC (A) | Dev: <a href="https://linkedin.com/in/m3nadh" target="_blank" class="text-indigo-500 underline">M.Thrinadh</a>
+    </footer>
+
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzuCEHK3h92DIpPwB89dxQdXnfkGyRTm2oOpT-5p2503vsLylptMdzCJfwpXk6Z7O2U/exec";
-        const UUID = btoa(navigator.userAgent + screen.width);
-        let USER = JSON.parse(localStorage.getItem('cs_connect_v2_user'));
-        let lastAnnId = localStorage.getItem('cs_last_ann') || 0;
-        let regRole = "";
+        const BACKEND = "https://script.google.com/macros/s/AKfycbzuCEHK3h92DIpPwB89dxQdXnfkGyRTm2oOpT-5p2503vsLylptMdzCJfwpXk6Z7O2U/exec";
+        const params = new URLSearchParams(window.location.search);
+        const SystemID = params.get('sysId') || "CS-01";
+        const MAC = params.get('mac') || "000000000000";
+        
+        let currentRole = 'Student';
 
-        async function init() {
+        function setView(id) {
+            document.querySelectorAll('#view-desktop, #view-mobile, #view-welcome, #view-manual').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(id).classList.add('active-view');
+        }
+
+        function showManualView() {
+            document.getElementById('form-mount-desktop').appendChild(document.getElementById('master-form-container'));
+            document.getElementById('master-form-container').classList.remove('hidden');
+            setView('view-manual');
+        }
+
+        function showDesktopView() { setView('view-desktop'); }
+
+        function init() {
             lucide.createIcons();
-            if(!USER) {
-                document.getElementById('view-roles').classList.remove('hidden');
+            if (params.get('mode') === 'mobile') {
+                document.getElementById('mob-pc-id').innerText = SystemID;
+                document.getElementById('form-mount-mobile').appendChild(document.getElementById('master-form-container'));
+                document.getElementById('master-form-container').classList.remove('hidden');
+                setView('view-mobile');
             } else {
-                document.getElementById('view-auth').classList.remove('hidden');
-                validateTimeWindow();
-                fetchAnnouncements();
-                setInterval(validateTimeWindow, 60000);
+                document.getElementById('pc-id-display').innerText = SystemID;
+                new QRCode(document.getElementById("qrcode"), { 
+                    text: `${window.location.origin}${window.location.pathname}?mode=mobile&sysId=${SystemID}&mac=${MAC}`,
+                    width: 250, height: 250 
+                });
+                setView('view-desktop');
+                setInterval(pollBackend, 2000);
             }
+            setInterval(() => { document.getElementById('clock-pc').innerText = new Date().toLocaleTimeString(); }, 1000);
         }
 
-        function validateTimeWindow() {
-            const hr = new Date().getHours();
-            const pill = document.getElementById('status-pill');
-            if (hr >= 10 && hr < 17) {
-                pill.innerHTML = `<span class="text-cyan-400">● PORTAL ACTIVE: ${hr < 13 ? 'FN' : 'AN'} SESSION</span>`;
-                return true;
-            } else {
-                pill.innerHTML = `<span class="text-red-500">○ PORTAL CLOSED (10AM - 5PM ONLY)</span>`;
-                return false;
-            }
+        function setRole(r) {
+            currentRole = r;
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${r}`).classList.add('active');
+            document.getElementById('group-student').classList.toggle('hidden', r !== 'Student');
+            document.getElementById('group-extra').classList.toggle('hidden', r === 'Student');
+            document.getElementById('inp-org').placeholder = (r === 'Lecturer') ? "Department Name" : "Organization / Purpose";
         }
 
-        async function fetchAnnouncements() {
+        function setMode(m) {
+            document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`mode-${m}`).classList.add('active');
+            document.getElementById('inp-subject').innerHTML = (m === 'Major') 
+                ? '<option>Computer Science</option><option>Artificial Intelligence</option>'
+                : '<option>Mathematics</option><option>Electronics</option>';
+        }
+
+        async function handleFinalSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('inp-name').value;
+            const payload = {
+                action: "lab_unlock", sysId: SystemID, mac: MAC, role: currentRole, name: name,
+                roll: (currentRole === 'Student') ? document.getElementById('inp-roll').value : 'STAFF',
+                year: (currentRole === 'Student') ? document.getElementById('inp-year').value : 'N/A',
+                sem: (currentRole === 'Student') ? document.getElementById('inp-sem').value : 'N/A'
+            };
+
+            if(params.get('mode') === 'mobile') {
+                document.body.innerHTML = `<div class="full-center"><h1 class="text-2xl font-black">Sync Sent</h1><p class="text-indigo-400">PC ${SystemID} Unlocking...</p></div>`;
+            } else {
+                document.getElementById('display-name').innerText = name;
+                setView('view-welcome');
+            }
+            await fetch(BACKEND, { method: 'POST', body: JSON.stringify(payload) });
+        }
+
+        async function pollBackend() {
             try {
-                const res = await fetch(`${GAS_URL}?action=getAnn&roll=${USER.id}&year=${USER.year || 0}`);
+                const res = await fetch(`${BACKEND}?action=lab`);
                 const data = await res.json();
-                if (data.id > lastAnnId) {
-                    document.getElementById('notif-ding').play();
-                    document.getElementById('ann-card').classList.remove('hidden');
-                    document.getElementById('ann-sender').innerText = data.sender;
-                    document.getElementById('ann-body').innerText = data.body;
-                    localStorage.setItem('cs_last_ann', data.id);
+                const myStatus = data.find(p => p.SystemID === SystemID);
+                if (myStatus && myStatus.Command === "UNLOCK" && myStatus.Status !== "Available") {
+                    document.getElementById('display-name').innerText = myStatus.Status;
+                    setView('view-welcome');
                 }
             } catch(e) {}
-        }
-
-        function pickRole(role) {
-            regRole = role;
-            document.getElementById('view-roles').classList.add('hidden');
-            document.getElementById('view-reg').classList.remove('hidden');
-            document.getElementById('reg-title').innerText = role + " Enrollment";
-            if(role === 'Student') document.getElementById('stu-fields').classList.remove('hidden');
-        }
-
-        async function submitRegistration() {
-            const payload = {
-                action: "register",
-                role: regRole,
-                id: document.getElementById('reg-id').value,
-                name: document.getElementById('reg-name').value,
-                major: document.getElementById('reg-major').value || "N/A",
-                year: document.getElementById('reg-year').value || "N/A",
-                uuid: UUID
-            };
-            const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-            const result = await res.text();
-            if (result === "REGISTRATION_SUCCESS") {
-                localStorage.setItem('cs_connect_v2_user', JSON.stringify(payload));
-                location.reload();
-            } else { alert(result); }
-        }
-
-        async function verifyFP() {
-            navigator.vibrate(50);
-            document.getElementById('step-fp').classList.add('hidden');
-            document.getElementById('step-face').classList.remove('hidden');
-            startFaceAI();
-        }
-
-        async function startFaceAI() {
-            const MODEL_URL = 'https://vladmandic.github.io/face-api/model/';
-            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-            document.getElementById('video').srcObject = stream;
-
-            const loop = setInterval(async () => {
-                const detect = await faceapi.detectSingleFace(document.getElementById('video'), new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
-                if (detect && detect.expressions.happy > 0.8) {
-                    clearInterval(loop);
-                    logPresence();
-                }
-            }, 800);
-        }
-
-        async function logPresence() {
-            document.getElementById('face-status').innerText = "VERIFIED";
-            await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'attendance', id: USER.id, role: USER.role, uuid: UUID }) });
-            document.getElementById('step-face').classList.add('hidden');
-            document.getElementById('step-lab').classList.remove('hidden');
-        }
-
-        function openLabQR() {
-            const scanner = new Html5Qrcode("qr-reader");
-            scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (url) => {
-                const p = new URLSearchParams(url.split('?')[1]);
-                fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'lab_unlock', id: USER.id, roll: USER.id, name: USER.name, sysId: p.get('sysId'), mac: p.get('mac') }) });
-                alert("Sign-in sent to PC " + p.get('sysId'));
-                scanner.stop();
-            });
         }
 
         window.onload = init;
