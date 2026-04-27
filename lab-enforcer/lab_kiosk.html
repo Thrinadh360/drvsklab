@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Station | CSync v1.0</title>
+    
+    <!-- Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --accent: #00f2ff; --bg: #020617; --primary: #4f46e5; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: white; 
+            height: 100vh; width: 100vw;
+            overflow: hidden; user-select: none;
+        }
+
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        /* Background Glows */
+        .glow { position: absolute; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.2; }
+        .glow-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; left: -100px; }
+        .glow-2 { width: 300px; height: 300px; background: var(--accent); bottom: -50px; right: -50px; }
+
+        /* Welcome Card Animation */
+        .welcome-anim { animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+        @keyframes slideUp { 
+            from { opacity: 0; transform: translateY(40px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+
+        #qrcode img { border: 12px solid white; border-radius: 24px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        
+        .photo-frame {
+            width: 180px; height: 180px;
+            border-radius: 50%; border: 6px solid var(--primary);
+            box-shadow: 0 0 40px rgba(79, 70, 229, 0.4);
+            object-fit: cover; margin: 0 auto 25px;
+        }
+
+        footer { letter-spacing: 1px; color: #334155; }
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="flex items-center justify-center p-10">
+
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <!-- 1. THE LOCK SCREEN (QR VIEW) -->
+    <div id="lock-view" class="flex flex-col items-center space-y-10">
+        <header class="text-center">
+            <p class="text-indigo-400 font-bold uppercase tracking-[0.6em] text-xs mb-3">Dr. V.S. Krishna Govt. Degree College (Autonomous)</p>
+            <h1 style="font-family: 'Orbitron';" class="text-6xl font-black tracking-tighter uppercase italic">CSYNC</h1>
+            <p class="text-slate-500 font-medium text-lg mt-2">Department of Computer Science & AI</p>
+        </header>
+
+        <div class="glass p-16 rounded-[4rem] shadow-2xl border-t-8 border-indigo-600 relative">
+            <h2 id="display-sys-id" class="text-8xl font-black text-white mb-6 tracking-tighter">CS-XX</h2>
+            <div id="qrcode"></div>
+            <p class="text-slate-500 font-black uppercase text-[10px] tracking-[0.4em] mt-10">Scan QR with CSync Native App to Unlock</p>
+            
+            <!-- Connection Status -->
+            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[#020617] px-6 py-2 rounded-full border border-white/10 flex items-center gap-2">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span class="text-[9px] font-bold uppercase text-emerald-500 tracking-widest">Sovereign Cloud Active</span>
+            </div>
+        </div>
+
+        <div class="text-3xl font-light text-slate-500 font-mono tracking-widest" id="clock">00:00:00 AM</div>
+    </div>
+
+    <!-- 2. THE WELCOME SCREEN (HANDSHAKE SUCCESS) -->
+    <div id="welcome-view" class="hidden-view text-center welcome-anim">
+        <div class="relative inline-block">
+            <img id="u-photo" src="" class="photo-frame">
+            <div class="absolute bottom-6 right-2 bg-emerald-500 p-2 rounded-full border-4 border-[#020617] shadow-xl">
+                <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+            </div>
+        </div>
+        
+        <h1 class="text-7xl font-black uppercase italic tracking-tighter leading-none mb-4">Welcome</h1>
+        <h2 id="u-name" class="text-3xl font-bold text-indigo-400 uppercase tracking-[0.1em] italic">Student Name</h2>
+        
+        <!-- PERSONALIZED AI GREETING -->
+        <div class="mt-10 max-w-lg mx-auto glass p-6 rounded-2xl border-indigo-500/20">
+            <p id="ai-greeting" class="text-slate-400 italic font-medium leading-relaxed">"Initializing your high-performance environment. Great things happen in this lab."</p>
+        </div>
+
+        <div class="mt-16 flex flex-col items-center">
+            <div class="px-8 py-3 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center gap-3">
+                <div class="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div>
+                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400">Restoring Desktop Shell...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSTITUTIONAL FOOTER -->
+    <footer class="fixed bottom-8 w-full text-center text-[10px] font-bold uppercase tracking-widest">
+        Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna GDC (A) <br>
+        Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank" class="text-indigo-500 underline">M.Thrinadh</a>
+    </footer>
+
+    <script>
+        const BACKEND = "https://script.google.com/macros/s/AKfycbzuCEHK3h92DIpPwB89dxQdXnfkGyRTm2oOpT-5p2503vsLylptMdzCJfwpXk6Z7O2U/exec";
+        
+        // Parse PC Identity from URL Params (passed by PowerShell)
+        const params = new URLSearchParams(window.location.search);
+        const SystemID = params.get('sysId') || "CS-01";
+        const MAC = params.get('mac') || "00-00-00-00-00-00";
+
+        document.getElementById('display-sys-id').innerText = SystemID;
+
+        // 1. GENERATE STATION QR CODE
+        function generateQR() {
+            const origin = window.location.origin + window.location.pathname;
+            const qrData = `${origin}?mode=mobile&sysId=${SystemID}&mac=${MAC}`;
+            
+            new QRCode(document.getElementById("qrcode"), {
+                text: qrData,
+                width: 250, height: 250,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        // 2. POLL SOVEREIGN CLOUD FOR HANDSHAKE
+        async function pollHandshake() {
+            try {
+                const res = await fetch(`${BACKEND}?action=lab`);
+                const data = await res.json();
+                
+                // Find the command for THIS system
+                const pc = data.find(p => p.SystemID === SystemID);
+
+                if (pc && pc.Command === "UNLOCK") {
+                    handleUnlockTransition(pc);
+                }
+            } catch (e) {
+                console.log("CSync Syncing...");
+            }
+        }
+
+        function handleUnlockTransition(pc) {
+            // Status field contains "Name | AI Greeting" from Engine v25.0
+            const parts = pc.Status.split('|');
+            document.getElementById('u-name').innerText = parts[0];
+            document.getElementById('ai-greeting').innerText = parts[1] || "Work hard, code better.";
+            
+            // PhotoBase64 contains the registered face
+            if (pc.PhotoBase64 && pc.PhotoBase64.length > 100) {
+                document.getElementById('u-photo').src = pc.PhotoBase64;
+            } else {
+                document.getElementById('u-photo').src = "https://ui-avatars.com/api/?background=4f46e5&color=fff&name=" + parts[0];
+            }
+
+            document.getElementById('lock-view').classList.add('hidden-view');
+            document.getElementById('welcome-view').classList.remove('hidden-view');
+            
+            lucide.createIcons();
+            // Transition signals PowerShell to kill browser and start Explorer.exe
+        }
+
+        // 3. UI UTILITIES
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB', { hour12: true });
+        }
+
+        window.onload = () => {
+            generateQR();
+            lucide.createIcons();
+            setInterval(updateClock, 1000);
+            setInterval(pollHandshake, 2000); // 2 second polling interval
+
+            // Kiosk Lockdown Logic: Disable Right Click & F12
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.onkeydown = e => {
+                if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false;
+            };
+        };
+    </script>
+</body>
+</html>
