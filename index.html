@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: white; overflow: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: white; margin: 0; padding: 0; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .cyber-border { border-top: 8px solid #4f46e5; box-shadow: 0 20px 50px rgba(79, 70, 229, 0.2); }
         
@@ -19,34 +19,34 @@
         .role-btn.active { background: #4f46e5; border-color: #4f46e5; color: white; box-shadow: 0 0 20px rgba(79, 70, 229, 0.4); }
         
         .input-vivid { background: rgba(15, 23, 42, 0.8); border: 2px solid #1e293b; padding: 16px; border-radius: 15px; width: 100%; outline: none; font-weight: 700; color: white; }
-        .input-vivid:focus { border-color: #4f46e5; background: rgba(30, 41, 59, 1); }
-        
         #qrcode img { border: 10px solid white; border-radius: 20px; margin: 0 auto; }
-        .overlay-screen { position: fixed; inset: 0; background: #020617; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        /* Layout Containers */
+        #desktop-ui, #mobile-ui, #welcome-ui, #manual-ui { display: none; }
+        .active-view { display: flex !important; }
+        
+        .full-center { min-height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
     </style>
 </head>
-<body class="h-screen w-screen flex items-center justify-center">
+<body>
 
-    <!-- 1. MAIN MONITOR VIEW (QR + Manual Button) -->
-    <div id="view-desktop" class="text-center space-y-10">
+    <!-- 1. DESKTOP MONITOR VIEW (QR SCREEN) -->
+    <div id="desktop-ui" class="full-center p-10 space-y-10">
         <header>
             <p class="text-indigo-400 font-bold uppercase tracking-[0.6em] text-xs mb-3">Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
             <h1 class="text-7xl font-black tracking-tighter uppercase italic">CS Connect</h1>
-            <p class="text-slate-500 font-bold uppercase text-sm mt-2 tracking-widest">Dept. of Computer Science & AI</p>
         </header>
 
         <div class="flex items-center justify-center gap-16">
-            <!-- QR Section -->
             <div class="glass p-12 rounded-[4rem] cyber-border w-[450px]">
                 <h2 id="pc-sys-id" class="text-7xl font-black text-white mb-4 tracking-tighter">CS-XX</h2>
                 <p class="text-slate-500 font-bold uppercase text-[10px] tracking-[0.3em] mb-10">Scan with Mobile to Sync</p>
                 <div id="qrcode"></div>
             </div>
 
-            <!-- Manual Link Section -->
             <div class="space-y-6">
                 <div class="w-1 h-32 bg-gradient-to-b from-transparent via-indigo-500 to-transparent mx-auto"></div>
-                <button onclick="showManualForm()" class="group flex flex-col items-center gap-4 transition-all hover:scale-105">
+                <button onclick="switchView('manual-ui')" class="group flex flex-col items-center gap-4 transition-all hover:scale-105">
                     <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10 group-hover:bg-indigo-600 transition-colors">
                         <i data-lucide="keyboard" class="w-10 h-10 text-indigo-400 group-hover:text-white"></i>
                     </div>
@@ -54,66 +54,62 @@
                 </button>
             </div>
         </div>
-
-        <div class="text-3xl font-light text-slate-600 font-mono tracking-widest" id="clock">00:00:00 AM</div>
+        <div class="text-3xl font-light text-slate-600 font-mono tracking-widest" id="clock-desktop">00:00:00 AM</div>
     </div>
 
-    <!-- 2. DESKTOP MANUAL FORM VIEW -->
-    <div id="view-manual" class="hidden overlay-screen">
-        <div class="w-full max-w-2xl glass p-16 rounded-[4rem] cyber-border">
-            <div class="flex justify-between items-center mb-10">
+    <!-- 2. MOBILE LOGIN VIEW (TRIGGERED BY mode=mobile) -->
+    <div id="mobile-ui" class="min-h-screen w-full flex flex-col p-6 overflow-y-auto">
+        <header class="text-center mt-4 mb-8">
+            <h1 class="text-5xl font-black tracking-tighter" id="mob-pc-display">CS-XX</h1>
+            <p class="text-indigo-400 font-bold uppercase text-[10px] tracking-widest mt-2">Mobile Candidate Login</p>
+        </header>
+        <div id="mobile-form-anchor"></div> <!-- Form will be injected here -->
+    </div>
+
+    <!-- 3. MANUAL DESKTOP FORM VIEW -->
+    <div id="manual-ui" class="full-center bg-[#020617] p-10">
+        <div class="w-full max-w-2xl glass p-12 rounded-[4rem] cyber-border text-left">
+            <div class="flex justify-between items-center mb-8">
                 <h3 class="text-3xl font-black uppercase italic tracking-tighter">Station Login</h3>
-                <button onclick="hideManualForm()" class="text-slate-500 hover:text-white font-bold uppercase text-[10px] tracking-widest">← Back to QR</button>
+                <button onclick="switchView('desktop-ui')" class="text-slate-500 hover:text-white font-bold uppercase text-[10px] tracking-widest">← Back</button>
             </div>
-
-            <!-- Role Selection -->
-            <div class="flex gap-3 mb-10">
-                <button onclick="setRole('Student')" id="r-Student" class="role-btn active">Student</button>
-                <button onclick="setRole('Lecturer')" id="r-Lecturer" class="role-btn">Lecturer</button>
-                <button onclick="setRole('Guest')" id="r-Guest" class="role-btn">Guest</button>
+            <div id="main-form-container">
+                <!-- THE MASTER FORM -->
+                <div class="flex gap-3 mb-8">
+                    <button onclick="setRole('Student')" id="r-Student" class="role-btn active">Student</button>
+                    <button onclick="setRole('Lecturer')" id="r-Lecturer" class="role-btn">Lecturer</button>
+                    <button onclick="setRole('Guest')" id="r-Guest" class="role-btn">Guest</button>
+                </div>
+                <form onsubmit="handleHandshake(event)" class="grid grid-cols-2 gap-4">
+                    <input type="text" id="m-name" placeholder="Full Name" required class="col-span-2 input-vivid">
+                    <div id="student-fields" class="contents">
+                        <select id="m-year" class="input-vivid"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+                        <select id="m-sem" class="input-vivid"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option>Sem 4</option><option>Sem 5</option><option>Sem 6</option><option>Sem 7</option><option>Sem 8</option></select>
+                        <select id="m-major" class="col-span-2 input-vivid"><option>Computer Science</option><option>Artificial Intelligence</option></select>
+                        <input type="text" id="m-roll" placeholder="Registration Number" class="col-span-2 input-vivid uppercase">
+                    </div>
+                    <div id="extra-fields" class="hidden col-span-2">
+                        <input type="text" id="m-org" placeholder="Department Name" class="input-vivid">
+                    </div>
+                    <button type="submit" class="col-span-2 bg-indigo-600 py-5 rounded-2xl font-black text-xl uppercase shadow-2xl mt-4 tracking-widest">Sign In & Unlock</button>
+                </form>
             </div>
-
-            <form onsubmit="handleHandshake(event)" class="grid grid-cols-2 gap-6">
-                <div class="col-span-2">
-                    <input type="text" id="m-name" placeholder="Full Name" required class="input-vivid">
-                </div>
-
-                <div id="student-fields" class="contents">
-                    <select id="m-year" class="input-vivid"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
-                    <select id="m-sem" class="input-vivid"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option>Sem 4</option><option>Sem 5</option><option>Sem 6</option><option>Sem 7</option><option>Sem 8</option></select>
-                    <select id="m-major" class="col-span-2 input-vivid"><option>Computer Science</option><option>Artificial Intelligence</option></select>
-                    <input type="text" id="m-roll" placeholder="Registration Number" class="col-span-2 input-vivid uppercase">
-                </div>
-
-                <div id="extra-fields" class="hidden col-span-2">
-                    <input type="text" id="m-org" placeholder="Department Name" class="input-vivid">
-                </div>
-
-                <button type="submit" class="col-span-2 bg-indigo-600 py-6 rounded-2xl font-black text-xl uppercase shadow-2xl active:scale-95 transition mt-4 tracking-widest">Sign In & Unlock</button>
-            </form>
         </div>
     </div>
 
-    <!-- 3. MOBILE SIGN-IN VIEW (Identical to previous, triggered by mode=mobile) -->
-    <div id="view-mobile" class="hidden min-h-screen p-8 overlay-screen overflow-y-auto">
-        <!-- Re-use the form logic from view-manual here but optimized for mobile -->
-        <h1 class="text-4xl font-black mb-8" id="mob-pc-id">CS-XX</h1>
-        <div id="mobile-form-container" class="w-full max-w-sm"></div>
-    </div>
-
-    <!-- 4. WELCOME OVERLAY -->
-    <div id="welcome-screen" class="hidden overlay-screen">
-        <div class="w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center mb-8 shadow-2xl">
+    <!-- 4. WELCOME SCREEN -->
+    <div id="welcome-ui" class="full-center fixed inset-0 bg-[#020617] z-[2000]">
+        <div class="w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center mb-8 shadow-2xl animate-bounce">
             <i data-lucide="user" class="w-16 h-16 text-white"></i>
         </div>
         <h1 class="text-7xl font-black uppercase italic tracking-tighter">Welcome</h1>
-        <h2 id="user-display" class="text-3xl font-bold text-indigo-400 uppercase mt-4 italic">User</h2>
-        <p class="mt-12 text-slate-700 font-black uppercase text-[10px] tracking-[0.5em] animate-pulse">Establishing Secure Session...</p>
+        <h2 id="welcome-name" class="text-3xl font-bold text-indigo-400 uppercase mt-4 italic">User</h2>
+        <p class="mt-12 text-slate-700 font-black uppercase text-[10px] tracking-[0.5em] animate-pulse">Launching Desktop Environment...</p>
     </div>
 
     <!-- FOOTER -->
-    <footer class="fixed bottom-8 w-full text-center text-[10px] font-bold text-slate-700 uppercase tracking-widest">
-        Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna Govt. Degree College (Autonomous) | Dev: <a href="https://linkedin.com/in/m3nadh" target="_blank" class="text-indigo-500 underline">M.Thrinadh</a>
+    <footer class="fixed bottom-6 w-full text-center text-[10px] font-bold text-slate-700 uppercase tracking-widest">
+        Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna GDC (A) | Dev: <a href="https://linkedin.com/in/m3nadh" target="_blank" class="text-indigo-500 underline">M.Thrinadh</a>
     </footer>
 
     <script>
@@ -123,28 +119,34 @@
         const MAC = params.get('mac') || "000000000000";
         let currentRole = 'Student';
 
+        function switchView(viewId) {
+            document.querySelectorAll('#desktop-ui, #mobile-ui, #welcome-ui, #manual-ui').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(viewId).classList.add('active-view');
+        }
+
         function init() {
             lucide.createIcons();
+            // IMMEDIATE CHECK FOR MOBILE MODE
             if (params.get('mode') === 'mobile') {
-                document.getElementById('view-desktop').classList.add('hidden');
-                document.getElementById('view-mobile').classList.remove('hidden');
-                document.getElementById('mob-pc-id').innerText = SystemID;
-                document.getElementById('mobile-form-container').appendChild(document.querySelector('#view-manual form'));
+                document.getElementById('mob-pc-display').innerText = SystemID;
+                document.getElementById('mobile-form-anchor').appendChild(document.getElementById('main-form-container'));
+                switchView('mobile-ui');
             } else {
                 document.getElementById('pc-sys-id').innerText = SystemID;
                 generateQR();
+                switchView('desktop-ui');
                 setInterval(pollCloud, 2000);
             }
-            setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+            setInterval(() => {
+                const time = new Date().toLocaleTimeString();
+                if(document.getElementById('clock-desktop')) document.getElementById('clock-desktop').innerText = time;
+            }, 1000);
         }
 
         function generateQR() {
             const qrUrl = `${window.location.origin}${window.location.pathname}?mode=mobile&sysId=${SystemID}&mac=${MAC}`;
             new QRCode(document.getElementById("qrcode"), { text: qrUrl, width: 220, height: 220 });
         }
-
-        function showManualForm() { document.getElementById('view-manual').classList.remove('hidden'); }
-        function hideManualForm() { document.getElementById('view-manual').classList.add('hidden'); }
 
         function setRole(role) {
             currentRole = role;
@@ -157,24 +159,21 @@
 
         async function handleHandshake(e) {
             e.preventDefault();
+            const name = document.getElementById('m-name').value;
             const data = {
                 action: "lab_unlock", sysId: SystemID, mac: MAC, role: currentRole,
-                name: document.getElementById('m-name').value,
+                name: name,
                 roll: (currentRole === 'Student') ? document.getElementById('m-roll').value : 'STAFF',
                 year: (currentRole === 'Student') ? document.getElementById('m-year').value : 'N/A',
                 sem: (currentRole === 'Student') ? document.getElementById('m-sem').value : 'N/A'
             };
-            
-            // Immediately show "Unlocking" on the screen where the button was pressed
-            if(params.get('mode') === 'mobile') {
-                document.body.innerHTML = `<div class="overlay-screen"><h1>Syncing...</h1></div>`;
-            } else {
-                document.getElementById('user-display').innerText = data.name;
-                document.getElementById('view-manual').classList.add('hidden');
-                document.getElementById('view-desktop').classList.add('hidden');
-                document.getElementById('welcome-screen').classList.remove('hidden');
-            }
 
+            if(params.get('mode') === 'mobile') {
+                document.body.innerHTML = `<div class="full-center"><h1>Sign-in Sent!</h1><p class="text-indigo-400 mt-2">Unlocking workstation ${SystemID}</p></div>`;
+            } else {
+                document.getElementById('welcome-name').innerText = name;
+                switchView('welcome-ui');
+            }
             await fetch(BACKEND, { method: 'POST', body: JSON.stringify(data) });
         }
 
@@ -184,10 +183,8 @@
                 const data = await res.json();
                 const status = data.find(p => p.SystemID === SystemID);
                 if (status && status.Command === "UNLOCK") {
-                    document.getElementById('view-desktop').classList.add('hidden');
-                    document.getElementById('view-manual').classList.add('hidden');
-                    document.getElementById('welcome-screen').classList.remove('hidden');
-                    document.getElementById('user-display').innerText = status.Status;
+                    document.getElementById('welcome-name').innerText = status.Status;
+                    switchView('welcome-ui');
                     lucide.createIcons();
                 }
             } catch(e) {}
