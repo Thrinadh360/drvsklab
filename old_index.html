@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabConnect Master | Admin Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        :root { --primary: #4f46e5; --sidebar-w: 320px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; user-select: none; height: 100vh; width: 100vw; overflow: hidden; display: flex; }
+        
+        .sidebar { background: #000; width: var(--sidebar-w); height: 100vh; display: flex; flex-direction: column; border-right: 1px solid #1e293b; z-index: 100; }
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; background: #f8fafc; position: relative; overflow: hidden; }
+
+        /* Vivid Header States */
+        header { height: 11vh; display: flex; align-items: center; justify-content: space-between; padding: 0 3vw; color: white; transition: 0.5s ease; z-index: 40; }
+        .header-open { background: #10b981; border-bottom: 5px solid #059669; }
+        .header-closed { background: #e11d48; border-bottom: 5px solid #be123c; }
+
+        /* 8x6 Fit-to-Screen Grid */
+        .grid-container { display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(6, 1fr); gap: 1.2vh; padding: 1.5vh; height: 100%; flex: 1; }
+        .system-card { border-radius: 1.8vh; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.3s; border: 0.5vh solid transparent; cursor: pointer; }
+        .system-num { font-size: 5.5vh; font-weight: 900; line-height: 1; letter-spacing: -2px; }
+        .occ-name { font-size: 1.25vh; font-weight: 800; text-transform: uppercase; margin-top: 1vh; text-align: center; width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Status Colors */
+        .status-available { background: #fff; border-color: #10b981; color: #064e3b; } 
+        .status-occupied { background: #2563eb; border-color: #1d4ed8; color: #fff; box-shadow: 0 0 20px rgba(37,99,235,0.3); } 
+        .status-exam { background: #f59e0b; border-color: #d97706; color: #000; }      
+        .status-repair { background: #ef4444; border-color: #b91c1c; color: #fff; animation: flash 1.5s infinite; }    
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+        /* Admin Dashboard Cards */
+        .admin-action-card { background: white; border-radius: 2.5vh; padding: 3vh; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-top: 1vh solid #4f46e5; display: flex; flex-direction: column; justify-content: space-between; }
+        .live-record-table { width: 100%; border-collapse: collapse; font-size: 1.3vh; }
+        .live-record-table th { background: #f1f5f9; color: #475569; padding: 1.5vh; font-weight: 800; text-transform: uppercase; text-align: left; position: sticky; top: 0; }
+        .live-record-table td { padding: 1.2vh 1.5vh; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: #1e293b; }
+
+        .type-btn { font-size: 1.4vh; font-weight: 900; padding: 2.2vh 0; border-radius: 1.8vh; border: 3px solid #e2e8f0; background: white; transition: 0.3s; }
+        .type-btn.active { background: #4f46e5; color: white; border-color: #312e81; transform: translateY(-3px); }
+        .active-nav { background: #4f46e5 !important; color: white !important; }
+        
+        .input-field { font-size: 2vh !important; padding: 1.5vh !important; border-radius: 1.5vh !important; border: 2px solid #f1f5f9; font-weight: 700; width: 100%; outline: none; }
+        .input-field:focus { border-color: #4f46e5; }
+
+        footer { height: 5vh; background: #000; color: #00f2ff; display: flex; align-items: center; justify-content: center; font-size: 1.35vh; font-weight: 800; letter-spacing: 0.05vw; border-top: 1px solid #333; width: 100%; position: absolute; bottom: 0; }
+        #lock-screen { position: fixed; inset: 0; background: #020617; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+        .hidden-lock { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- HARDWARE LOCK SCREEN -->
+    <div id="lock-screen"><i data-lucide="shield-alert" class="w-32 h-32 text-red-500 mb-8 animate-pulse"></i><h1 class="text-6xl font-black mb-4 uppercase">Restricted</h1><p class="text-indigo-400 text-2xl font-bold uppercase">Launch Controller Required</p></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="p-8 border-b border-white/10 text-center">
+            <div class="inline-flex p-4 bg-indigo-600 rounded-3xl mb-4 shadow-2xl"><i data-lucide="monitor" class="w-10 h-10 text-white"></i></div>
+            <h1 class="text-lg font-black uppercase text-white tracking-tighter">Dr. V.S. Krishna</h1>
+            <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest mt-1 leading-none">Autonomous College</p>
+        </div>
+        <nav class="flex-1 px-4 py-8 space-y-3">
+            <button onclick="showPage('checkin')" id="nav-checkin" class="active-nav w-full flex items-center gap-4 p-5 rounded-3xl text-slate-400 font-black transition"><i data-lucide="user-plus"></i> SIGN IN</button>
+            <button onclick="showPage('checkout')" id="nav-checkout" class="w-full flex items-center gap-4 p-5 rounded-3xl text-slate-400 font-black transition hover:bg-white/5"><i data-lucide="log-out"></i> SIGN OUT</button>
+            <button onclick="showPage('layout')" id="nav-layout" class="w-full flex items-center gap-4 p-5 rounded-3xl text-slate-400 font-black transition hover:bg-white/5"><i data-lucide="layout-grid"></i> LIVE GRID</button>
+            <button onclick="showPage('admin-login')" id="nav-admin-login" class="w-full flex items-center gap-4 p-5 rounded-3xl text-slate-400 font-black transition hover:bg-white/5"><i data-lucide="shield-check"></i> ADMIN PANEL</button>
+        </nav>
+        <div class="p-6 mx-4 mb-20 bg-white/5 rounded-[2.5rem] border border-white/10 text-center">
+            <p id="clock-time" class="text-3xl font-black font-mono text-cyan-400 uppercase tracking-tighter">00:00:00 AM</p>
+            <p id="clock-date" class="text-[10px] font-bold text-slate-400 uppercase mt-2 tracking-widest">---</p>
+        </div>
+    </aside>
+
+    <div class="main-content">
+        <header id="main-header" class="header-open">
+            <div><h2 id="page-title" class="text-4xl font-black uppercase tracking-tighter italic">SIGN IN</h2><p id="header-status-msg" class="text-sm font-bold uppercase tracking-[0.4em] opacity-90">Lab Open</p></div>
+            <div id="search-container" class="hidden relative w-[450px]">
+                <i data-lucide="search" class="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400"></i>
+                <input type="text" id="stu-search" onkeyup="filterGrid()" placeholder="SEARCH ROLL NO / NAME..." class="w-full pl-16 pr-8 py-5 rounded-3xl border-none bg-white shadow-2xl font-black uppercase text-slate-900 outline-none">
+            </div>
+        </header>
+
+        <section class="flex-1 relative overflow-hidden">
+            <!-- PAGE: SIGN IN -->
+            <div id="page-checkin" class="absolute inset-0 flex items-center justify-center p-10">
+                <div class="w-[900px] glass p-14 rounded-[4.5rem] shadow-2xl border-t-[2vh] border-indigo-600">
+                    <div class="grid grid-cols-5 gap-2 mb-8">
+                        <button onclick="setType('CS')" id="t-CS" class="type-btn active">CS Major</button>
+                        <button onclick="setType('AI')" id="t-AI" class="type-btn">AI Major</button>
+                        <button onclick="setType('Minor')" id="t-Minor" class="type-btn">Minor</button>
+                        <button onclick="setType('CSLecturer')" id="t-CSLecturer" class="type-btn">Lecturer</button>
+                        <button onclick="setType('Guest')" id="t-Guest" class="type-btn">Guest</button>
+                    </div>
+                    <form id="checkin-form" onsubmit="handleSignIn(event)" class="space-y-8">
+                        <div id="std-fields" class="grid grid-cols-2 gap-8">
+                            <select id="in-year" class="input-field bg-white shadow-sm font-bold"></select>
+                            <select id="in-sem" class="input-field bg-white shadow-sm font-bold"><option>Semester 1</option><option>Semester 2</option><option>Semester 3</option><option>Semester 4</option><option>Semester 5</option><option>Semester 6</option><option>Semester 7</option><option>Semester 8</option></select>
+                            <input type="text" id="in-name" placeholder="FULL STUDENT NAME" class="col-span-2 input-field shadow-sm">
+                            <input type="text" id="in-roll" placeholder="REGISTRATION / ROLL NO" class="col-span-2 input-field shadow-sm uppercase">
+                        </div>
+                        <div id="minor-fields" class="hidden"><select id="in-subject" class="input-field text-indigo-700 font-black"><option value="Mathematics">Mathematics</option><option value="Electronics">Electronics</option></select></div>
+                        <div id="lecturer-fields" class="hidden"><input type="text" id="in-fac-name" placeholder="CS LECTURER FULL NAME" class="input-field shadow-sm"></div>
+                        <div id="guest-fields" class="hidden space-y-6"><input type="text" id="in-guest-name" placeholder="GUEST NAME" class="input-field"><input type="text" id="in-org" placeholder="ORGANIZATION" class="input-field"></div>
+                        <div class="pt-6 border-t-4 border-slate-100 text-center"><label class="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">SYSTEM ID</label><input type="text" id="in-sys-display" class="w-full bg-transparent font-black text-indigo-700 text-7xl text-center border-none outline-none" readonly></div>
+                        <button type="submit" id="btn-submit" class="w-full bg-indigo-600 text-white font-black py-7 rounded-[3rem] shadow-2xl hover:bg-indigo-700 uppercase tracking-widest text-3xl active:scale-95 transition">SIGN IN</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- PAGE: SIGN OUT -->
+            <div id="page-checkout" class="hidden absolute inset-0 flex items-center justify-center">
+                <form onsubmit="handleCheckOutAction(event)" class="w-[600px] glass p-20 rounded-[5rem] shadow-2xl text-center border-b-[2.5vh] border-orange-500">
+                    <i data-lucide="log-out" class="w-32 h-32 mx-auto text-orange-500 animate-pulse mb-10"></i>
+                    <h3 class="text-5xl font-black text-slate-800 uppercase tracking-tighter mb-10">Sign Out</h3>
+                    <input type="text" id="out-sys-display" class="w-full p-10 rounded-[3rem] bg-slate-100 font-black text-8xl text-center text-orange-600 shadow-inner border-none outline-none mb-10" readonly>
+                    <button type="submit" class="w-full bg-orange-600 text-white font-black py-8 rounded-[3rem] shadow-2xl text-3xl uppercase">Confirm Logout</button>
+                </form>
+            </div>
+
+            <!-- PAGE: GRID -->
+            <div id="page-layout" class="hidden h-full"><div class="grid-container" id="lab-grid"></div></div>
+
+            <!-- PAGE: ADMIN LOGIN -->
+            <div id="page-admin-login" class="hidden absolute inset-0 flex items-center justify-center">
+                <form onsubmit="handleAdminVerify(event)" class="glass p-16 rounded-[5rem] shadow-2xl text-center w-[550px] border-t-[2vh] border-slate-900">
+                    <i data-lucide="shield-check" class="w-24 h-24 mx-auto mb-10 text-indigo-600"></i>
+                    <h3 class="text-4xl font-black mb-10 text-slate-800 uppercase tracking-tighter">Lecturer PIN</h3>
+                    <input type="password" id="admin-pin" placeholder="••••" class="w-full p-8 rounded-[3rem] border-4 border-slate-100 mb-10 text-center text-8xl tracking-[0.5em] outline-none font-black bg-slate-50">
+                    <button type="submit" class="w-full bg-slate-900 text-white font-black py-8 rounded-[3rem] text-3xl uppercase shadow-2xl">Verify</button>
+                </form>
+            </div>
+
+            <!-- PAGE: ADMIN DASHBOARD (KEENLY ARRANGED) -->
+            <div id="page-admin-dash" class="hidden p-8 h-full flex flex-col gap-6 overflow-hidden">
+                <div class="grid grid-cols-3 gap-6 h-[40vh]">
+                    <!-- Exam Allotment -->
+                    <div class="admin-action-card" style="border-top-color: #f59e0b;">
+                        <h4 class="font-black text-amber-600 uppercase text-lg italic tracking-tighter flex items-center gap-2"><i data-lucide="award"></i> Exam Allotment</h4>
+                        <div class="space-y-4">
+                            <input type="text" id="adm-exam-roll" placeholder="STUDENT ROLL NO" class="input-field border-amber-100">
+                            <select id="adm-exam-sys" class="input-field border-amber-100 font-bold"></select>
+                        </div>
+                        <button onclick="adminAction('Exam')" class="admin-btn bg-amber-600 text-white shadow-lg hover:bg-amber-700 mt-4">Lock Desk</button>
+                    </div>
+                    <!-- Maintenance -->
+                    <div class="admin-action-card" style="border-top-color: #ef4444;">
+                        <h4 class="font-black text-red-600 uppercase text-lg italic tracking-tighter flex items-center gap-2"><i data-lucide="wrench"></i> Maintenance</h4>
+                        <div class="flex-1 flex flex-col justify-center">
+                            <label class="text-[10px] font-black text-slate-400 mb-2 uppercase">System ID</label>
+                            <select id="adm-repair-sys" class="input-field border-red-100 font-bold"></select>
+                        </div>
+                        <button onclick="adminAction('Repair')" class="admin-btn bg-red-600 text-white shadow-lg hover:bg-red-700">Flag Repair</button>
+                    </div>
+                    <!-- Exports -->
+                    <div class="admin-action-card" style="border-top-color: #10b981;">
+                        <h4 class="font-black text-emerald-600 uppercase text-lg italic tracking-tighter flex items-center gap-2"><i data-lucide="download-cloud"></i> Reports Hub</h4>
+                        <p class="text-xs font-bold text-slate-400 mb-2 uppercase leading-relaxed">Download current session logs or historical records.</p>
+                        <div class="space-y-3">
+                            <button onclick="exportData('csv')" class="admin-btn bg-emerald-600 text-white shadow-lg flex items-center justify-center gap-3"><i data-lucide="file-spreadsheet"></i> CSV Export</button>
+                            <button onclick="exportData('pdf')" class="admin-btn bg-cyan-600 text-white shadow-lg flex items-center justify-center gap-3"><i data-lucide="file-text"></i> PDF Export</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Systems Record (Keenly Visible) -->
+                <div class="flex-1 flex flex-col bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-slate-200">
+                    <div class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center">
+                        <h4 class="font-black text-xs uppercase tracking-widest">Live Systems Record (Currently Occupied)</h4>
+                        <span id="active-count-tag" class="bg-indigo-600 text-[10px] px-3 py-1 rounded-full font-bold">0 ACTIVE USERS</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto">
+                        <table class="live-record-table">
+                            <thead>
+                                <tr><th>Desk</th><th>Student Name</th><th>Roll/ID</th><th>Login Time</th><th>Academic Year</th><th>Category</th></tr>
+                            </thead>
+                            <tbody id="admin-live-body">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>© <span id="foot-year"></span> &nbsp; DEPT OF COMPUTER SCIENCE, DR. V. S. KRISHNA GOVT. DEGREE COLLEGE (A). ALL RIGHTS RESERVED.</footer>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbworz63t_h5Y90GfiH3kQVQX3H77om2PT7c8UDIKVufWj5YwNK71Ik5q0C7588Db64s/exec";
+        let state = {}; let rawHistory = []; let loginType = 'CS'; let DEVICE_MAC = ""; let ASSIGNED_SYS = "";
+
+        function handleHardwareBinding() {
+            const p = new URLSearchParams(window.location.search);
+            DEVICE_MAC = p.get('mac'); ASSIGNED_SYS = p.get('sysId');
+            if(DEVICE_MAC && ASSIGNED_SYS) {
+                document.getElementById('lock-screen').classList.add('hidden-lock');
+                document.getElementById('in-sys-display').value = ASSIGNED_SYS;
+                document.getElementById('out-sys-display').value = ASSIGNED_SYS;
+                if(p.get('page') === 'checkout') showPage('checkout');
+            }
+        }
+
+        function getIST() {
+            const now = new Date();
+            const df = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const lf = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour12: false, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', weekday: 'short' });
+            const p = lf.formatToParts(now).reduce((acc, part) => ({ ...acc, [part.type]: part.value }), {});
+            return { hrs24: parseInt(p.hour), mo: parseInt(p.month), yr: parseInt(p.year), dy: parseInt(p.day), wk: p.weekday, timeStr: df.format(now) };
+        }
+
+        function checkStatus() {
+            const ist = getIST(); let closed = false; let msg = "Lab Open";
+            document.getElementById('foot-year').innerText = ist.yr;
+            if (ist.hrs24 >= 17 || ist.hrs24 < 10 || ist.mo === 5 || ist.wk === "Sun") closed = true;
+            document.getElementById('clock-time').innerText = ist.timeStr;
+            document.getElementById('clock-date').innerText = `${ist.dy}/${ist.mo}/${ist.yr} (${ist.wk})`;
+            const header = document.getElementById('main-header');
+            header.className = closed ? 'header-closed' : 'header-open';
+            document.getElementById('header-status-msg').innerText = closed ? "Lab Closed" : "Lab Open";
+            document.getElementById('btn-submit').disabled = closed;
+            return closed;
+        }
+
+        function setupGrid() {
+            const grid = document.getElementById('lab-grid');
+            const admE = document.getElementById('adm-exam-sys');
+            const admR = document.getElementById('adm-repair-sys');
+            for (let i = 1; i <= 48; i++) {
+                const id = `CS-${String(i).padStart(2, '0')}`;
+                [admE, admR].forEach(s => { const o = document.createElement('option'); o.value = id; o.innerText = id; s.appendChild(o); });
+                state[id] = { status: 'available' };
+                const box = document.createElement('div');
+                box.id = `grid-${id}`; box.className = "system-card status-available font-black shadow-sm";
+                box.innerHTML = `<div class="system-num">${id.split('-')[1]}</div><div class="occ-name">FREE</div>`;
+                grid.appendChild(box);
+            }
+            const yrSel = document.getElementById('in-year');
+            const ist = getIST();
+            const startYear = (ist.mo >= 6) ? ist.yr : ist.yr - 1;
+            const opt = document.createElement('option'); opt.value = `${startYear}-${startYear+1}`; opt.innerText = `${startYear}-${startYear+1}`; yrSel.appendChild(opt);
+            setType('CS');
+        }
+
+        function setType(t) {
+            loginType = t; document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`t-${t}`).classList.add('active');
+            document.getElementById('std-fields').classList.toggle('hidden', ['Guest', 'CSLecturer'].includes(t));
+            document.getElementById('minor-fields').classList.toggle('hidden', t !== 'Minor');
+            document.getElementById('lecturer-fields').classList.toggle('hidden', t !== 'CSLecturer');
+            document.getElementById('guest-fields').classList.toggle('hidden', t !== 'Guest');
+        }
+
+        function showPage(p) {
+            ['checkin', 'checkout', 'layout', 'admin-login', 'admin-dash'].forEach(id => { document.getElementById(`page-${id}`).classList.add('hidden'); });
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-nav'));
+            document.getElementById(`page-${p}`).classList.remove('hidden');
+            document.getElementById(`nav-${p}`).classList.add('active-nav');
+            document.getElementById('page-title').innerText = p.toUpperCase().replace('IN',' IN').replace('OUT',' OUT');
+            document.getElementById('search-container').classList.toggle('hidden', p !== 'layout');
+            if (p === 'layout' || p === 'admin-dash') syncData();
+            lucide.createIcons();
+        }
+
+        async function syncData() {
+            try {
+                const res = await fetch(SCRIPT_URL); const data = await res.json();
+                rawHistory = data;
+                const latestMap = {};
+                
+                // Processing Snapshot
+                data.forEach(log => {
+                    if (!latestMap[log.SystemID] || log.Timestamp > latestMap[log.SystemID].Timestamp) latestMap[log.SystemID] = log;
+                });
+
+                // Update Grid UI
+                let activeCount = 0;
+                let activeRows = [];
+
+                Object.keys(state).forEach(id => {
+                    const log = latestMap[id]; const ist = getIST();
+                    if (ist.hrs24 >= 17 || ist.hrs24 < 10) state[id] = { status: 'available', name: 'FREE' };
+                    else if (log && log.Type !== 'Logout') {
+                        let st = 'occupied';
+                        if (log.Type === 'Exam') st = 'exam';
+                        if (log.Type === 'Repair') st = 'repair';
+                        state[id] = { status: st, name: log.StudentName, roll: log.RollNo, type: log.Type, year: log.AcademicYear, time: log.EventTime };
+                        activeCount++;
+                        activeRows.push(state[id]);
+                        activeRows[activeRows.length-1].sysId = id;
+                    } else state[id] = { status: 'available', name: 'FREE' };
+                    
+                    const el = document.getElementById(`grid-${id}`);
+                    if(el) {
+                        el.className = `system-card status-${state[id].status} shadow-md`;
+                        el.querySelector('.occ-name').innerText = state[id].name;
+                    }
+                });
+
+                // Populate Admin Live Table
+                const liveBody = document.getElementById('admin-live-body');
+                if(liveBody) {
+                    document.getElementById('active-count-tag').innerText = `${activeCount} ACTIVE USERS`;
+                    liveBody.innerHTML = activeRows.map(r => `
+                        <tr>
+                            <td><span class="bg-indigo-100 px-2 py-1 rounded text-indigo-700">${r.sysId}</span></td>
+                            <td>${r.name}</td>
+                            <td>${r.roll}</td>
+                            <td>${r.time}</td>
+                            <td>${r.year}</td>
+                            <td><span class="text-[10px] bg-slate-100 px-2 py-1 rounded uppercase">${r.type}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) { }
+        }
+
+        // Action Handlers
+        async function handleSignIn(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit'); btn.disabled = true;
+            const ist = getIST(); let name = document.getElementById('in-name').value; let roll = document.getElementById('in-roll').value;
+            if (loginType === 'CSLecturer') { name = "LECTURER: " + document.getElementById('in-fac-name').value; roll = "FACULTY"; }
+            if (loginType === 'Guest') { name = "GUEST: " + document.getElementById('in-guest-name').value; roll = document.getElementById('in-org').value; }
+            if (loginType === 'Minor') name += " (" + document.getElementById('in-subject').value + ")";
+            const p = { sysId: ASSIGNED_SYS, mac: DEVICE_MAC, time: ist.timeStr, type: loginType, year: document.getElementById('in-year').value || '---', sem: document.getElementById('in-sem').value || '---', name, roll };
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(p) });
+            alert("Sign-In Successful! System Unlocked.");
+            location.reload();
+        }
+
+        async function handleCheckOutAction(e) {
+            e.preventDefault();
+            const ist = getIST();
+            const p = { year: '---', sem: '---', name: '---', roll: '---', sysId: ASSIGNED_SYS, mac: DEVICE_MAC, time: ist.timeStr, type: 'Logout' };
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(p) });
+            alert("Logged Out Successfully.");
+            location.reload();
+        }
+
+        async function adminAction(type) {
+            const sys = type === 'Exam' ? document.getElementById('adm-exam-sys').value : document.getElementById('adm-repair-sys').value;
+            const roll = type === 'Exam' ? document.getElementById('adm-exam-roll').value : '---';
+            const ist = getIST();
+            const p = { year: 'ADMIN', sem: 'ADMIN', name: type, roll: roll, sysId: sys, mac: 'ADMIN', time: ist.timeStr, type: type };
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(p) });
+            alert(`Admin: System ${sys} updated to ${type}`);
+            syncData();
+        }
+
+        function handleAdminVerify(e) {
+            e.preventDefault();
+            if(btoa(document.getElementById('admin-pin').value) === "dnNrYWRtaW4=") showPage('admin-dash');
+            else alert("PIN Invalid");
+        }
+
+        function exportData(fmt) {
+            if(fmt === 'csv') {
+                const ws = XLSX.utils.json_to_sheet(rawHistory);
+                const csv = XLSX.utils.sheet_to_csv(ws);
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "Krishna_Lab_Attendance.csv";
+                link.click();
+            } else {
+                const { jsPDF } = window.jspdf; const doc = new jsPDF();
+                doc.setFontSize(10); doc.text("Dr. V.S. Krishna Govt. Degree College (Autonomous) - Attendance Master Log", 14, 15);
+                doc.autoTable({ head: [['Timestamp', 'Name', 'Roll/ID', 'System', 'Type']], body: rawHistory.slice(-100).map(d => [d.Timestamp, d.StudentName, d.RollNo, d.SystemID, d.Type]), startY: 20 });
+                doc.save("Krishna_Lab_Report.pdf");
+            }
+        }
+
+        function filterGrid() {
+            const term = document.getElementById('stu-search').value.toLowerCase();
+            Object.keys(state).forEach(id => {
+                const el = document.getElementById(`grid-${id}`);
+                const match = state[id].name?.toLowerCase().includes(term) || id.toLowerCase().includes(term);
+                el.style.opacity = match ? "1" : "0.1";
+            });
+        }
+
+        setInterval(checkStatus, 1000);
+        window.onload = () => { handleHardwareBinding(); setupGrid(); checkStatus(); syncData(); lucide.createIcons(); };
+    </script>
+</body>
+</html>
