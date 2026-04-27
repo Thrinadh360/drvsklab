@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSync Admin | VSK GDC (A)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --primary: #4f46e5; --bg: #020617; --sidebar-w: 280px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color: #0f172a; overflow: hidden; }
+        
+        /* Sidebar Design */
+        .sidebar { background: #000; width: var(--sidebar-w); height: 100vh; position: fixed; color: #94a3b8; z-index: 100; border-right: 1px solid #1e293b; }
+        .sidebar-btn { @apply w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all hover:text-white hover:bg-white/5 uppercase tracking-widest text-[10px]; }
+        .sidebar-btn.active { @apply bg-indigo-600 text-white shadow-lg shadow-indigo-600/30; }
+        
+        /* Layout */
+        .main-content { margin-left: var(--sidebar-w); height: 100vh; overflow-y: auto; }
+        .glass-card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        
+        /* Lab Grid (8x6) */
+        .lab-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
+        .pc-node { @apply aspect-square rounded-xl flex flex-col items-center justify-center border-2 transition-all; }
+        .pc-available { @apply bg-slate-50 border-slate-200 text-slate-400; }
+        .pc-active { @apply bg-indigo-50 border-indigo-500 text-indigo-700 shadow-md; }
+        .pc-repair { @apply bg-red-50 border-red-500 text-red-700; }
+
+        /* Footer */
+        .admin-footer { @apply border-t border-slate-100 py-6 px-10 text-[10px] font-bold text-slate-400 uppercase text-center; }
+        a { color: #4f46e5; text-decoration: underline; }
+
+        /* Views */
+        .view-section { display: none; }
+        .view-active { display: block !important; }
+
+        /* Auth Screen */
+        #admin-lock { position: fixed; inset: 0; background: #020617; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. ADMIN ACCESS LOCK -->
+    <div id="admin-lock">
+        <div class="text-center space-y-8">
+            <h1 style="font-family: 'Orbitron';" class="text-4xl text-white tracking-tighter">CSYNC VAULT</h1>
+            <p class="text-indigo-400 font-bold uppercase text-xs tracking-widest">Enter Lecturer Access PIN</p>
+            <input type="password" id="admin-pin" placeholder="••••" class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center text-5xl text-white outline-none w-64 font-black tracking-[0.5em]">
+            <button onclick="unlockVault()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">Decrypt Access</button>
+        </div>
+    </div>
+
+    <!-- 2. SIDEBAR NAVIGATION -->
+    <aside class="sidebar p-6 flex flex-col">
+        <div class="mb-10 text-center">
+            <h1 style="font-family: 'Orbitron';" class="text-2xl text-white tracking-tighter">CSYNC</h1>
+            <p class="text-[8px] font-black text-indigo-500 uppercase tracking-widest mt-1">Admin Command Center</p>
+        </div>
+
+        <nav class="flex-1 space-y-2">
+            <button onclick="showView('dashboard')" id="nav-dashboard" class="sidebar-btn active"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+            <button onclick="showView('lab')" id="nav-lab" class="sidebar-btn"><i data-lucide="monitor"></i> Live Lab Grid</button>
+            <button onclick="showView('roster')" id="nav-roster" class="sidebar-btn"><i data-lucide="users"></i> Student Roster</button>
+            <button onclick="showView('exams')" id="nav-exams" class="sidebar-btn"><i data-lucide="pen-tool"></i> Exam Architect</button>
+            <button onclick="showView('audit')" id="nav-audit" class="sidebar-btn"><i data-lucide="shield-check"></i> NAAC / Audit</button>
+            <button onclick="showView('settings')" id="nav-settings" class="sidebar-btn"><i data-lucide="settings"></i> Config</button>
+        </nav>
+
+        <div class="mt-auto pt-6 border-t border-white/10">
+            <button onclick="openBroadcast()" class="w-full bg-red-600 text-white py-3 rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg">Broadcast Alert</button>
+        </div>
+    </aside>
+
+    <!-- 3. MAIN CONTENT AREA -->
+    <main class="main-content flex flex-col">
+        
+        <!-- HEADER -->
+        <header class="bg-white border-b border-slate-200 h-20 px-10 flex items-center justify-between">
+            <div>
+                <h2 id="view-title" class="text-xl font-black text-slate-900 uppercase italic">Enterprise Dashboard</h2>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dr. V.S. Krishna Govt. Degree College (Autonomous)</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right">
+                    <p class="text-[10px] font-black text-indigo-600 uppercase">Academic Year</p>
+                    <p id="ay-display" class="text-sm font-bold text-slate-800">2025-26</p>
+                </div>
+                <div class="h-10 w-px bg-slate-200"></div>
+                <button onclick="fetchData()" class="bg-slate-100 p-3 rounded-xl hover:bg-indigo-600 hover:text-white transition"><i data-lucide="refresh-cw"></i></button>
+            </div>
+        </header>
+
+        <div class="flex-1 p-10 space-y-10">
+            
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="view-section view-active space-y-10">
+                <div class="grid grid-cols-4 gap-6">
+                    <div class="glass-card p-6 border-l-4 border-indigo-500">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase">Total Students</h4>
+                        <p class="text-3xl font-black mt-1" id="stat-total">--</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-emerald-500">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase">CS Presence</h4>
+                        <p class="text-3xl font-black mt-1 text-emerald-600" id="stat-cs">92%</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-cyan-500">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase">AI Presence</h4>
+                        <p class="text-3xl font-black mt-1 text-cyan-600" id="stat-ai">88%</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-red-500">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase">Shortage Alerts</h4>
+                        <p class="text-3xl font-black mt-1 text-red-600" id="stat-short">04</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-10">
+                    <div class="glass-card p-8">
+                        <h3 class="font-black uppercase text-xs mb-6 italic">Attendance Distribution</h3>
+                        <canvas id="chart-attendance" height="250"></canvas>
+                    </div>
+                    <div class="glass-card p-8">
+                        <h3 class="font-black uppercase text-xs mb-6 italic">Hustle Streaks (Top 10)</h3>
+                        <div id="streak-list" class="space-y-3">
+                            <!-- AI list -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: LIVE LAB GRID (8x6) -->
+            <section id="view-lab" class="view-section">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-2xl font-black uppercase italic">Workstation Occupancy (48 PCs)</h3>
+                    <div class="flex gap-2">
+                        <button onclick="sendGlobalCommand('LOCKALL')" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg font-black text-[9px] uppercase">Lock All</button>
+                        <button onclick="sendGlobalCommand('SHUTDOWNALL')" class="bg-slate-900 text-white px-4 py-2 rounded-lg font-black text-[9px] uppercase">Shutdown All</button>
+                    </div>
+                </div>
+                <div id="pc-grid" class="lab-grid">
+                    <!-- 48 Nodes will be generated here -->
+                </div>
+            </section>
+
+            <!-- VIEW: AUDIT & NAAC -->
+            <section id="view-audit" class="view-section space-y-6">
+                <div class="glass-card p-10 border-t-8 border-emerald-500">
+                    <h3 class="text-2xl font-black uppercase mb-2">NAAC Criterion Intelligence</h3>
+                    <p class="text-slate-500 text-sm mb-10">Generate sovereign departmental archives with Groq AI narratives.</p>
+                    
+                    <div class="grid grid-cols-3 gap-6">
+                        <button onclick="generateAuditPDF(1)" class="p-6 border-2 border-slate-100 rounded-2xl text-left hover:border-indigo-600 transition">
+                            <h5 class="font-black text-indigo-600 uppercase text-[10px]">Criterion 1</h5>
+                            <p class="font-bold text-sm">Curricular Aspects</p>
+                        </button>
+                        <button onclick="generateAuditPDF(2)" class="p-6 border-2 border-slate-100 rounded-2xl text-left hover:border-indigo-600 transition">
+                            <h5 class="font-black text-indigo-600 uppercase text-[10px]">Criterion 2</h5>
+                            <p class="font-bold text-sm">Teaching & Evaluation</p>
+                        </button>
+                        <button onclick="generateAuditPDF(5)" class="p-6 border-2 border-slate-100 rounded-2xl text-left hover:border-indigo-600 transition">
+                            <h5 class="font-black text-indigo-600 uppercase text-[10px]">Criterion 5</h5>
+                            <p class="font-bold text-sm">Student Progression</p>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <footer class="admin-footer">
+            <p>Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
+            <p class="mt-2">Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank">M.Thrinadh</a></p>
+        </footer>
+    </main>
+
+    <!-- MODAL: BROADCAST -->
+    <div id="modal-broadcast" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[500] backdrop-blur-md p-6">
+        <div class="bg-white w-full max-w-lg rounded-[3rem] p-10 space-y-6 relative cyber-card">
+            <button onclick="closeBroadcast()" class="absolute top-8 right-8 text-slate-400 hover:text-black"><i data-lucide="x-circle"></i></button>
+            <h3 class="text-2xl font-black uppercase italic">Broadcast Hub</h3>
+            <div class="space-y-4">
+                <select id="b-target" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none">
+                    <option value="ALL">All Students</option>
+                    <option value="YEAR-1">1st Year Only</option>
+                    <option value="YEAR-2">2nd Year Only</option>
+                    <option value="CS-MAJOR">CS Major Only</option>
+                </select>
+                <textarea id="b-msg" placeholder="Type notice here..." class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm h-40 outline-none"></textarea>
+                <button onclick="triggerBroadcast()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl">Push to Mobile Devices</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzuCEHK3h92DIpPwB89dxQdXnfkGyRTm2oOpT-5p2503vsLylptMdzCJfwpXk6Z7O2U/exec";
+        const V_PASS = "dnNrYWRtaW4="; // Base64 'vskadmin'
+
+        function unlockVault() {
+            const pin = document.getElementById('admin-pin').value;
+            if (btoa(pin) === V_PASS) {
+                document.getElementById('admin-lock').style.display = 'none';
+                initDashboard();
+            } else {
+                alert("Decryption Failed: Invalid PIN.");
+            }
+        }
+
+        function showView(id) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('view-active'));
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('view-'+id).classList.add('view-active');
+            document.getElementById('nav-'+id).classList.add('active');
+            document.getElementById('view-title').innerText = id + " HUB";
+        }
+
+        function initDashboard() {
+            lucide.createIcons();
+            generateLabGrid();
+            setInterval(syncLabStatus, 3000);
+            renderCharts();
+        }
+
+        function generateLabGrid() {
+            const grid = document.getElementById('pc-grid');
+            for(let i=1; i<=48; i++) {
+                const id = "CS-" + (i<10?"0"+i:i);
+                grid.innerHTML += `
+                    <div id="pc-${id}" class="pc-node pc-available shadow-sm">
+                        <span class="text-xs font-black">${i}</span>
+                        <span id="name-${id}" class="text-[7px] font-bold uppercase mt-1 truncate w-16 text-center">Free</span>
+                    </div>
+                `;
+            }
+        }
+
+        async function syncLabStatus() {
+            try {
+                const res = await fetch(`${GAS_URL}?action=lab`);
+                const data = await res.json();
+                data.forEach(pc => {
+                    const el = document.getElementById(`pc-${pc.SystemID}`);
+                    const name = document.getElementById(`name-${pc.SystemID}`);
+                    if(el) {
+                        if(pc.Command === "UNLOCK" && pc.Status !== "Available") {
+                            el.className = "pc-node pc-active";
+                            name.innerText = pc.Status;
+                        } else {
+                            el.className = "pc-node pc-available";
+                            name.innerText = "Free";
+                        }
+                    }
+                });
+            } catch(e) {}
+        }
+
+        function openBroadcast() { document.getElementById('modal-broadcast').classList.remove('hidden'); }
+        function closeBroadcast() { document.getElementById('modal-broadcast').classList.add('hidden'); }
+
+        async function sendGlobalCommand(cmd) {
+            if(confirm(`Trigger ${cmd} across the entire lab?`)) {
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'command', SystemID: 'ALL', Command: cmd, CommandID: 'ADMIN-'+Date.now() })
+                });
+                alert("Global Command Dispatched.");
+            }
+        }
+
+        function renderCharts() {
+            const ctx = document.getElementById('chart-attendance').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CS Present', 'AI Present', 'Absent'],
+                    datasets: [{
+                        data: [42, 38, 10],
+                        backgroundColor: ['#4f46e5', '#06b6d4', '#e2e8f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { cutout: '80%', plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        window.onload = () => { lucide.createIcons(); };
+    </script>
+</body>
+</html>
