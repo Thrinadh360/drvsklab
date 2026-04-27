@@ -4,111 +4,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LabConnect | Dr. V.S. Krishna GDC (A)</title>
-    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: white; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: white; margin: 0; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .cyber-border { border-top: 8px solid #4f46e5; box-shadow: 0 20px 50px rgba(79, 70, 229, 0.2); }
+        .cyber-border { border-top: 6px solid #4f46e5; box-shadow: 0 10px 40px rgba(79, 70, 229, 0.2); }
         
-        .role-btn { padding: 12px; border-radius: 12px; font-weight: 800; text-transform: uppercase; font-size: 11px; border: 2px solid #1e293b; transition: 0.3s; width: 100%; }
-        .role-btn.active { background: #4f46e5; border-color: #4f46e5; color: white; box-shadow: 0 0 20px rgba(79, 70, 229, 0.4); }
+        .role-btn, .sub-btn { padding: 12px; border-radius: 12px; font-weight: 800; text-transform: uppercase; font-size: 10px; border: 2px solid #1e293b; transition: 0.3s; width: 100%; color: #94a3b8; }
+        .role-btn.active, .sub-btn.active { background: #4f46e5; border-color: #6366f1; color: white; box-shadow: 0 0 15px rgba(79, 70, 229, 0.3); }
         
-        .input-vivid { background: rgba(15, 23, 42, 0.8); border: 2px solid #1e293b; padding: 16px; border-radius: 15px; width: 100%; outline: none; font-weight: 700; color: white; }
-        #qrcode img { border: 10px solid white; border-radius: 20px; margin: 0 auto; }
+        .input-vivid { background: rgba(15, 23, 42, 0.8); border: 2px solid #1e293b; padding: 14px; border-radius: 12px; width: 100%; outline: none; font-weight: 700; color: white; font-size: 14px; }
+        .input-vivid:focus { border-color: #4f46e5; }
         
-        /* Layout Containers */
         #desktop-ui, #mobile-ui, #welcome-ui, #manual-ui { display: none; }
         .active-view { display: flex !important; }
-        
         .full-center { min-height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #qrcode img { border: 8px solid white; border-radius: 15px; margin: 0 auto; }
     </style>
 </head>
 <body>
 
-    <!-- 1. DESKTOP MONITOR VIEW (QR SCREEN) -->
-    <div id="desktop-ui" class="full-center p-10 space-y-10">
+    <!-- 1. DESKTOP QR SCREEN -->
+    <div id="desktop-ui" class="full-center p-10 space-y-8">
         <header>
-            <p class="text-indigo-400 font-bold uppercase tracking-[0.6em] text-xs mb-3">Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
-            <h1 class="text-7xl font-black tracking-tighter uppercase italic">CS Connect</h1>
+            <p class="text-indigo-400 font-bold uppercase tracking-[0.6em] text-xs mb-2">Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
+            <h1 class="text-6xl font-black tracking-tighter uppercase italic">CS Connect</h1>
         </header>
 
-        <div class="flex items-center justify-center gap-16">
-            <div class="glass p-12 rounded-[4rem] cyber-border w-[450px]">
-                <h2 id="pc-sys-id" class="text-7xl font-black text-white mb-4 tracking-tighter">CS-XX</h2>
-                <p class="text-slate-500 font-bold uppercase text-[10px] tracking-[0.3em] mb-10">Scan with Mobile to Sync</p>
+        <div class="flex items-center justify-center gap-12">
+            <div class="glass p-10 rounded-[3rem] cyber-border w-[400px]">
+                <h2 id="pc-sys-id" class="text-7xl font-black text-white mb-4">CS-XX</h2>
+                <p class="text-slate-500 font-bold uppercase text-[9px] tracking-[0.3em] mb-8">Scan to Unlock Station</p>
                 <div id="qrcode"></div>
             </div>
 
-            <div class="space-y-6">
-                <div class="w-1 h-32 bg-gradient-to-b from-transparent via-indigo-500 to-transparent mx-auto"></div>
-                <button onclick="switchView('manual-ui')" class="group flex flex-col items-center gap-4 transition-all hover:scale-105">
-                    <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10 group-hover:bg-indigo-600 transition-colors">
-                        <i data-lucide="keyboard" class="w-10 h-10 text-indigo-400 group-hover:text-white"></i>
+            <div class="space-y-4">
+                <div class="w-px h-24 bg-indigo-500/30 mx-auto"></div>
+                <button onclick="switchView('manual-ui')" class="group flex flex-col items-center gap-3">
+                    <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border border-white/10 group-hover:bg-indigo-600 transition-all">
+                        <i data-lucide="keyboard" class="w-8 h-8 text-indigo-400 group-hover:text-white"></i>
                     </div>
-                    <p class="text-indigo-400 font-black uppercase text-xs tracking-widest">Manual Sign-In</p>
+                    <p class="text-indigo-400 font-black uppercase text-[10px] tracking-widest">Manual Login</p>
                 </button>
             </div>
         </div>
-        <div class="text-3xl font-light text-slate-600 font-mono tracking-widest" id="clock-desktop">00:00:00 AM</div>
     </div>
 
-    <!-- 2. MOBILE LOGIN VIEW (TRIGGERED BY mode=mobile) -->
-    <div id="mobile-ui" class="min-h-screen w-full flex flex-col p-6 overflow-y-auto">
-        <header class="text-center mt-4 mb-8">
-            <h1 class="text-5xl font-black tracking-tighter" id="mob-pc-display">CS-XX</h1>
-            <p class="text-indigo-400 font-bold uppercase text-[10px] tracking-widest mt-2">Mobile Candidate Login</p>
+    <!-- 2. MOBILE VIEW CONTAINER -->
+    <div id="mobile-ui" class="min-h-screen w-full flex flex-col p-5 overflow-y-auto">
+        <header class="text-center mt-4 mb-6">
+            <h1 class="text-4xl font-black tracking-tighter" id="mob-pc-display">CS-XX</h1>
+            <p class="text-indigo-400 font-bold uppercase text-[10px] tracking-widest mt-1">Sovereign Lab Entry</p>
         </header>
-        <div id="mobile-form-anchor"></div> <!-- Form will be injected here -->
+        <div id="mobile-form-anchor"></div>
     </div>
 
-    <!-- 3. MANUAL DESKTOP FORM VIEW -->
-    <div id="manual-ui" class="full-center bg-[#020617] p-10">
-        <div class="w-full max-w-2xl glass p-12 rounded-[4rem] cyber-border text-left">
-            <div class="flex justify-between items-center mb-8">
-                <h3 class="text-3xl font-black uppercase italic tracking-tighter">Station Login</h3>
-                <button onclick="switchView('desktop-ui')" class="text-slate-500 hover:text-white font-bold uppercase text-[10px] tracking-widest">← Back</button>
-            </div>
+    <!-- 3. MANUAL DESKTOP VIEW -->
+    <div id="manual-ui" class="full-center p-6">
+        <div class="w-full max-w-xl glass p-10 rounded-[3rem] cyber-border text-left relative">
+            <button onclick="switchView('desktop-ui')" class="absolute top-8 right-8 text-slate-500 hover:text-white"><i data-lucide="x-circle"></i></button>
+            <h3 class="text-2xl font-black uppercase italic mb-8">Workstation Login</h3>
             <div id="main-form-container">
-                <!-- THE MASTER FORM -->
-                <div class="flex gap-3 mb-8">
+                <!-- START OF DYNAMIC FORM -->
+                <div class="grid grid-cols-3 gap-2 mb-6">
                     <button onclick="setRole('Student')" id="r-Student" class="role-btn active">Student</button>
                     <button onclick="setRole('Lecturer')" id="r-Lecturer" class="role-btn">Lecturer</button>
                     <button onclick="setRole('Guest')" id="r-Guest" class="role-btn">Guest</button>
                 </div>
-                <form onsubmit="handleHandshake(event)" class="grid grid-cols-2 gap-4">
-                    <input type="text" id="m-name" placeholder="Full Name" required class="col-span-2 input-vivid">
-                    <div id="student-fields" class="contents">
-                        <select id="m-year" class="input-vivid"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
-                        <select id="m-sem" class="input-vivid"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option>Sem 4</option><option>Sem 5</option><option>Sem 6</option><option>Sem 7</option><option>Sem 8</option></select>
-                        <select id="m-major" class="col-span-2 input-vivid"><option>Computer Science</option><option>Artificial Intelligence</option></select>
-                        <input type="text" id="m-roll" placeholder="Registration Number" class="col-span-2 input-vivid uppercase">
+
+                <form onsubmit="handleHandshake(event)" class="space-y-4">
+                    <input type="text" id="m-name" placeholder="Full Name" required class="input-vivid">
+
+                    <!-- STUDENT BRANCH -->
+                    <div id="branch-student" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="setStudentType('Major')" id="s-Major" class="sub-btn active">Major</button>
+                            <button type="button" onclick="setStudentType('Minor')" id="s-Minor" class="sub-btn">Minor</button>
+                        </div>
+                        
+                        <select id="m-subject" class="input-vivid font-bold text-indigo-400">
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        </select>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="m-year" class="input-vivid"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+                            <select id="m-sem" class="input-vivid"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option>Sem 4</option><option>Sem 5</option><option>Sem 6</option><option>Sem 7</option><option>Sem 8</option></select>
+                        </div>
+                        <input type="text" id="m-roll" placeholder="Registration Number" class="input-vivid uppercase">
                     </div>
-                    <div id="extra-fields" class="hidden col-span-2">
-                        <input type="text" id="m-org" placeholder="Department Name" class="input-vivid">
+
+                    <!-- GUEST BRANCH -->
+                    <div id="branch-guest" class="hidden">
+                        <input type="text" id="m-org" placeholder="Department or Organization" class="input-vivid">
                     </div>
-                    <button type="submit" class="col-span-2 bg-indigo-600 py-5 rounded-2xl font-black text-xl uppercase shadow-2xl mt-4 tracking-widest">Sign In & Unlock</button>
+
+                    <button type="submit" class="w-full bg-indigo-600 py-5 rounded-xl font-black text-lg uppercase shadow-xl mt-4 tracking-tighter">Sign In & Unlock</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- 4. WELCOME SCREEN -->
+    <!-- 4. WELCOME OVERLAY -->
     <div id="welcome-ui" class="full-center fixed inset-0 bg-[#020617] z-[2000]">
-        <div class="w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center mb-8 shadow-2xl animate-bounce">
-            <i data-lucide="user" class="w-16 h-16 text-white"></i>
+        <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mb-6 shadow-2xl animate-pulse">
+            <i data-lucide="check" class="w-12 h-12 text-white"></i>
         </div>
-        <h1 class="text-7xl font-black uppercase italic tracking-tighter">Welcome</h1>
-        <h2 id="welcome-name" class="text-3xl font-bold text-indigo-400 uppercase mt-4 italic">User</h2>
-        <p class="mt-12 text-slate-700 font-black uppercase text-[10px] tracking-[0.5em] animate-pulse">Launching Desktop Environment...</p>
+        <h1 class="text-6xl font-black uppercase italic tracking-tighter">Welcome</h1>
+        <h2 id="welcome-name" class="text-2xl font-bold text-indigo-400 uppercase mt-2 italic">User</h2>
+        <p class="mt-10 text-slate-700 font-black uppercase text-[9px] tracking-[0.5em] animate-pulse">Authorizing Lab Session...</p>
     </div>
 
     <!-- FOOTER -->
-    <footer class="fixed bottom-6 w-full text-center text-[10px] font-bold text-slate-700 uppercase tracking-widest">
+    <footer class="fixed bottom-4 w-full text-center text-[9px] font-bold text-slate-700 uppercase tracking-widest">
         Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna GDC (A) | Dev: <a href="https://linkedin.com/in/m3nadh" target="_blank" class="text-indigo-500 underline">M.Thrinadh</a>
     </footer>
 
@@ -117,59 +129,50 @@
         const params = new URLSearchParams(window.location.search);
         const SystemID = params.get('sysId') || "CS-01";
         const MAC = params.get('mac') || "000000000000";
-        let currentRole = 'Student';
+        
+        let role = 'Student';
+        let studentType = 'Major';
 
-        function switchView(viewId) {
+        function switchView(id) {
             document.querySelectorAll('#desktop-ui, #mobile-ui, #welcome-ui, #manual-ui').forEach(v => v.classList.remove('active-view'));
-            document.getElementById(viewId).classList.add('active-view');
+            document.getElementById(id).classList.add('active-view');
         }
 
-        function init() {
-            lucide.createIcons();
-            // IMMEDIATE CHECK FOR MOBILE MODE
-            if (params.get('mode') === 'mobile') {
-                document.getElementById('mob-pc-display').innerText = SystemID;
-                document.getElementById('mobile-form-anchor').appendChild(document.getElementById('main-form-container'));
-                switchView('mobile-ui');
-            } else {
-                document.getElementById('pc-sys-id').innerText = SystemID;
-                generateQR();
-                switchView('desktop-ui');
-                setInterval(pollCloud, 2000);
-            }
-            setInterval(() => {
-                const time = new Date().toLocaleTimeString();
-                if(document.getElementById('clock-desktop')) document.getElementById('clock-desktop').innerText = time;
-            }, 1000);
-        }
-
-        function generateQR() {
-            const qrUrl = `${window.location.origin}${window.location.pathname}?mode=mobile&sysId=${SystemID}&mac=${MAC}`;
-            new QRCode(document.getElementById("qrcode"), { text: qrUrl, width: 220, height: 220 });
-        }
-
-        function setRole(role) {
-            currentRole = role;
+        function setRole(r) {
+            role = r;
             document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`r-${role}`).classList.add('active');
-            document.getElementById('student-fields').classList.toggle('hidden', role !== 'Student');
-            document.getElementById('extra-fields').classList.toggle('hidden', role === 'Student');
-            document.getElementById('m-org').placeholder = (role === 'Lecturer') ? "Department Name" : "Organization / Purpose";
+            document.getElementById(`r-${r}`).classList.add('active');
+            
+            document.getElementById('branch-student').classList.toggle('hidden', r !== 'Student');
+            document.getElementById('branch-guest').classList.toggle('hidden', r !== 'Guest');
+        }
+
+        function setStudentType(t) {
+            studentType = t;
+            document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`s-${t}`).classList.add('active');
+            
+            const subSelect = document.getElementById('m-subject');
+            subSelect.innerHTML = t === 'Major' 
+                ? '<option>Computer Science</option><option>Artificial Intelligence</option>'
+                : '<option>Mathematics</option><option>Electronics</option>';
         }
 
         async function handleHandshake(e) {
             e.preventDefault();
             const name = document.getElementById('m-name').value;
             const data = {
-                action: "lab_unlock", sysId: SystemID, mac: MAC, role: currentRole,
+                action: "lab_unlock", sysId: SystemID, mac: MAC, role: role,
                 name: name,
-                roll: (currentRole === 'Student') ? document.getElementById('m-roll').value : 'STAFF',
-                year: (currentRole === 'Student') ? document.getElementById('m-year').value : 'N/A',
-                sem: (currentRole === 'Student') ? document.getElementById('m-sem').value : 'N/A'
+                roll: (role === 'Student') ? document.getElementById('m-roll').value : (role === 'Lecturer' ? 'STAFF' : 'GUEST'),
+                course: (role === 'Student') ? document.getElementById('m-subject').value : 'N/A',
+                year: (role === 'Student') ? document.getElementById('m-year').value : 'N/A',
+                sem: (role === 'Student') ? document.getElementById('m-sem').value : 'N/A',
+                org: (role === 'Guest') ? document.getElementById('m-org').value : 'N/A'
             };
 
             if(params.get('mode') === 'mobile') {
-                document.body.innerHTML = `<div class="full-center"><h1>Sign-in Sent!</h1><p class="text-indigo-400 mt-2">Unlocking workstation ${SystemID}</p></div>`;
+                document.body.innerHTML = `<div class="full-center"><h1>Unlocking...</h1><p class="text-indigo-400 mt-2">Station ${SystemID} ready.</p></div>`;
             } else {
                 document.getElementById('welcome-name').innerText = name;
                 switchView('welcome-ui');
@@ -180,18 +183,31 @@
         async function pollCloud() {
             try {
                 const res = await fetch(`${BACKEND}?action=lab`);
-                const data = await res.json();
-                const status = data.find(p => p.SystemID === SystemID);
-                if (status && status.Command === "UNLOCK") {
-                    document.getElementById('welcome-name').innerText = status.Status;
+                const logs = await res.json();
+                const myPC = logs.find(p => p.SystemID === SystemID);
+                if (myPC && myPC.Command === "UNLOCK") {
+                    document.getElementById('welcome-name').innerText = myPC.Status;
                     switchView('welcome-ui');
-                    lucide.createIcons();
                 }
             } catch(e) {}
         }
 
-        window.onload = init;
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        window.onload = () => {
+            lucide.createIcons();
+            if (params.get('mode') === 'mobile') {
+                document.getElementById('mob-pc-display').innerText = SystemID;
+                document.getElementById('mobile-form-anchor').appendChild(document.getElementById('main-form-container'));
+                switchView('mobile-ui');
+            } else {
+                document.getElementById('pc-sys-id').innerText = SystemID;
+                new QRCode(document.getElementById("qrcode"), { 
+                    text: `${window.location.origin}${window.location.pathname}?mode=mobile&sysId=${SystemID}&mac=${MAC}`,
+                    width: 200, height: 200 
+                });
+                switchView('desktop-ui');
+                setInterval(pollCloud, 2000);
+            }
+        };
     </script>
 </body>
 </html>
