@@ -8,7 +8,7 @@
 
 const CloudSync = {
     // --- MASTER BACKEND URL ---
-    apiUrl: "https://script.google.com/macros/s/AKfycbwPJVhu3T8NZQScH0MdO1MRWCjjOaHrxGFIuNsyaWAoeROgqlR5xM-eZQ9BSBNRo1c6/exec",
+    apiUrl: "https://script.google.com/macros/s/AKfycbx9KZfFxGH8V0XdZjNMeJHO08O3GNUxCXJe96Bi1RsPhUjZ9sl5HfX37fk8CcrNuVdg/exec",
 
     // 1. UNIVERSAL POST HANDLER (Sovereign Security)
     async post(payload) {
