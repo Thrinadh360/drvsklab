@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CSync | Sovereign Portal</title>
     
-    <!-- PWA Standard -->
+    <!-- PWA & Native Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
@@ -20,147 +20,89 @@
 
     <style>
         :root { --accent: #00f2ff; --bg: #020617; --card: rgba(255, 255, 255, 0.03); }
-        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; user-select: none; overflow: hidden; margin: 0; }
         
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg); 
-            color: white; 
-            user-select: none; 
-            overflow: hidden; 
-            margin: 0;
-        }
-
-        /* 🛠️ CRITICAL FIX: INPUT RESPONSIVENESS PATCH */
-        input, textarea, select, [contenteditable="true"] {
-            user-select: text !important;
-            -webkit-user-select: text !important;
-            pointer-events: auto !important;
-            touch-action: manipulation !important;
-            cursor: text;
-        }
+        /* INPUT FOCUS PATCH */
+        input, textarea, select { user-select: text !important; -webkit-user-select: text !important; pointer-events: auto !important; touch-action: manipulation !important; cursor: text; }
 
         .glass { background: var(--card); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .cyber-card { border-top: 3px solid var(--accent); box-shadow: 0 15px 40px rgba(0, 242, 255, 0.1); }
-        
-        /* Layout Structure */
         .app-wrapper { height: 100dvh; display: flex; flex-direction: column; padding: 20px; padding-top: calc(env(safe-area-inset-top) + 10px); }
         .main-viewport { flex: 1; overflow-y: auto; padding-bottom: 160px; scroll-behavior: smooth; position: relative; z-index: 5; }
-        
-        /* Sidebar Drawer */
         #sidebar { position: fixed; inset-y: 0; left: 0; width: 280px; background: #05060f; z-index: 1000; transform: translateX(-100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-right: 1px solid rgba(255,255,255,0.05); }
         #sidebar.open { transform: translateX(0); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
-
-        .video-circle { width: 190px; height: 190px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); margin: 0 auto; box-shadow: 0 0 30px var(--accent); background: black; }
+        .video-circle { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); margin: 0 auto; box-shadow: 0 0 30px var(--accent); background: black; }
         video { width: 100%; height: 100%; object-fit: cover; }
-
-        /* Navigation */
         .bottom-nav { position: fixed; bottom: 85px; left: 20px; right: 20px; height: 65px; z-index: 100; border-radius: 24px; display: flex; justify-content: space-around; align-items: center; }
         .nav-active { color: var(--accent) !important; filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
         .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 10px calc(15px + env(safe-area-inset-bottom)); background: #000; text-align: center; font-size: 9px; font-weight: 700; border-top: 1px solid #1e293b; z-index: 90; color: #475569; }
-        
         .hidden-view { display: none !important; }
-        .btn-action { background: var(--accent); color: black; font-weight: 900; padding: 16px; border-radius: 14px; width: 100%; text-transform: uppercase; transition: 0.2s; font-size: 11px; letter-spacing: 1.5px; }
+        .btn-action { background: var(--accent); color: #000; font-weight: 900; padding: 16px; border-radius: 14px; width: 100%; text-transform: uppercase; transition: 0.2s; font-size: 11px; letter-spacing: 1.5px; }
         .btn-action:active { transform: scale(0.96); opacity: 0.8; }
-        
         @media (min-width: 1024px) { #desktop-blocker { display: flex !important; } .app-wrapper { display: none; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- 1. HARDWARE ACCESS BLOCKER -->
+    <!-- DESKTOP BLOCKER -->
     <div id="desktop-blocker" class="hidden fixed inset-0 bg-black z-[9999] flex-col items-center justify-center p-10 text-center">
         <i data-lucide="smartphone" class="w-20 h-20 text-cyan-400 mb-6"></i>
         <h1 class="text-3xl font-black uppercase text-white tracking-tighter">Mobile Node Only</h1>
-        <p class="text-slate-500 mt-4 text-sm max-w-sm">CSync requires smartphone biometric sensors and hardware UUID binding to operate.</p>
+        <p class="text-slate-500 mt-4 text-sm max-w-sm">CSync requires smartphone hardware sensors to operate.</p>
     </div>
 
-    <!-- 2. SOVEREIGN SIDEBAR -->
+    <!-- SIDEBAR -->
     <div id="sidebar" class="sidebar p-8 flex flex-col">
         <div class="mb-10 text-center">
             <h1 style="font-family:'Orbitron'" class="text-2xl text-cyan-400 tracking-tighter">CSYNC</h1>
-            <p class="text-[8px] font-black text-indigo-500 uppercase tracking-widest mt-1">Sovereign Ecosystem</p>
+            <p class="text-[8px] font-black text-indigo-500 uppercase tracking-widest mt-1">Sovereign Cloud</p>
         </div>
         <nav class="space-y-6 flex-1">
-            <button onclick="UIManager.switchTab('dashboard')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-slate-300"><i data-lucide="layout-dashboard"></i> Dashboard</button>
-            <button onclick="UIManager.switchTab('nexus')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-slate-300"><i data-lucide="users"></i> Nexus Directory</button>
-            <button onclick="UIManager.switchTab('discuss')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-slate-300"><i data-lucide="message-square"></i> Discussion Feed</button>
-            
+            <button onclick="switchTab('dashboard')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-slate-300"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+            <button onclick="switchTab('nexus')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-slate-300"><i data-lucide="users"></i> Nexus</button>
+            <button onclick="switchTab('discuss')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-slate-300"><i data-lucide="message-square"></i> Feed</button>
             <div id="staff-menu" class="hidden space-y-6 pt-6 border-t border-white/5">
-                <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Faculty Suite</p>
-                <button onclick="UIManager.switchTab('architect')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-indigo-400"><i data-lucide="sparkles"></i> AI Architect</button>
-                <button onclick="UIManager.switchTab('audit')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-emerald-400"><i data-lucide="shield-check"></i> NAAC Audit</button>
+                <button onclick="switchTab('architect')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-indigo-400"><i data-lucide="sparkles"></i> AI Architect</button>
+                <button onclick="switchTab('audit')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-emerald-400"><i data-lucide="shield-check"></i> NAAC Audit</button>
             </div>
         </nav>
-        <button onclick="UIManager.forceLogout('Manual session termination.')" class="text-red-500 text-[9px] font-black uppercase mt-10 flex items-center gap-2"><i data-lucide="log-out" class="w-3 h-3"></i> Unbind Device</button>
+        <button onclick="logout()" class="text-red-500 text-[9px] font-black uppercase mt-10">Unbind Device</button>
     </div>
 
     <div class="app-wrapper">
         <header class="flex justify-between items-center mb-6">
-            <button onclick="UIManager.toggleSidebar()" class="p-2"><i data-lucide="menu" class="text-cyan-400"></i></button>
-            <div class="text-center">
-                <p class="text-[7px] font-bold text-slate-500 uppercase tracking-widest">Dr. V.S. Krishna Govt. Degree College (A)</p>
-                <h1 style="font-family: 'Orbitron';" class="text-xl font-bold tracking-tighter">CSYNC</h1>
-            </div>
-            <img id="u-photo" src="" class="w-10 h-10 rounded-full border border-cyan-400 object-cover shadow-lg bg-slate-900">
+            <button onclick="toggleSidebar()" class="p-2"><i data-lucide="menu" class="text-cyan-400"></i></button>
+            <h1 style="font-family: 'Orbitron';" class="text-xl font-bold tracking-tighter">CSYNC</h1>
+            <img id="u-photo-top" src="" class="w-10 h-10 rounded-full border border-cyan-400 object-cover shadow-lg">
         </header>
 
-        <!-- ANNOUNCEMENT BLOCK -->
-        <div id="ann-card" class="hidden glass p-4 rounded-2xl mb-6 border-l-4 border-red-500 animate-pulse">
-            <audio id="ding" src="assets/audio/notification.mp3"></audio>
-            <div class="flex items-center gap-2 mb-1">
-                <span id="ann-sender" class="text-[9px] font-black uppercase text-red-500">Notice</span>
-            </div>
-            <p id="ann-body" class="text-xs font-bold text-white leading-tight"></p>
-        </div>
-
-        <div id="status-pill" class="glass py-2 px-6 rounded-full text-center text-[9px] font-black uppercase tracking-widest mb-6 text-slate-500 border-slate-800">
-            Connecting...
-        </div>
+        <div id="status-pill" class="glass py-2 px-6 rounded-full text-center text-[9px] font-black uppercase tracking-widest mb-6 text-slate-500 border-slate-800">Connecting...</div>
 
         <main class="main-viewport">
-            
-            <!-- VIEW: ROLE SELECTION -->
-            <div id="view-roles" class="hidden-view flex flex-col space-y-4 pt-4">
-                <h2 class="text-center text-[10px] font-black text-slate-600 uppercase mb-4 tracking-widest">Establish Sovereign Identity</h2>
-                <button onclick="UIManager.openReg('Student')" class="glass p-6 rounded-3xl text-left border-l-4 border-cyan-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg uppercase">Student</h4>
-                    <p class="text-[9px] text-slate-400 uppercase">CS & AI Batches</p>
-                </button>
-                <button onclick="UIManager.openReg('Alumni')" class="glass p-6 rounded-3xl text-left border-l-4 border-emerald-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg uppercase text-emerald-400">Alumni</h4>
-                    <p class="text-[9px] text-slate-400 uppercase">Legacy Network</p>
-                </button>
-                <button onclick="UIManager.openReg('Lecturer')" class="glass p-6 rounded-3xl text-left border-l-4 border-indigo-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg uppercase text-indigo-400">Lecturer</h4>
-                    <p class="text-[9px] text-slate-400 uppercase">Faculty Portal</p>
-                </button>
-                <button onclick="UIManager.openReg('LabAssistant')" class="glass p-6 rounded-3xl text-left border-l-4 border-orange-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg uppercase text-orange-400">Lab Assistant</h4>
-                    <p class="text-[9px] text-slate-400 uppercase">System Maintenance</p>
-                </button>
-                <button onclick="UIManager.openReg('HOD')" class="glass p-6 rounded-3xl text-left border-l-4 border-purple-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg uppercase">HOD / Admin</h4>
-                    <p class="text-[9px] text-slate-400 uppercase">Executive Controls</p>
-                </button>
+            <!-- VIEW: ROLES (Registration) -->
+            <div id="view-roles" class="hidden-view flex flex-col space-y-4">
+                <h2 class="text-center text-[10px] font-black text-slate-600 uppercase mb-4 tracking-widest">Identify Your Node</h2>
+                <button onclick="startReg('Student')" class="glass p-6 rounded-3xl text-left border-l-4 border-cyan-500"><h4 class="font-black">STUDENT</h4></button>
+                <button onclick="startReg('Alumni')" class="glass p-6 rounded-3xl text-left border-l-4 border-emerald-500"><h4 class="font-black text-emerald-400">ALUMNI</h4></button>
+                <button onclick="startReg('Lecturer')" class="glass p-6 rounded-3xl text-left border-l-4 border-indigo-500"><h4 class="font-black text-indigo-400">LECTURER</h4></button>
+                <button onclick="startReg('HOD')" class="glass p-6 rounded-3xl text-left border-l-4 border-purple-500"><h4 class="font-black text-purple-400">HOD / ADMIN</h4></button>
             </div>
 
-            <!-- VIEW: ENROLLMENT FORM -->
+            <!-- VIEW: REGISTRATION FORM -->
             <div id="view-register" class="hidden-view space-y-6">
                 <div class="glass p-8 rounded-[2.5rem] cyber-card text-center">
-                    <h2 id="reg-title" class="text-xl font-black text-cyan-400 uppercase mb-6">Enrollment</h2>
+                    <h2 id="reg-title" class="text-lg font-black text-cyan-400 uppercase mb-6">Enrollment</h2>
                     <div class="video-circle mb-6"><video id="v-reg" autoplay muted playsinline></video></div>
                     <canvas id="c-resize" class="hidden"></canvas>
                     <div class="space-y-4">
-                        <input id="r-id" type="text" placeholder="Roll No / Employee ID" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none uppercase font-black text-sm">
+                        <input id="r-id" type="text" placeholder="ID Number" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none uppercase font-black text-sm">
                         <input id="r-name" type="text" placeholder="Full Name" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none text-sm font-semibold">
                         <div id="stu-fields" class="hidden space-y-4">
-                            <select id="r-major" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 text-xs font-bold"><option>Computer Science</option><option>Artificial Intelligence</option></select>
-                            <select id="r-year" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 text-xs font-bold"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
-                            <input id="r-pmail" type="email" placeholder="Parent Email (Required for Absence Alerts)" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none text-sm">
+                            <select id="r-major" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 text-xs"><option>Computer Science</option><option>Artificial Intelligence</option></select>
+                            <select id="r-year" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 text-xs"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
                         </div>
-                        <button onclick="UIManager.processRegistration()" class="btn-action mt-4">Complete Biometric Binding</button>
+                        <button onclick="processReg()" class="btn-action">Bind Biometrics</button>
                     </div>
                 </div>
             </div>
@@ -173,75 +115,30 @@
                         <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
                         <h4 class="text-[8px] font-black uppercase text-cyan-400 tracking-widest">Sovereign AI Terminal</h4>
                     </div>
-                    <textarea id="ai-input" class="w-full bg-black/40 p-4 rounded-xl text-xs font-mono text-cyan-100 outline-none h-20 border border-white/5" placeholder="Command AI (e.g. 'Shortage alert')"></textarea>
-                    <button onclick="UIManager.executeAI()" class="mt-2 text-cyan-400 font-bold text-[9px] uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-all"><i data-lucide="terminal" class="w-3 h-3"></i> Execute_Logic</button>
+                    <textarea id="ai-input" class="w-full bg-black/40 p-4 rounded-xl text-xs font-mono text-cyan-100 outline-none h-20 border border-white/5" placeholder="Ask CSync AI..."></textarea>
+                    <button onclick="executeAI()" class="mt-2 text-cyan-400 font-bold text-[9px] uppercase tracking-widest flex items-center gap-2">Execute_Logic</button>
                     <div id="ai-response" class="hidden mt-3 p-3 bg-black/60 rounded-xl text-[9px] font-mono text-slate-400 border border-white/5 leading-relaxed"></div>
                 </div>
 
-                <!-- Identity Summary -->
-                <div class="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <div class="text-left">
-                        <h4 id="u-name" class="font-black text-sm uppercase">Loading...</h4>
-                        <p id="u-meta" class="text-[8px] text-slate-500 uppercase font-black"></p>
-                    </div>
-                </div>
-
-                <!-- Dynamic Action Cards (Controlled by ui-manager.js) -->
-                <div id="module-attendance" class="hidden-view glass p-10 rounded-[3rem] text-center cyber-card space-y-6">
-                    <i data-lucide="fingerprint" class="w-12 h-12 mx-auto text-cyan-400"></i>
-                    <h3 class="text-xs font-bold uppercase text-slate-400">Secure Biometric Verification</h3>
-                    <button onclick="UIManager.triggerAuth()" class="btn-action">Verify Daily Presence</button>
+                <div id="module-attendance" class="hidden-view glass p-10 rounded-[3rem] text-center cyber-card">
+                    <i data-lucide="fingerprint" class="w-12 h-12 mx-auto mb-6 text-cyan-400"></i>
+                    <button onclick="triggerAuth()" class="btn-action">Verify Daily Presence</button>
                 </div>
 
                 <div id="module-lab" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-emerald-500">
                     <h2 class="text-emerald-400 font-black text-xl mb-4">ACCESS GRANTED</h2>
-                    <button onclick="UIManager.startLabScan()" class="btn-action !bg-white !text-black">Scan Lab PC QR</button>
+                    <button onclick="scanPC()" class="btn-action !bg-white !text-black">Scan Lab PC QR</button>
                     <div id="qr-reader" class="mt-4 rounded-3xl overflow-hidden shadow-2xl"></div>
                 </div>
-
-                <div id="module-active-pc" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-orange-500">
-                    <h2 id="active-pc-display" class="text-5xl font-black text-white mb-2 italic">CS-XX</h2>
-                    <p class="text-[10px] text-slate-500 uppercase font-black mb-8">Workstation Session Active</p>
-                    <button onclick="UIManager.killSession()" class="btn-action !bg-orange-600 !text-white">Close & Lock Session</button>
-                </div>
-
-                <!-- STAFF LOUNGE -->
-                <div id="module-staff" class="hidden-view space-y-4">
-                    <div class="glass p-6 rounded-3xl border-l-4 border-indigo-500">
-                        <h4 class="text-xs font-black uppercase text-indigo-400 mb-4">Duty Status</h4>
-                        <button onclick="UIManager.markStaffLeave()" class="btn-action !p-3 !text-[10px] !bg-white/5 border border-white/10 !text-white">Mark Leave for Today</button>
-                    </div>
-                    <div class="glass p-6 rounded-3xl border-l-4 border-cyan-500">
-                        <h4 class="text-xs font-black uppercase text-cyan-400 mb-4">Academic Ledger</h4>
-                        <textarea id="diary-entry" class="w-full bg-white/5 p-3 rounded-xl text-xs outline-none border border-white/10 h-24" placeholder="Log today's activity..."></textarea>
-                        <button onclick="UIManager.saveDiary()" class="btn-action !p-3 !text-[10px] mt-2">Commit to Cloud</button>
-                    </div>
-                </div>
             </div>
-
-            <!-- VIEW: NEXUS DIRECTORY -->
-            <div id="view-nexus" class="hidden-view space-y-6">
-                <h2 class="text-xl font-black text-indigo-400 uppercase tracking-tighter">Nexus Directory</h2>
-                <div id="nexus-container" class="grid grid-cols-1 gap-4 pb-20"></div>
-            </div>
-
-            <!-- VIEW: DISCUSSIONS -->
-            <div id="view-discuss" class="hidden-view space-y-6">
-                <h2 class="text-xl font-black text-purple-400 uppercase tracking-tighter">Discussion Feed</h2>
-                <div id="topic-container" class="space-y-4 pb-20"></div>
-            </div>
-
         </main>
 
-        <!-- NAVIGATION TAB BAR -->
         <nav id="nav-bar" class="hidden-view bottom-nav glass">
-            <button onclick="UIManager.switchTab('dashboard')" id="tab-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i></button>
-            <button onclick="UIManager.switchTab('nexus')" id="tab-nexus" class="nav-item"><i data-lucide="users"></i></button>
-            <button onclick="UIManager.switchTab('discuss')" id="tab-discuss" class="nav-item"><i data-lucide="message-square"></i></button>
-            <button onclick="UIManager.toggleSidebar()" class="nav-item"><i data-lucide="more-horizontal"></i></button>
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i></button>
+            <button onclick="switchTab('nexus')" id="tab-nexus" class="nav-item"><i data-lucide="users"></i></button>
+            <button onclick="switchTab('discuss')" id="tab-discuss" class="nav-item"><i data-lucide="message-square"></i></button>
         </nav>
 
-        <!-- INSTITUTIONAL FOOTER -->
         <footer class="app-footer">
             <p>Copyright © 2026 | Dept of Computer Science</p>
             <p>Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
@@ -250,16 +147,100 @@
     </div>
 
     <!-- AI VISION OVERLAY -->
-    <div id="face-gate" class="hidden-view fixed inset-0 z-[2000] bg-black/95 flex flex-col items-center justify-center p-10 text-center pointer-events-auto">
+    <div id="face-gate" class="hidden-view fixed inset-0 z-[2000] bg-black/95 flex flex-col items-center justify-center p-10 text-center">
         <div class="video-circle mb-8"><video id="v-auth" autoplay muted playsinline></video></div>
         <h3 id="face-status" class="text-cyan-400 font-black uppercase text-xs animate-pulse tracking-widest">Scanning Identity...</h3>
-        <p class="text-slate-500 text-[9px] uppercase mt-4">Centering on Neural Node. Smile or Blink.</p>
     </div>
 
-    <!-- Core Logic Dependencies -->
-    <script src="assets/js/cloud-sync.js"></script>
-    <script src="assets/js/auth-engine.js"></script>
-    <script src="assets/js/scanner.js"></script>
-    <script src="assets/js/ui-manager.js"></script>
+    <script>
+        // 🛠️ THE MASTER BACKEND URL
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyjlfep_eavyIXgzJ4Ezru3f5odjw4M433R6cWqP419693_tFckIqTzUWsfxrp0tZtg/exec";
+        const UUID = btoa(navigator.userAgent + screen.width);
+        let USER = JSON.parse(localStorage.getItem('csync_v1_profile'));
+        let regRole = "";
+
+        async function init() {
+            lucide.createIcons();
+            if (!USER) {
+                switchView('view-roles');
+            } else {
+                switchView('view-dashboard');
+                document.getElementById('nav-bar').classList.remove('hidden-view');
+                refreshUI();
+            }
+            updateTimeStatus();
+            setInterval(updateTimeStatus, 60000);
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        function switchView(id) {
+            document.querySelectorAll('main > div').forEach(v => v.classList.add('hidden-view'));
+            document.getElementById(id).classList.remove('hidden-view');
+            document.getElementById('sidebar').classList.remove('open');
+        }
+        function switchTab(t) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('nav-active'));
+            document.getElementById('tab-'+t).classList.add('nav-active');
+            switchView('view-'+t);
+        }
+
+        async function executeAI() {
+            const input = document.getElementById('ai-input');
+            const resBox = document.getElementById('ai-response');
+            if(!input.value) return;
+            resBox.classList.remove('hidden');
+            resBox.innerText = "Processing sovereign logic...";
+            const res = await fetch(`${GAS_URL}?action=ai_helpdesk&query=${encodeURIComponent(input.value)}`);
+            resBox.innerText = await res.text();
+            input.value = "";
+        }
+
+        function updateTimeStatus() {
+            const hr = new Date().getHours();
+            const pill = document.getElementById('status-pill');
+            if (hr >= 10 && hr < 17) pill.innerHTML = `<span class="text-cyan-400 animate-pulse">● PORTAL ACTIVE: ${hr < 13 ? 'FN' : 'AN'} SESSION</span>`;
+            else pill.innerHTML = `<span class="text-red-500">○ PORTAL LOCKED</span>`;
+        }
+
+        function startReg(role) {
+            regRole = role;
+            switchView('view-register');
+            document.getElementById('stu-fields').classList.toggle('hidden', role !== 'Student');
+            document.getElementById('reg-title').innerText = role + " ENROLLMENT";
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }).then(s => document.getElementById('v-reg').srcObject = s);
+        }
+
+        async function processReg() {
+            const canvas = document.getElementById('c-resize');
+            const video = document.getElementById('v-reg');
+            canvas.width = 120; canvas.height = 120;
+            canvas.getContext('2d').drawImage(video, 0, 0, 120, 120);
+            const photo = canvas.toDataURL('image/jpeg', 0.6);
+
+            const payload = {
+                action: "register",
+                role: regRole,
+                id: document.getElementById('r-id').value,
+                name: document.getElementById('r-name').value,
+                major: document.getElementById('r-major').value || "N/A",
+                year: document.getElementById('r-year').value || "0",
+                uuid: UUID, photo: photo
+            };
+
+            const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+            if ((await res.text()) === "REGISTRATION_SUCCESS") {
+                localStorage.setItem('csync_v1_profile', JSON.stringify(payload));
+                location.reload();
+            }
+        }
+
+        function refreshUI() {
+            const isMarked = localStorage.getItem('marked_today') === new Date().toDateString();
+            document.getElementById('module-attendance').classList.toggle('hidden-view', isMarked);
+            document.getElementById('module-lab').classList.toggle('hidden-view', !isMarked);
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
