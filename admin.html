@@ -2,95 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CSync Admin | VSK GDC (A)</title>
+    <title>CSync Admin | Sovereign Command</title>
+    
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 
     <style>
-        :root { --primary: #4f46e5; --bg: #020617; --sidebar-w: 280px; }
+        :root { --accent: #00f2ff; --bg: #020617; --primary: #4f46e5; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color: #0f172a; overflow: hidden; }
         
         /* Sidebar Design */
-        .sidebar { background: #000; width: var(--sidebar-w); height: 100vh; position: fixed; color: #94a3b8; z-index: 100; border-right: 1px solid #1e293b; }
+        .sidebar { background: #000; width: 280px; height: 100vh; position: fixed; color: #94a3b8; z-index: 100; border-right: 1px solid #1e293b; }
         .sidebar-btn { @apply w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all hover:text-white hover:bg-white/5 uppercase tracking-widest text-[10px]; }
         .sidebar-btn.active { @apply bg-indigo-600 text-white shadow-lg shadow-indigo-600/30; }
         
-        /* Layout */
-        .main-content { margin-left: var(--sidebar-w); height: 100vh; overflow-y: auto; }
-        .glass-card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        
+        /* HUD Layout */
+        .main-content { margin-left: 280px; height: 100vh; overflow-y: auto; background: #f8fafc; }
+        .glass-card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+        .cyber-header { border-top: 4px solid var(--accent); }
+
         /* Lab Grid (8x6) */
-        .lab-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
-        .pc-node { @apply aspect-square rounded-xl flex flex-col items-center justify-center border-2 transition-all; }
-        .pc-available { @apply bg-slate-50 border-slate-200 text-slate-400; }
-        .pc-active { @apply bg-indigo-50 border-indigo-500 text-indigo-700 shadow-md; }
-        .pc-repair { @apply bg-red-50 border-red-500 text-red-700; }
+        .lab-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; }
+        .pc-node { @apply aspect-square rounded-2xl flex flex-col items-center justify-center border-2 transition-all cursor-pointer relative overflow-hidden; }
+        .pc-available { @apply bg-slate-50 border-slate-100 text-slate-300; }
+        .pc-active { @apply bg-indigo-50 border-indigo-500 text-indigo-700 shadow-md shadow-indigo-200; }
+        .pc-flagged { @apply bg-red-50 border-red-500 text-red-600 animate-pulse; }
+
+        /* Form Styling */
+        .input-vivid { @apply w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm transition-all focus:border-indigo-600 focus:bg-white; }
+        textarea { resize: none; }
 
         /* Footer */
         .admin-footer { @apply border-t border-slate-100 py-6 px-10 text-[10px] font-bold text-slate-400 uppercase text-center; }
-        a { color: #4f46e5; text-decoration: underline; }
+        a { color: var(--primary); text-decoration: underline; }
 
-        /* Views */
         .view-section { display: none; }
-        .view-active { display: block !important; }
+        .view-active { display: block !important; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Auth Screen */
         #admin-lock { position: fixed; inset: 0; background: #020617; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <!-- 1. ADMIN ACCESS LOCK -->
+    <!-- 1. ADMIN VAULT ACCESS -->
     <div id="admin-lock">
         <div class="text-center space-y-8">
-            <h1 style="font-family: 'Orbitron';" class="text-4xl text-white tracking-tighter">CSYNC VAULT</h1>
-            <p class="text-indigo-400 font-bold uppercase text-xs tracking-widest">Enter Lecturer Access PIN</p>
-            <input type="password" id="admin-pin" placeholder="••••" class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center text-5xl text-white outline-none w-64 font-black tracking-[0.5em]">
-            <button onclick="unlockVault()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">Decrypt Access</button>
+            <h1 style="font-family:'Orbitron'" class="text-4xl text-white tracking-tighter italic">CSYNC VAULT</h1>
+            <p class="text-indigo-400 font-bold uppercase text-[10px] tracking-[0.4em]">Decryption Required</p>
+            <input type="password" id="vault-pin" placeholder="••••" class="bg-white/5 border border-white/10 rounded-3xl p-6 text-center text-6xl text-white outline-none w-72 font-black tracking-[0.4em]">
+            <button onclick="unlockVault()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-2xl active:scale-95 transition">Authorize Access</button>
         </div>
     </div>
 
-    <!-- 2. SIDEBAR NAVIGATION -->
+    <!-- 2. SIDEBAR -->
     <aside class="sidebar p-6 flex flex-col">
         <div class="mb-10 text-center">
             <h1 style="font-family: 'Orbitron';" class="text-2xl text-white tracking-tighter">CSYNC</h1>
-            <p class="text-[8px] font-black text-indigo-500 uppercase tracking-widest mt-1">Admin Command Center</p>
+            <p class="text-[8px] font-black text-indigo-500 uppercase tracking-widest mt-1 italic">Sovereign Admin HUD</p>
         </div>
 
-        <nav class="flex-1 space-y-2">
-            <button onclick="showView('dashboard')" id="nav-dashboard" class="sidebar-btn active"><i data-lucide="layout-dashboard"></i> Dashboard</button>
-            <button onclick="showView('lab')" id="nav-lab" class="sidebar-btn"><i data-lucide="monitor"></i> Live Lab Grid</button>
-            <button onclick="showView('roster')" id="nav-roster" class="sidebar-btn"><i data-lucide="users"></i> Student Roster</button>
-            <button onclick="showView('exams')" id="nav-exams" class="sidebar-btn"><i data-lucide="pen-tool"></i> Exam Architect</button>
-            <button onclick="showView('audit')" id="nav-audit" class="sidebar-btn"><i data-lucide="shield-check"></i> NAAC / Audit</button>
-            <button onclick="showView('settings')" id="nav-settings" class="sidebar-btn"><i data-lucide="settings"></i> Config</button>
+        <nav class="flex-1 space-y-1">
+            <button onclick="switchView('dashboard')" id="nav-dashboard" class="sidebar-btn active"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+            <button onclick="switchView('lab')" id="nav-lab" class="sidebar-btn"><i data-lucide="monitor"></i> Live Lab Grid</button>
+            <button onclick="switchView('exams')" id="nav-exams" class="sidebar-btn"><i data-lucide="pen-tool"></i> Exam Architect</button>
+            <button onclick="switchView('teaching')" id="nav-teaching" class="sidebar-btn"><i data-lucide="book-open"></i> Teaching Notes</button>
+            <button onclick="switchView('bos')" id="nav-bos" class="sidebar-btn"><i data-lucide="scroll-text"></i> BoS Architect</button>
+            <button onclick="switchView('naac')" id="nav-naac" class="sidebar-btn text-emerald-500"><i data-lucide="shield-check"></i> NAAC Audit</button>
+            <button onclick="switchView('settings')" id="nav-settings" class="sidebar-btn"><i data-lucide="settings"></i> System Config</button>
         </nav>
 
-        <div class="mt-auto pt-6 border-t border-white/10">
-            <button onclick="openBroadcast()" class="w-full bg-red-600 text-white py-3 rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg">Broadcast Alert</button>
+        <div class="mt-auto pt-6 border-t border-white/5">
+             <button onclick="openBroadcast()" class="w-full bg-red-600 text-white py-3 rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg active:scale-95 transition">Broadcast Emergency</button>
         </div>
     </aside>
 
-    <!-- 3. MAIN CONTENT AREA -->
+    <!-- 3. MAIN AREA -->
     <main class="main-content flex flex-col">
-        
-        <!-- HEADER -->
-        <header class="bg-white border-b border-slate-200 h-20 px-10 flex items-center justify-between">
+        <header class="bg-white border-b border-slate-200 h-20 px-10 flex items-center justify-between sticky top-0 z-50">
             <div>
-                <h2 id="view-title" class="text-xl font-black text-slate-900 uppercase italic">Enterprise Dashboard</h2>
+                <h2 id="view-title" class="text-xl font-black text-slate-900 uppercase italic">Department Command</h2>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dr. V.S. Krishna Govt. Degree College (Autonomous)</p>
             </div>
             <div class="flex items-center gap-6">
-                <div class="text-right">
-                    <p class="text-[10px] font-black text-indigo-600 uppercase">Academic Year</p>
-                    <p id="ay-display" class="text-sm font-bold text-slate-800">2025-26</p>
+                <div class="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-full border border-emerald-100">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span class="text-[9px] font-black text-emerald-600 uppercase">Sovereign Cloud Active</span>
                 </div>
-                <div class="h-10 w-px bg-slate-200"></div>
-                <button onclick="fetchData()" class="bg-slate-100 p-3 rounded-xl hover:bg-indigo-600 hover:text-white transition"><i data-lucide="refresh-cw"></i></button>
+                <button onclick="location.reload()" class="bg-slate-50 p-3 rounded-xl hover:bg-indigo-600 hover:text-white transition"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
             </div>
         </header>
 
@@ -99,193 +102,240 @@
             <!-- VIEW: DASHBOARD -->
             <section id="view-dashboard" class="view-section view-active space-y-10">
                 <div class="grid grid-cols-4 gap-6">
-                    <div class="glass-card p-6 border-l-4 border-indigo-500">
-                        <h4 class="text-[10px] font-black text-slate-400 uppercase">Total Students</h4>
-                        <p class="text-3xl font-black mt-1" id="stat-total">--</p>
-                    </div>
-                    <div class="glass-card p-6 border-l-4 border-emerald-500">
+                    <div class="glass-card border-l-4 border-indigo-600">
                         <h4 class="text-[10px] font-black text-slate-400 uppercase">CS Presence</h4>
-                        <p class="text-3xl font-black mt-1 text-emerald-600" id="stat-cs">92%</p>
+                        <p class="text-4xl font-black mt-2 text-indigo-700">92.4%</p>
                     </div>
-                    <div class="glass-card p-6 border-l-4 border-cyan-500">
+                    <div class="glass-card border-l-4 border-cyan-500">
                         <h4 class="text-[10px] font-black text-slate-400 uppercase">AI Presence</h4>
-                        <p class="text-3xl font-black mt-1 text-cyan-600" id="stat-ai">88%</p>
+                        <p class="text-4xl font-black mt-2 text-cyan-600">89.1%</p>
                     </div>
-                    <div class="glass-card p-6 border-l-4 border-red-500">
-                        <h4 class="text-[10px] font-black text-slate-400 uppercase">Shortage Alerts</h4>
-                        <p class="text-3xl font-black mt-1 text-red-600" id="stat-short">04</p>
+                    <div class="glass-card border-l-4 border-orange-500">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase">Lab Usage</h4>
+                        <p class="text-4xl font-black mt-2 text-orange-600">32/48</p>
+                    </div>
+                    <div class="glass-card border-l-4 border-red-500">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase">Alerts</h4>
+                        <p class="text-4xl font-black mt-2 text-red-600">02</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-10">
-                    <div class="glass-card p-8">
-                        <h3 class="font-black uppercase text-xs mb-6 italic">Attendance Distribution</h3>
-                        <canvas id="chart-attendance" height="250"></canvas>
-                    </div>
-                    <div class="glass-card p-8">
-                        <h3 class="font-black uppercase text-xs mb-6 italic">Hustle Streaks (Top 10)</h3>
-                        <div id="streak-list" class="space-y-3">
-                            <!-- AI list -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div class="glass-card cyber-header">
+                        <h3 class="font-black text-xs uppercase mb-6 flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4"></i> Faculty Verification Queue</h3>
+                        <div id="verification-list" class="space-y-4">
+                            <p class="text-xs text-slate-400 italic">No pending manual sign-in requests.</p>
                         </div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 class="font-black text-xs uppercase mb-6 flex items-center gap-2"><i data-lucide="trending-up"></i> Department Vibe (AI)</h3>
+                        <canvas id="deptVibeChart" height="200"></canvas>
                     </div>
                 </div>
             </section>
 
-            <!-- VIEW: LIVE LAB GRID (8x6) -->
-            <section id="view-lab" class="view-section">
-                <div class="flex justify-between items-center mb-8">
-                    <h3 class="text-2xl font-black uppercase italic">Workstation Occupancy (48 PCs)</h3>
+            <!-- VIEW: LIVE LAB GRID -->
+            <section id="view-lab" class="view-section space-y-8">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-black uppercase italic tracking-tighter">Workstation Monitor</h3>
                     <div class="flex gap-2">
-                        <button onclick="sendGlobalCommand('LOCKALL')" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg font-black text-[9px] uppercase">Lock All</button>
-                        <button onclick="sendGlobalCommand('SHUTDOWNALL')" class="bg-slate-900 text-white px-4 py-2 rounded-lg font-black text-[9px] uppercase">Shutdown All</button>
+                        <button onclick="globalPCCommand('LOCKALL')" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest">Force Lock All</button>
+                        <button onclick="globalPCCommand('SHUTDOWNALL')" class="px-4 py-2 bg-red-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-red-200">Emergency Shutdown</button>
                     </div>
                 </div>
                 <div id="pc-grid" class="lab-grid">
-                    <!-- 48 Nodes will be generated here -->
+                    <!-- 48 PCs generated by JS -->
                 </div>
             </section>
 
-            <!-- VIEW: AUDIT & NAAC -->
-            <section id="view-audit" class="view-section space-y-6">
-                <div class="glass-card p-10 border-t-8 border-emerald-500">
-                    <h3 class="text-2xl font-black uppercase mb-2">NAAC Criterion Intelligence</h3>
-                    <p class="text-slate-500 text-sm mb-10">Generate sovereign departmental archives with Groq AI narratives.</p>
+            <!-- VIEW: EXAM ARCHITECT -->
+            <section id="view-exams" class="view-section space-y-6">
+                <div class="glass-card cyber-header space-y-6">
+                    <h3 class="text-2xl font-black uppercase italic">AI Exam Architect</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" id="ex-uni" placeholder="University / College Name" class="input-vivid">
+                        <input type="text" id="ex-sub" placeholder="Subject Name & Paper" class="input-vivid">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <textarea id="ex-syllabus" placeholder="Paste Syllabus Topics..." class="input-vivid h-40"></textarea>
+                        <textarea id="ex-model" placeholder="Paste Model Paper Structure / Blueprint..." class="input-vivid h-40"></textarea>
+                    </div>
+                    <div class="flex items-center justify-between p-6 bg-slate-50 rounded-2xl">
+                        <div class="flex items-center gap-4">
+                            <span class="text-xs font-black uppercase text-slate-500">Unique Sets:</span>
+                            <input type="number" id="ex-sets" value="3" class="w-16 p-2 rounded-lg border border-slate-200 font-black text-center">
+                        </div>
+                        <button onclick="generateExamPapers()" id="btn-gen-exam" class="bg-indigo-600 text-white px-10 py-4 rounded-xl font-black uppercase text-xs shadow-xl flex items-center gap-2">
+                            <i data-lucide="cpu"></i> Generate Sovereign Papers
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: TEACHING NOTES -->
+            <section id="view-teaching" class="view-section space-y-6">
+                <div class="glass-card cyber-header space-y-6">
+                    <h3 class="text-2xl font-black uppercase italic">AI Academic Architect</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <input type="text" id="tn-lecturer" placeholder="Lecturer Name for the Diary" class="input-vivid">
+                        <input type="text" id="tn-subject" placeholder="Subject Name" class="input-vivid">
+                        <textarea id="tn-syllabus" placeholder="Paste Syllabus / Topic details..." class="input-vivid h-64"></textarea>
+                        <button onclick="generateTeachingPlan()" id="btn-gen-notes" class="w-full bg-emerald-600 text-white py-5 rounded-2xl font-black uppercase text-xs shadow-xl tracking-[0.2em]">Architect Humanized Teaching Diary</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: NAAC AUDIT -->
+            <section id="view-naac" class="view-section space-y-8">
+                <div class="glass-card cyber-header border-emerald-500 p-10">
+                    <h3 class="text-2xl font-black uppercase italic mb-2">NAAC Sovereign Shield</h3>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-10">24/7 Audit Readiness Engine</p>
                     
-                    <div class="grid grid-cols-3 gap-6">
-                        <button onclick="generateAuditPDF(1)" class="p-6 border-2 border-slate-100 rounded-2xl text-left hover:border-indigo-600 transition">
-                            <h5 class="font-black text-indigo-600 uppercase text-[10px]">Criterion 1</h5>
-                            <p class="font-bold text-sm">Curricular Aspects</p>
+                    <div class="grid grid-cols-4 gap-6">
+                        <button onclick="runAudit(1)" class="p-6 border-2 rounded-2xl hover:border-indigo-600 transition group">
+                            <h5 class="font-black text-indigo-600 text-[10px] uppercase mb-1">Crit. 1</h5>
+                            <p class="font-bold text-xs uppercase group-hover:text-indigo-600">Curriculum</p>
                         </button>
-                        <button onclick="generateAuditPDF(2)" class="p-6 border-2 border-slate-100 rounded-2xl text-left hover:border-indigo-600 transition">
-                            <h5 class="font-black text-indigo-600 uppercase text-[10px]">Criterion 2</h5>
-                            <p class="font-bold text-sm">Teaching & Evaluation</p>
+                        <button onclick="runAudit(2)" class="p-6 border-2 rounded-2xl hover:border-indigo-600 transition group">
+                            <h5 class="font-black text-indigo-600 text-[10px] uppercase mb-1">Crit. 2</h5>
+                            <p class="font-bold text-xs uppercase group-hover:text-indigo-600">Teaching</p>
                         </button>
-                        <button onclick="generateAuditPDF(5)" class="p-6 border-2 border-slate-100 rounded-2xl text-left hover:border-indigo-600 transition">
-                            <h5 class="font-black text-indigo-600 uppercase text-[10px]">Criterion 5</h5>
-                            <p class="font-bold text-sm">Student Progression</p>
+                        <button onclick="runAudit(5)" class="p-6 border-2 rounded-2xl hover:border-indigo-600 transition group">
+                            <h5 class="font-black text-indigo-600 text-[10px] uppercase mb-1">Crit. 5</h5>
+                            <p class="font-bold text-xs uppercase group-hover:text-indigo-600">Progression</p>
                         </button>
+                        <button onclick="runFullAudit()" class="p-6 bg-slate-900 text-white rounded-2xl shadow-2xl">
+                             <p class="font-black text-xs uppercase">Full SSR Audit</p>
+                             <p class="text-[9px] text-slate-500 mt-1 uppercase">AI-Executive Summary</p>
+                        </button>
+                    </div>
+                    
+                    <!-- AI Audit Terminal -->
+                    <div id="audit-terminal" class="hidden mt-10 p-8 bg-black rounded-3xl border border-emerald-500/30 text-emerald-400 font-mono text-[10px] leading-relaxed h-80 overflow-y-auto">
+                        <div class="flex justify-between mb-4 border-b border-emerald-900 pb-2">
+                            <span>SOVEREIGN_AUDIT_LOG: v1.0</span>
+                            <button onclick="closeAudit()" class="text-emerald-700">[CLOSE]</button>
+                        </div>
+                        <div id="audit-output"></div>
                     </div>
                 </div>
             </section>
 
         </div>
 
+        <!-- FOOTER -->
         <footer class="admin-footer">
             <p>Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
-            <p class="mt-2">Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank">M.Thrinadh</a></p>
+            <p class="mt-2">Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank">M. Thrinadh</a></p>
         </footer>
     </main>
 
-    <!-- MODAL: BROADCAST -->
-    <div id="modal-broadcast" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[500] backdrop-blur-md p-6">
-        <div class="bg-white w-full max-w-lg rounded-[3rem] p-10 space-y-6 relative cyber-card">
-            <button onclick="closeBroadcast()" class="absolute top-8 right-8 text-slate-400 hover:text-black"><i data-lucide="x-circle"></i></button>
-            <h3 class="text-2xl font-black uppercase italic">Broadcast Hub</h3>
-            <div class="space-y-4">
-                <select id="b-target" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none">
-                    <option value="ALL">All Students</option>
-                    <option value="YEAR-1">1st Year Only</option>
-                    <option value="YEAR-2">2nd Year Only</option>
-                    <option value="CS-MAJOR">CS Major Only</option>
-                </select>
-                <textarea id="b-msg" placeholder="Type notice here..." class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm h-40 outline-none"></textarea>
-                <button onclick="triggerBroadcast()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl">Push to Mobile Devices</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzuCEHK3h92DIpPwB89dxQdXnfkGyRTm2oOpT-5p2503vsLylptMdzCJfwpXk6Z7O2U/exec";
-        const V_PASS = "dnNrYWRtaW4="; // Base64 'vskadmin'
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyjlfep_eavyIXgzJ4Ezru3f5odjw4M433R6cWqP419693_tFckIqTzUWsfxrp0tZtg/exec";
 
         function unlockVault() {
-            const pin = document.getElementById('admin-pin').value;
-            if (btoa(pin) === V_PASS) {
+            const pin = document.getElementById('vault-pin').value;
+            if (btoa(pin) === "dnNrYWRtaW4=") { // 'vskadmin'
                 document.getElementById('admin-lock').style.display = 'none';
-                initDashboard();
+                initHUD();
             } else {
-                alert("Decryption Failed: Invalid PIN.");
+                alert("Decryption Denied. Check Master Key.");
             }
         }
 
-        function showView(id) {
+        function initHUD() {
+            lucide.createIcons();
+            renderLabGrid();
+            setInterval(syncLabState, 3000);
+        }
+
+        function switchView(id) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('view-active'));
             document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('view-'+id).classList.add('view-active');
             document.getElementById('nav-'+id).classList.add('active');
-            document.getElementById('view-title').innerText = id + " HUB";
-        }
-
-        function initDashboard() {
+            document.getElementById('view-title').innerText = id + " Hub";
             lucide.createIcons();
-            generateLabGrid();
-            setInterval(syncLabStatus, 3000);
-            renderCharts();
         }
 
-        function generateLabGrid() {
+        function renderLabGrid() {
             const grid = document.getElementById('pc-grid');
             for(let i=1; i<=48; i++) {
                 const id = "CS-" + (i<10?"0"+i:i);
                 grid.innerHTML += `
-                    <div id="pc-${id}" class="pc-node pc-available shadow-sm">
+                    <div id="grid-${id}" class="pc-node pc-available">
                         <span class="text-xs font-black">${i}</span>
-                        <span id="name-${id}" class="text-[7px] font-bold uppercase mt-1 truncate w-16 text-center">Free</span>
+                        <span id="label-${id}" class="text-[7px] font-bold uppercase mt-1">Free</span>
                     </div>
                 `;
             }
         }
 
-        async function syncLabStatus() {
+        async function syncLabState() {
             try {
                 const res = await fetch(`${GAS_URL}?action=lab`);
                 const data = await res.json();
                 data.forEach(pc => {
-                    const el = document.getElementById(`pc-${pc.SystemID}`);
-                    const name = document.getElementById(`name-${pc.SystemID}`);
-                    if(el) {
-                        if(pc.Command === "UNLOCK" && pc.Status !== "Available") {
+                    const el = document.getElementById(`grid-${pc.SystemID}`);
+                    const lbl = document.getElementById(`label-${pc.SystemID}`);
+                    if (el) {
+                        if (pc.Command === "UNLOCK") {
                             el.className = "pc-node pc-active";
-                            name.innerText = pc.Status;
+                            lbl.innerText = pc.Status.split('|')[0];
                         } else {
                             el.className = "pc-node pc-available";
-                            name.innerText = "Free";
+                            lbl.innerText = "Free";
                         }
                     }
                 });
             } catch(e) {}
         }
 
-        function openBroadcast() { document.getElementById('modal-broadcast').classList.remove('hidden'); }
-        function closeBroadcast() { document.getElementById('modal-broadcast').classList.add('hidden'); }
+        // --- AI ARCHITECT TOOLS ---
 
-        async function sendGlobalCommand(cmd) {
-            if(confirm(`Trigger ${cmd} across the entire lab?`)) {
-                await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'command', SystemID: 'ALL', Command: cmd, CommandID: 'ADMIN-'+Date.now() })
-                });
-                alert("Global Command Dispatched.");
-            }
+        async function generateTeachingPlan() {
+            const btn = document.getElementById('btn-gen-notes');
+            btn.innerHTML = "GROQ AI IS ARCHITECTING DIARY...";
+            btn.disabled = true;
+
+            const payload = {
+                action: "gen_teaching_plan",
+                lecturer: document.getElementById('tn-lecturer').value,
+                subject: document.getElementById('tn-subject').value,
+                syllabus: document.getElementById('tn-syllabus').value
+            };
+
+            const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+            downloadPDF(await res.text(), "Teaching_Plan");
+            btn.innerHTML = "Architect Humanized Teaching Diary";
+            btn.disabled = false;
         }
 
-        function renderCharts() {
-            const ctx = document.getElementById('chart-attendance').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['CS Present', 'AI Present', 'Absent'],
-                    datasets: [{
-                        data: [42, 38, 10],
-                        backgroundColor: ['#4f46e5', '#06b6d4', '#e2e8f0'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { cutout: '80%', plugins: { legend: { position: 'bottom' } } }
-            });
+        async function generateExamPapers() {
+            const btn = document.getElementById('btn-gen-exam');
+            btn.innerHTML = "AI IS SETTING UNIQUE PAPERS...";
+            const payload = {
+                action: "gen_exam_papers",
+                sets: document.getElementById('ex-sets').value,
+                uni: document.getElementById('ex-uni').value,
+                sub: document.getElementById('ex-sub').value,
+                syllabus: document.getElementById('ex-syllabus').value,
+                model: document.getElementById('ex-model').value
+            };
+            const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+            downloadPDF(await res.text(), "Question_Papers");
+            btn.innerHTML = `<i data-lucide="cpu"></i> Generate Sovereign Papers`;
+            lucide.createIcons();
         }
 
-        window.onload = () => { lucide.createIcons(); };
+        function downloadPDF(content, title) {
+            const doc = new jspdf.jsPDF();
+            const lines = doc.splitTextToSize(content, 180);
+            doc.text(lines, 15, 15);
+            doc.save(title + ".pdf");
+        }
+
+        window.onload = () => lucide.createIcons();
     </script>
 </body>
 </html>
