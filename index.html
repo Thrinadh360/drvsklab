@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CSync | Dr. V.S. Krishna GDC (A)</title>
+    <title>CSync | Sovereign Ecosystem</title>
     
-    <!-- PWA Standard -->
+    <!-- PWA & Native Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
@@ -15,187 +15,177 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 
     <style>
         :root { --accent: #00f2ff; --bg: #020617; --card: rgba(255, 255, 255, 0.03); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; user-select: none; overflow: hidden; }
         
-        .glass { background: var(--card); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: white; 
+            user-select: none; 
+            overflow: hidden; 
+            margin: 0;
+        }
+
+        /* FIX: INPUT RESPONSIVENESS PATCH */
+        input, textarea, select, [contenteditable="true"] {
+            user-select: text !important;
+            -webkit-user-select: text !important;
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
+        }
+
+        .glass { background: var(--card); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .cyber-card { border-top: 3px solid var(--accent); box-shadow: 0 15px 40px rgba(0, 242, 255, 0.1); }
-        .video-wrap { width: 190px; height: 190px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); margin: 0 auto; position: relative; }
+        
+        /* Layout HUD */
+        .app-wrapper { height: 100vh; display: flex; flex-direction: column; padding: 20px; padding-top: calc(env(safe-area-inset-top) + 10px); }
+        .main-viewport { flex: 1; overflow-y: auto; padding-bottom: 160px; scroll-behavior: smooth; position: relative; z-index: 5; }
+        
+        /* Sidebar Drawer */
+        #sidebar { position: fixed; inset-y: 0; left: 0; width: 280px; background: #0a0b1e; z-index: 1000; transform: translateX(-100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        #sidebar.open { transform: translateX(0); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
+
+        .video-circle { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); margin: 0 auto; box-shadow: 0 0 30px var(--accent); }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Navigation HUD */
-        .app-shell { height: 100vh; display: flex; flex-direction: column; padding: 20px; padding-top: calc(env(safe-area-inset-top) + 5px); }
-        .view-port { flex: 1; overflow-y: auto; padding-bottom: 150px; scroll-behavior: smooth; }
-        .bottom-nav { position: fixed; bottom: 85px; left: 20px; right: 20px; z-index: 100; border-radius: 24px; display: flex; justify-content: space-around; padding: 12px; }
-        .nav-item { color: #475569; transition: 0.3s; }
-        .nav-item.active { color: var(--accent); transform: translateY(-3px); filter: drop-shadow(0 0 8px var(--accent)); }
-
-        /* Footer */
-        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 10px calc(15px + env(safe-area-inset-bottom)); background: rgba(0,0,0,0.9); text-align: center; font-size: 9px; font-weight: 700; border-top: 1px solid #1e293b; color: #475569; z-index: 90; }
-        a { color: var(--accent); text-decoration: underline; font-weight: 800; }
-
-        .hidden-view { display: none !important; }
-        .btn-action { background: var(--accent); color: black; font-weight: 800; padding: 16px; border-radius: 14px; width: 100%; text-transform: uppercase; transition: 0.2s; font-size: 12px; letter-spacing: 1px; }
-        .btn-action:active { transform: scale(0.96); opacity: 0.8; }
+        .nav-active { color: var(--accent) !important; filter: drop-shadow(0 0 8px var(--accent)); }
+        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 10px calc(15px + env(safe-area-inset-bottom)); background: rgba(0,0,0,0.9); text-align: center; font-size: 9px; font-weight: 700; border-top: 1px solid #1e293b; z-index: 90; }
         
-        /* Desktop Block */
-        @media (min-width: 1024px) { #desktop-block { display: flex !important; } .app-shell { display: none; } }
+        .hidden-view { display: none !important; }
+        .btn-action { background: var(--accent); color: black; font-weight: 800; padding: 16px; border-radius: 14px; width: 100%; text-transform: uppercase; transition: 0.2s; font-size: 11px; letter-spacing: 1px; }
+        
+        @media (min-width: 1024px) { #desktop-blocker { display: flex !important; } .app-wrapper { display: none; } }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
-    <!-- 1. HARDWARE ACCESS BLOCKER -->
-    <div id="desktop-block" class="hidden fixed inset-0 bg-black z-[9999] flex-col items-center justify-center p-10 text-center">
+    <!-- 1. HARDWARE BLOCKER -->
+    <div id="desktop-blocker" class="hidden fixed inset-0 bg-black z-[9999] flex-col items-center justify-center p-10 text-center">
         <i data-lucide="smartphone" class="w-20 h-20 text-cyan-400 mb-6"></i>
-        <h1 class="text-2xl font-black uppercase tracking-tighter">Mobile Only System</h1>
-        <p class="text-slate-500 mt-4 max-w-sm text-sm">CSync requires smartphone biometric sensors and hardware UUID binding to operate.</p>
+        <h1 class="text-2xl font-black uppercase">Mobile Node Only</h1>
+        <p class="text-slate-500 mt-4 text-sm">CSync requires smartphone biometric hardware binding.</p>
     </div>
 
-    <div class="app-shell">
-        <!-- INSTITUTIONAL HEADER -->
-        <header class="text-center mb-6">
-            <p class="text-[8px] font-bold text-cyan-400 uppercase tracking-[0.4em]">Dr. V.S. Krishna Govt. Degree College (A)</p>
-            <h1 style="font-family: 'Orbitron', sans-serif;" class="text-2xl font-bold tracking-tighter">CSYNC</h1>
+    <!-- 2. SOVEREIGN SIDEBAR -->
+    <div id="sidebar" class="sidebar p-8 border-r border-white/10 flex flex-col">
+        <div class="mb-10"><h1 style="font-family:'Orbitron'" class="text-2xl text-cyan-400">CSYNC</h1></div>
+        <nav class="space-y-6 flex-1">
+            <button onclick="switchTab('dashboard')" class="flex items-center gap-4 text-sm font-bold w-full text-left"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+            <button onclick="switchTab('nexus')" class="flex items-center gap-4 text-sm font-bold w-full text-left"><i data-lucide="users"></i> Nexus Directory</button>
+            <button onclick="switchTab('discuss')" class="flex items-center gap-4 text-sm font-bold w-full text-left"><i data-lucide="message-square"></i> Discussion Hub</button>
+            
+            <div id="staff-menu" class="hidden space-y-6 pt-6 border-t border-white/10">
+                <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Faculty Suite</p>
+                <button onclick="switchTab('architect')" class="flex items-center gap-4 text-sm font-bold w-full text-left"><i data-lucide="sparkles"></i> AI Architect</button>
+                <button onclick="switchTab('audit')" class="flex items-center gap-4 text-sm font-bold w-full text-left text-emerald-400"><i data-lucide="shield-check"></i> NAAC Audit</button>
+            </div>
+        </nav>
+        <button onclick="logout()" class="text-red-500 text-[10px] font-black uppercase mt-10">Unbind Device</button>
+    </div>
+
+    <div class="app-wrapper">
+        <header class="flex justify-between items-center mb-6">
+            <button onclick="toggleSidebar()"><i data-lucide="menu" class="text-cyan-400"></i></button>
+            <div class="text-center">
+                <p class="text-[7px] font-bold text-slate-500 uppercase">Dr. V.S. Krishna GDC (A)</p>
+                <h1 style="font-family: 'Orbitron';" class="text-xl font-bold tracking-tighter">CSYNC</h1>
+            </div>
+            <img id="my-pfp" src="" class="w-10 h-10 rounded-full border border-cyan-400 object-cover">
         </header>
 
-        <!-- RICH MEDIA ANNOUNCEMENT OVERLAY -->
-        <div id="ann-card" class="hidden glass p-4 rounded-2xl mb-6 border-l-4 border-red-500 animate-pulse">
+        <!-- ANNOUNCEMENT SYSTEM -->
+        <div id="ann-overlay" class="hidden glass p-4 rounded-2xl mb-6 border-l-4 border-red-500 animate-pulse">
             <audio id="ding" src="assets/audio/notification.mp3"></audio>
-            <div class="flex items-center gap-2 mb-2">
-                <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
-                <span id="ann-sender" class="text-[9px] font-black uppercase text-red-500">Department Alert</span>
+            <div class="flex items-center gap-2 mb-1">
+                <span id="ann-sender" class="text-[9px] font-black uppercase text-red-500">Notice</span>
             </div>
-            <p id="ann-body" class="text-xs font-bold leading-tight text-slate-100"></p>
+            <p id="ann-body" class="text-xs font-bold text-white"></p>
         </div>
 
-        <!-- PORTAL STATUS -->
-        <div id="status-pill" class="glass py-2 px-6 rounded-full text-center text-[9px] font-black uppercase tracking-widest mb-6 text-slate-500 border-slate-800">
-            Authenticating Sovereign Node...
+        <div id="status-pill" class="glass py-2 px-6 rounded-full text-center text-[9px] font-black uppercase tracking-widest mb-6 text-slate-400">
+            Connecting...
         </div>
 
-        <!-- MAIN VIEWPORT -->
-        <main class="view-port">
-            
-            <!-- VIEW: ROLE SELECTION (Enrollment Phase) -->
-            <div id="view-roles" class="hidden-view flex flex-col space-y-4">
-                <h2 class="text-center text-[10px] font-bold text-slate-500 uppercase mb-4 tracking-widest">Identify Your Role</h2>
-                <button onclick="pickRole('Student')" class="glass p-6 rounded-3xl text-left border-l-4 border-cyan-500 active:scale-95 transition">
-                    <h4 class="font-black text-xl uppercase">Student</h4>
-                    <p class="text-[9px] text-slate-400 uppercase">CS & AI Batches</p>
+        <main class="main-viewport">
+            <!-- VIEW: ROLES (Registration) -->
+            <div id="view-roles" class="hidden-view flex flex-col space-y-4 pt-10">
+                <h2 class="text-center text-xs font-bold text-slate-500 uppercase mb-4">Choose Identity</h2>
+                <button onclick="startReg('Student')" class="glass p-6 rounded-3xl text-left border-l-4 border-cyan-500">
+                    <h4 class="font-black">STUDENT</h4><p class="text-[9px] text-slate-400">Major: CS & AI</p>
                 </button>
-                <button onclick="pickRole('Lecturer')" class="glass p-6 rounded-3xl text-left border-l-4 border-indigo-500 active:scale-95 transition">
-                    <h4 class="font-black text-xl uppercase">Lecturer</h4>
-                    <p class="text-[9px] text-slate-400 uppercase">Faculty Portal</p>
+                <button onclick="startReg('Lecturer')" class="glass p-6 rounded-3xl text-left border-l-4 border-indigo-500">
+                    <h4 class="font-black">LECTURER</h4><p class="text-[9px] text-slate-400">Department Faculty</p>
                 </button>
-                <button onclick="pickRole('HOD')" class="glass p-6 rounded-3xl text-left border-l-4 border-purple-500 active:scale-95 transition">
-                    <h4 class="font-black text-xl uppercase">HOD / Admin</h4>
-                    <p class="text-[9px] text-slate-400 uppercase">Executive Desk</p>
+                <button onclick="startReg('HOD')" class="glass p-6 rounded-3xl text-left border-l-4 border-purple-500">
+                    <h4 class="font-black">HOD / ADMIN</h4><p class="text-[9px] text-slate-400">Management</p>
                 </button>
             </div>
 
-            <!-- VIEW: ENROLLMENT FORM -->
+            <!-- VIEW: REGISTRATION FORM -->
             <div id="view-register" class="hidden-view space-y-6">
                 <div class="glass p-8 rounded-[2.5rem] cyber-card text-center">
-                    <h2 id="reg-title" class="text-xl font-black text-cyan-400 uppercase mb-6">Biometric Enrollment</h2>
-                    <div class="video-wrap mb-6"><video id="v-reg" autoplay muted playsinline></video></div>
+                    <h2 id="reg-title" class="text-lg font-black text-cyan-400 uppercase mb-6">Enrollment</h2>
+                    <div class="video-circle mb-6"><video id="v-reg" autoplay muted playsinline></video></div>
                     <canvas id="c-resize" class="hidden"></canvas>
-                    <div class="space-y-3">
-                        <input id="r-id" type="text" placeholder="Roll No / Employee ID" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none uppercase font-bold text-sm">
-                        <input id="r-name" type="text" placeholder="Full Name" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none text-sm">
-                        <div id="stu-fields" class="hidden space-y-3">
-                            <select id="r-major" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 text-xs font-bold"><option>Computer Science</option><option>Artificial Intelligence</option></select>
-                            <select id="r-year" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 text-xs font-bold"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+                    <div class="space-y-4">
+                        <input id="r-id" type="text" placeholder="ID Number" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none uppercase font-bold">
+                        <input id="r-name" type="text" placeholder="Full Name" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none">
+                        <div id="stu-fields" class="hidden space-y-4">
+                            <select id="r-major" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 text-xs"><option>Computer Science</option><option>Artificial Intelligence</option></select>
+                            <select id="r-year" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 text-xs"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
                         </div>
-                        <button onclick="handleEnrollment()" class="btn-action mt-4">Bind Identity & Device</button>
+                        <button onclick="processRegistration()" class="btn-action">Bind Biometrics</button>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW: UNIFIED DASHBOARD -->
+            <!-- VIEW: DASHBOARD (MAIN HUB) -->
             <div id="view-dashboard" class="hidden-view space-y-6">
-                <!-- AI Insight -->
-                <div class="glass p-4 rounded-2xl flex items-center gap-3 border-t-2 border-indigo-500/50">
-                    <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
-                    <p id="ai-tip" class="text-[9px] italic text-slate-300">"Sovereign cloud active. Ready for instruction."</p>
-                </div>
-
-                <!-- User Profile Bento -->
-                <div class="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <img id="u-photo" src="" class="w-14 h-14 rounded-full border-2 border-cyan-500 object-cover">
-                    <div>
-                        <h4 id="u-name" class="font-black text-sm uppercase">Loading...</h4>
-                        <p id="u-meta" class="text-[8px] text-slate-500 uppercase tracking-widest font-black"></p>
+                <!-- AI COMMAND TERMINAL -->
+                <div class="glass p-5 rounded-[2rem] border-indigo-500/30">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
+                        <h4 class="text-[9px] font-black uppercase text-cyan-400 tracking-widest">Sovereign AI Terminal</h4>
                     </div>
+                    <textarea id="ai-input" class="w-full bg-black/40 p-4 rounded-xl text-xs font-mono text-cyan-100 outline-none h-20" placeholder="Type command..."></textarea>
+                    <button onclick="executeAI()" class="mt-2 text-cyan-400 font-bold text-[9px] uppercase tracking-widest flex items-center gap-2"><i data-lucide="terminal" class="w-3 h-3"></i> Execute</button>
+                    <div id="ai-response" class="hidden mt-3 p-3 bg-black/60 rounded-xl text-[9px] font-mono text-slate-400 border border-white/5"></div>
                 </div>
 
-                <!-- ATTENDANCE GATE (Student Only) -->
-                <div id="module-attendance" class="hidden-view glass p-10 rounded-[3rem] text-center cyber-card space-y-6">
-                    <div class="w-16 h-16 bg-cyan-500/10 rounded-full flex items-center justify-center mx-auto">
-                        <i data-lucide="fingerprint" class="w-8 h-8 text-cyan-400"></i>
-                    </div>
-                    <button onclick="startAttendanceFlow()" class="btn-action">Verify Daily Presence</button>
+                <!-- Action Cards -->
+                <div id="card-attendance" class="glass p-10 rounded-[3rem] text-center cyber-card">
+                    <i data-lucide="fingerprint" class="w-12 h-12 mx-auto mb-6 text-cyan-400"></i>
+                    <button onclick="triggerAuth()" class="btn-action">Verify Daily Presence</button>
                 </div>
 
-                <!-- LAB HANDSHAKE GATE (Visible after Attendance) -->
-                <div id="module-lab" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-emerald-500">
-                    <h3 class="text-emerald-400 font-black text-lg mb-4 uppercase italic">Attendance Verified</h3>
-                    <button onclick="initLabScan()" class="btn-action !bg-white !text-black">Scan Lab PC QR</button>
-                    <div id="qr-reader" class="mt-4 rounded-3xl overflow-hidden shadow-2xl"></div>
+                <div id="card-lab-scan" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-emerald-500">
+                    <button onclick="startLabScan()" class="btn-action !bg-white !text-black">Scan Lab PC QR</button>
+                    <div id="qr-reader" class="mt-4 rounded-3xl overflow-hidden"></div>
                 </div>
 
-                <!-- ACTIVE SESSION (PC Sign-out) -->
-                <div id="module-active-pc" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-orange-500">
-                    <h2 id="active-pc-display" class="text-5xl font-black text-white mb-2">CS-XX</h2>
-                    <p class="text-[9px] text-slate-500 uppercase font-black mb-8">Workstation Session Active</p>
-                    <button onclick="killSession()" class="btn-action !bg-orange-600 !text-white">Sign Out & Lock PC</button>
-                </div>
-
-                <!-- STAFF LOUNGE (Mark Leave / Diary) -->
-                <div id="module-staff" class="hidden-view space-y-4">
-                    <div class="glass p-6 rounded-3xl border-l-4 border-indigo-500">
-                        <h4 class="text-xs font-black uppercase text-indigo-400 mb-4">Staff Duty Status</h4>
-                        <button onclick="markStaffLeave()" class="btn-action !p-3 !text-[10px] !bg-white/5 border border-white/10 !text-white">Mark Leave for Today</button>
-                    </div>
-                    <div class="glass p-6 rounded-3xl">
-                        <h4 class="text-xs font-black uppercase text-cyan-400 mb-4">Academic Ledger</h4>
-                        <textarea id="diary-entry" class="w-full bg-white/5 p-3 rounded-xl text-xs outline-none border border-white/10 h-24" placeholder="Log today's activity..."></textarea>
-                        <button onclick="saveDiary()" class="btn-action !p-3 !text-[10px] mt-2">Log Entry</button>
-                    </div>
+                <div id="card-active-pc" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-orange-500">
+                    <h2 id="active-pc-id" class="text-4xl font-black mb-6">CS-XX</h2>
+                    <button onclick="signoutPC()" class="btn-action !bg-orange-600 !text-white">Close Workstation</button>
                 </div>
             </div>
 
-            <!-- VIEW: NEXUS DIRECTORY -->
-            <div id="view-nexus" class="hidden-view space-y-6">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-black text-indigo-400 uppercase tracking-tighter">CSync Nexus</h2>
-                    <input type="text" placeholder="Search Node..." class="bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-[10px] outline-none">
-                </div>
-                <div id="nexus-container" class="grid grid-cols-1 gap-4">
-                    <!-- Dynamic Bento Nodes -->
-                </div>
-            </div>
-
-            <!-- VIEW: DISCUSSIONS -->
-            <div id="view-discuss" class="hidden-view space-y-6">
-                <h2 class="text-xl font-black text-purple-400 uppercase tracking-tighter">Discussion Hub</h2>
-                <div id="topic-container" class="space-y-4">
-                    <!-- AI Sentimented Feed -->
+            <!-- VIEW: STAFF TOOLS (Architect) -->
+            <div id="view-architect" class="hidden-view space-y-6">
+                <div class="glass p-6 rounded-3xl border-l-4 border-indigo-500">
+                    <h3 class="font-black text-sm uppercase mb-4">AI Teaching Planner</h3>
+                    <textarea id="syllabus-in" class="w-full bg-white/5 p-4 rounded-xl text-xs outline-none h-32" placeholder="Paste syllabus text here..."></textarea>
+                    <button onclick="genTeachingPlan()" class="btn-action mt-4 !bg-indigo-600 !text-white">Architect 2-Page PDF</button>
                 </div>
             </div>
 
         </main>
 
-        <!-- NAVIGATION TAB BAR -->
-        <nav id="nav-bar" class="hidden-view bottom-nav glass">
-            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-item active"><i data-lucide="shield-check"></i></button>
-            <button onclick="switchTab('nexus')" id="tab-nexus" class="nav-item"><i data-lucide="users"></i></button>
-            <button onclick="switchTab('discuss')" id="tab-discuss" class="nav-item"><i data-lucide="message-square"></i></button>
-        </nav>
-
-        <!-- INSTITUTIONAL FOOTER -->
         <footer class="app-footer">
             <p>Copyright © 2026 | Dept of Computer Science</p>
             <p>Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
@@ -203,189 +193,136 @@
         </footer>
     </div>
 
-    <!-- AI VISION OVERLAY -->
-    <div id="ai-vision-overlay" class="hidden-view fixed inset-0 z-[500] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-10 text-center">
+    <!-- BIOMETRIC OVERLAY -->
+    <div id="face-gate" class="hidden-view fixed inset-0 z-[2000] bg-black/95 flex flex-col items-center justify-center p-10 text-center">
         <div class="video-circle mb-8"><video id="v-auth" autoplay muted playsinline></video></div>
-        <h3 id="ai-status-text" class="text-cyan-400 font-black uppercase tracking-[0.3em] text-xs animate-pulse">Scanning Liveness...</h3>
-        <p class="text-slate-500 text-[10px] mt-4 uppercase">Smile or Blink to Authorize</p>
+        <h3 id="face-status" class="text-cyan-400 font-black uppercase text-xs animate-pulse tracking-widest">Validating Liveness...</h3>
     </div>
 
     <script>
         const BACKEND = "https://script.google.com/macros/s/AKfycbzuCEHK3h92DIpPwB89dxQdXnfkGyRTm2oOpT-5p2503vsLylptMdzCJfwpXk6Z7O2U/exec";
         const UUID = btoa(navigator.userAgent + screen.width);
-        let USER = JSON.parse(localStorage.getItem('csync_v1_profile'));
+        let USER = JSON.parse(localStorage.getItem('csync_user_v1'));
         let regRole = "";
 
         async function init() {
             lucide.createIcons();
-            // 1. Initial Identity Check
             if (!USER) {
                 switchView('view-roles');
             } else {
-                // 2. Automated Session Validation (Cloud Kill-Switch)
-                const check = await fetch(`${BACKEND}?action=lab&id=${USER.id}`); // Minimal ping
-                if(check.status === 401) { localStorage.clear(); location.reload(); return; }
-
-                switchView('view-dashboard');
-                document.getElementById('nav-bar').classList.remove('hidden-view');
-                document.getElementById('u-name').innerText = USER.name;
-                document.getElementById('u-photo').src = USER.photo;
-                document.getElementById('u-meta').innerText = USER.role === 'Student' ? `${USER.year} Year | ${USER.major}` : USER.role;
-                
-                updatePortalClock();
-                refreshDashboardState();
-                pollAnnouncements();
+                setupUserSession();
             }
+            updateTimeGate();
+            setInterval(updateTimeGate, 60000);
         }
 
-        // --- ENROLLMENT LOGIC ---
-        function pickRole(role) {
+        // --- CORE UI LOGIC ---
+        function switchView(id) {
+            document.querySelectorAll('main > div').forEach(v => v.classList.add('hidden-view'));
+            document.getElementById(id).classList.remove('hidden-view');
+            closeSidebar();
+        }
+
+        function switchTab(t) {
+            switchView('view-' + t);
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+
+        function setupUserSession() {
+            switchView('view-dashboard');
+            document.getElementById('my-pfp').src = USER.photo;
+            if(USER.role !== 'Student' && USER.role !== 'Alumni') {
+                document.getElementById('staff-menu').classList.remove('hidden');
+            }
+            refreshAttendanceCards();
+        }
+
+        // --- ENROLLMENT ---
+        function startReg(role) {
             regRole = role;
             switchView('view-register');
-            document.getElementById('reg-title').innerText = role + " Enrollment";
             document.getElementById('stu-fields').classList.toggle('hidden', role !== 'Student');
-            startRegCamera();
+            document.getElementById('reg-title').innerText = role + " Enrollment";
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }).then(s => {
+                document.getElementById('v-reg').srcObject = s;
+            });
         }
 
-        async function startRegCamera() {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-            document.getElementById('v-reg').srcObject = stream;
-        }
-
-        async function handleEnrollment() {
+        async function processRegistration() {
             const canvas = document.getElementById('c-resize');
             const video = document.getElementById('v-reg');
             canvas.width = 120; canvas.height = 120;
             canvas.getContext('2d').drawImage(video, 0, 0, 120, 120);
             const photo = canvas.toDataURL('image/jpeg', 0.6);
 
-            const id = document.getElementById('r-id').value;
-            const name = document.getElementById('r-name').value;
-
-            // FINGERPRINT BINDING (WebAuthn)
-            try {
-                const challenge = new Uint8Array(32); window.crypto.getRandomValues(challenge);
-                const cred = await navigator.credentials.create({
-                    publicKey: {
-                        challenge,
-                        rp: { name: "CSync", id: window.location.hostname },
-                        user: { id: Uint8Array.from(id, c => c.charCodeAt(0)), name: id, displayName: name },
-                        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-                        authenticatorSelection: { authenticatorAttachment: "platform" }
-                    }
-                });
-                const fpId = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
-
-                const payload = {
-                    action: "register", role: regRole, id, name, uuid: UUID, photo, fpId,
-                    major: document.getElementById('r-major').value || "STAFF",
-                    year: document.getElementById('r-year').value || "0"
-                };
-
-                const res = await fetch(BACKEND, { method: 'POST', body: JSON.stringify(payload) });
-                if ((await res.text()) === "REGISTRATION_SUCCESS") {
-                    localStorage.setItem('csync_v1_profile', JSON.stringify(payload));
-                    location.reload();
+            // WebAuthn Fingerprint Enrollment
+            const challenge = new Uint8Array(32); window.crypto.getRandomValues(challenge);
+            const cred = await navigator.credentials.create({
+                publicKey: {
+                    challenge,
+                    rp: { name: "CSync", id: window.location.hostname },
+                    user: { id: Uint8Array.from(document.getElementById('r-id').value, c => c.charCodeAt(0)), name: document.getElementById('r-id').value, displayName: document.getElementById('r-name').value },
+                    pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                    authenticatorSelection: { authenticatorAttachment: "platform" }
                 }
-            } catch(e) { alert("Hardware Biometric Binding Failed. Ensure screen lock is active."); }
-        }
-
-        // --- ATTENDANCE FLOW ---
-        async function startAttendanceFlow() {
-            // 1. Hardware Fingerprint Challenge
-            try {
-                const challenge = new Uint8Array(32); window.crypto.getRandomValues(challenge);
-                await navigator.credentials.get({
-                    publicKey: {
-                        challenge,
-                        allowCredentials: [{ id: Uint8Array.from(atob(USER.fpId), c => c.charCodeAt(0)), type: 'public-key' }],
-                        userVerification: "required"
-                    }
-                });
-                
-                // 2. Face AI Liveness
-                if("vibrate" in navigator) navigator.vibrate(50);
-                document.getElementById('ai-vision-overlay').classList.remove('hidden-view');
-                const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-                document.getElementById('v-auth').srcObject = s;
-
-                // Simple Liveness Mock: In production, use face-api logic here
-                setTimeout(async () => {
-                    await fetch(BACKEND, { method: 'POST', body: JSON.stringify({ action: 'attendance', id: USER.id, role: USER.role, uuid: UUID }) });
-                    localStorage.setItem('csync_last_marked', new Date().toDateString());
-                    document.getElementById('ai-vision-overlay').classList.add('hidden-view');
-                    refreshDashboardState();
-                }, 3000);
-
-            } catch(e) { alert("Biometric mismatch."); }
-        }
-
-        // --- LAB HANDSHAKE ---
-        function initLabScan() {
-            const scanner = new Html5Qrcode("qr-reader");
-            scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (url) => {
-                const p = new URLSearchParams(url.split('?')[1]);
-                fetch(BACKEND, { method: 'POST', body: JSON.stringify({ 
-                    action: 'lab_unlock', id: USER.id, role: USER.role, sysId: p.get('sysId'), mac: p.get('mac') 
-                })});
-                localStorage.setItem('csync_active_pc', p.get('sysId'));
-                scanner.stop(); refreshDashboardState();
             });
+            const fpId = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+
+            const payload = {
+                action: "register",
+                role: regRole,
+                id: document.getElementById('r-id').value,
+                name: document.getElementById('r-name').value,
+                major: document.getElementById('r-major').value || "N/A",
+                year: document.getElementById('r-year').value || "0",
+                photo: photo,
+                fpId: fpId,
+                uuid: UUID
+            };
+
+            const res = await fetch(BACKEND, { method: 'POST', body: JSON.stringify(payload) });
+            if ((await res.text()) === "REGISTRATION_SUCCESS") {
+                localStorage.setItem('csync_user_v1', JSON.stringify(payload));
+                location.reload();
+            }
         }
 
-        async function killSession() {
-            const pcId = localStorage.getItem('csync_active_pc');
-            await fetch(BACKEND, { method: 'POST', body: JSON.stringify({ 
-                action: 'command', SystemID: pcId, Command: "LOCK", CommandID: "OUT-"+Date.now(), Name: "Available" 
-            })});
-            localStorage.removeItem('csync_active_pc'); refreshDashboardState();
-        }
-
-        // --- SYSTEM UTILS ---
-        function switchTab(t) {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById('tab-'+t).classList.add('active');
-            switchView('view-'+t);
-        }
-
-        function switchView(id) {
-            document.querySelectorAll('main > div').forEach(v => v.classList.add('hidden-view'));
-            document.getElementById(id).classList.remove('hidden-view');
-            lucide.createIcons();
-        }
-
-        function refreshDashboardState() {
-            const isMarked = localStorage.getItem('csync_last_marked') === new Date().toDateString();
-            const activePC = localStorage.getItem('csync_active_pc');
-
-            document.getElementById('module-attendance').classList.toggle('hidden-view', isMarked || USER.role !== 'Student');
-            document.getElementById('module-lab').classList.toggle('hidden-view', !isMarked || activePC || USER.role !== 'Student');
-            document.getElementById('module-active-pc').classList.toggle('hidden-view', !activePC);
-            document.getElementById('module-staff').classList.toggle('hidden-view', USER.role === 'Student');
-            
-            if(activePC) document.getElementById('active-pc-display').innerText = activePC;
-        }
-
-        function updatePortalClock() {
+        // --- DISCIPLINARY LOGIC ---
+        function updateTimeGate() {
             const now = new Date();
             const time = now.getHours() + (now.getMinutes() / 60);
             const pill = document.getElementById('status-pill');
-            if (time >= 10 && time <= 13.33) pill.innerHTML = `<span class="text-cyan-400 animate-pulse">● FN SESSION LIVE</span>`;
+
+            if (time >= 10 && time <= 13.33) pill.innerHTML = `<span class="text-cyan-400">● FN ATTENDANCE LIVE</span>`;
             else if (time > 13.33 && time < 15.5) pill.innerHTML = `<span class="text-orange-400">● LUNCH | LAB OPEN</span>`;
-            else if (time >= 15.5 && time <= 17) pill.innerHTML = `<span class="text-cyan-400 animate-pulse">● AN SESSION LIVE</span>`;
-            else pill.innerHTML = `<span class="text-red-500">○ SYSTEM OFFLINE</span>`;
+            else if (time >= 15.5 && time <= 17) pill.innerHTML = `<span class="text-cyan-400">● AN ATTENDANCE LIVE</span>`;
+            else pill.innerHTML = `<span class="text-red-500">○ PORTAL LOCKED</span>`;
         }
 
-        async function pollAnnouncements() {
-            const res = await fetch(`${BACKEND}?action=getAnn&roll=${USER.id}&year=${USER.year || 0}`);
-            const data = await res.json();
-            if (data.id > (localStorage.getItem('csync_last_ann') || 0)) {
-                document.getElementById('ding').play();
-                document.getElementById('ann-card').classList.remove('hidden');
-                document.getElementById('ann-sender').innerText = data.sender;
-                document.getElementById('ann-body').innerText = data.body;
-                localStorage.setItem('csync_last_ann', data.id);
-            }
+        function refreshAttendanceCards() {
+            const isMarked = localStorage.getItem('marked_today') === new Date().toDateString();
+            const activePC = localStorage.getItem('active_pc');
+            
+            document.getElementById('card-attendance').classList.toggle('hidden-view', isMarked);
+            document.getElementById('card-lab-scan').classList.toggle('hidden-view', !isMarked || activePC);
+            document.getElementById('card-active-pc').classList.toggle('hidden-view', !activePC);
+            if(activePC) document.getElementById('active-pc-id').innerText = activePC;
+        }
+
+        // --- AI TERMINAL ---
+        async function executeAI() {
+            const input = document.getElementById('ai-input');
+            const resBox = document.getElementById('ai-response');
+            if(!input.value) return;
+            
+            resBox.classList.remove('hidden');
+            resBox.innerText = "Processing sovereign logic...";
+            
+            const res = await fetch(`${BACKEND}?action=ai_helpdesk&query=${encodeURIComponent(input.value)}`);
+            resBox.innerText = await res.text();
+            input.value = "";
         }
 
         window.onload = init;
