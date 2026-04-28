@@ -4,323 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CSync | Sovereign Portal</title>
-    
-    <!-- PWA Standard Meta -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-
-    <!-- Dependencies -->
+    <script src="assets/js/config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="assets/css/csync-hud.css">
     <style>
-        :root { --accent: #00f2ff; --bg: #020617; --card: rgba(30, 41, 59, 0.7); --input-bg: #1e1b4b; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --accent: #00f2ff; --bg: #020617; --input-bg: #1e1b4b; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; user-select: none; overflow: hidden; margin: 0; }
         
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg); color: white; 
-            user-select: none; overflow: hidden; margin: 0;
-        }
-
-        /* 🛡️ INPUT FOCUS & RESPONSIVENESS PATCH */
-        input, textarea, select, button, [contenteditable="true"] {
-            user-select: text !important;
-            -webkit-user-select: text !important;
-            pointer-events: auto !important;
-            touch-action: manipulation !important;
-        }
-
-        /* 🟦 VIVID ROUNDED RECTANGLE INPUTS */
+        /* RECTANGULAR ROUNDED INPUTS */
         input, textarea, select {
-            background-color: var(--input-bg) !important;
-            border: 2px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 14px !important;
-            padding: 14px 16px !important;
-            color: #ffffff !important;
-            font-weight: 600 !important;
-            outline: none !important;
-            transition: all 0.3s ease;
-            appearance: none;
+            user-select: text !important; -webkit-user-select: text !important; pointer-events: auto !important;
+            background-color: var(--input-bg) !important; border: 2px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px !important; padding: 14px 16px !important; color: #ffffff !important;
+            font-weight: 600 !important; outline: none !important; transition: all 0.3s ease;
         }
-        input:focus, select:focus { border-color: var(--accent) !important; box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
-        option { background-color: #1e1b4b; color: white; }
-
-        .glass { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; }
-        .cyber-card { border-top: 3px solid var(--accent); box-shadow: 0 20px 50px rgba(0, 242, 255, 0.15); }
-        
-        .app-wrapper { height: 100dvh; display: flex; flex-direction: column; padding: 20px; padding-top: calc(env(safe-area-inset-top) + 10px); }
-        .main-viewport { flex: 1; overflow-y: auto; padding-bottom: 160px; scroll-behavior: smooth; position: relative; }
-        
-        /* 📱 BOTTOM NAV (INSTAGRAM STYLE) */
-        .bottom-nav { position: fixed; bottom: 85px; left: 15px; right: 15px; height: 70px; z-index: 1000; border-radius: 24px; display: flex; justify-content: space-around; align-items: center; background: rgba(10, 11, 30, 0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); }
-        .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; text-transform: uppercase; transition: 0.3s; border: none; background: none; }
-        .nav-active { color: var(--accent) !important; filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
-
-        .video-circle { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); margin: 0 auto; background: black; position: relative;}
-        video { width: 100%; height: 100%; object-fit: cover; }
-
-        .btn-action { background: var(--accent); color: #000; font-weight: 900; padding: 16px; border-radius: 14px; width: 100%; text-transform: uppercase; border: none; cursor: pointer; font-size: 11px; letter-spacing: 1.5px; }
-        .btn-action:disabled { background: #1e293b; color: #475569; opacity: 0.5; }
-        
+        input:focus { border-color: var(--accent) !important; box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
         .hidden-view { display: none !important; }
-        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 10px calc(15px + env(safe-area-inset-bottom)); background: #000; text-align: center; font-size: 9px; font-weight: 700; border-top: 1px solid #1e293b; z-index: 900; color: #475569; }
-        a { color: var(--accent); text-decoration: underline; font-weight: 800; }
-        @media (min-width: 1024px) { #desktop-blocker { display: flex !important; } .app-wrapper { display: none; } }
+        .btn-action { background: var(--accent); color: #000; font-weight: 900; padding: 16px; border-radius: 14px; width: 100%; text-transform: uppercase; border: none; cursor: pointer; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- DESKTOP ACCESS BLOCKER -->
-    <div id="desktop-blocker" class="hidden fixed inset-0 bg-black z-[9999] flex-col items-center justify-center p-10 text-center">
-        <i data-lucide="smartphone" class="w-20 h-20 text-cyan-400 mb-6"></i>
-        <h1 class="text-3xl font-black uppercase text-white tracking-tighter">Mobile Node Only</h1>
-        <p class="text-slate-500 mt-4 text-sm max-w-sm">CSync requires smartphone hardware sensors to operate.</p>
-    </div>
-
-    <div class="app-wrapper">
-        <!-- HEADER -->
-        <header class="flex justify-between items-center mb-6">
-            <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></div>
-                <p id="role-tag" class="text-[7px] font-black text-slate-500 uppercase tracking-widest">Standalone</p>
-            </div>
-            <div class="text-center">
-                <p class="text-[7px] font-bold text-slate-500 uppercase tracking-widest">Dr. V.S. Krishna GDC (A)</p>
-                <h1 style="font-family:'Orbitron'" class="text-xl font-bold tracking-tighter">CSYNC</h1>
-            </div>
-            <div class="w-10 h-10 rounded-full border border-cyan-400 overflow-hidden bg-slate-900 shadow-lg">
-                <img id="u-photo-top" src="https://ui-avatars.com/api/?name=CS&background=020617&color=00f2ff" class="w-full h-full object-cover">
-            </div>
+    <div class="app-wrapper flex flex-col h-screen">
+        <header class="flex justify-between items-center p-6 pt-10">
+            <h1 class="orbitron text-xl font-bold tracking-tighter text-white">CSYNC</h1>
+            <img id="u-photo-top" src="" class="w-10 h-10 rounded-full border border-cyan-400 object-cover shadow-lg bg-slate-900">
         </header>
 
-        <!-- ANNOUNCEMENTS -->
-        <div id="ann-card" class="hidden glass p-4 mx-2 rounded-2xl mb-6 border-l-4 border-red-500 animate-pulse">
-            <audio id="ding" src="https://www.soundjay.com/buttons/beep-07.mp3"></audio>
-            <div class="flex items-center gap-2 mb-1">
-                <span id="ann-sender" class="text-[9px] font-black uppercase text-red-500">Notice</span>
-            </div>
-            <p id="ann-body" class="text-xs font-bold text-white leading-tight"></p>
-        </div>
-
-        <div id="status-pill" class="mx-4 glass py-2 px-6 rounded-full text-center text-[9px] font-black uppercase tracking-widest mb-6 text-slate-500 border-slate-800">
-            Connecting...
-        </div>
-
-        <main class="main-viewport px-5">
-            
-            <!-- VIEW: ROLE SELECTION -->
-            <div id="view-roles" class="hidden-view flex flex-col space-y-4 pt-4">
-                <h2 class="text-center text-[10px] font-black text-slate-600 uppercase mb-4 tracking-widest">Identify Your Node</h2>
-                <button onclick="pickRole('Student')" class="glass p-6 rounded-3xl text-left border-l-4 border-cyan-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg text-white">STUDENT</h4>
-                </button>
-                <button onclick="pickRole('Alumni')" class="glass p-6 rounded-3xl text-left border-l-4 border-emerald-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg text-white">ALUMNI</h4>
-                </button>
-                <button onclick="pickRole('Lecturer')" class="glass p-6 rounded-3xl text-left border-l-4 border-indigo-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg text-white">LECTURER</h4>
-                </button>
-                <button onclick="pickRole('LabAssistant')" class="glass p-6 rounded-3xl text-left border-l-4 border-orange-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg text-white">LAB ASSISTANT</h4>
-                </button>
-                <button onclick="pickRole('HOD')" class="glass p-6 rounded-3xl text-left border-l-4 border-purple-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg text-white">HOD</h4>
-                </button>
-            </div>
-
-            <!-- VIEW: ENROLLMENT FORM -->
+        <main class="flex-1 overflow-y-auto px-5 pb-40">
+            <!-- VIEW: ENROLLMENT -->
             <div id="view-register" class="hidden-view space-y-6">
-                <div class="glass p-8 rounded-[2.5rem] cyber-card text-center">
-                    <h2 id="reg-title" class="text-lg font-black text-cyan-400 uppercase mb-6 italic">Enrollment</h2>
-                    <div class="video-circle mb-8 border-4 border-cyan-400 rounded-full overflow-hidden w-40 h-40 mx-auto">
-                        <video id="v-reg" autoplay muted playsinline></video>
-                    </div>
+                <div class="glass p-8 rounded-[2.5rem] border-t-4 border-cyan-500 text-center">
+                    <h2 id="reg-title" class="text-lg font-black text-cyan-400 uppercase mb-6">Enrollment</h2>
+                    <div class="video-circle mb-8 border-4 border-cyan-400 rounded-full overflow-hidden w-40 h-40 mx-auto"><video id="v-reg" autoplay muted playsinline></video></div>
                     <canvas id="c-resize" class="hidden"></canvas>
                     <div class="space-y-4">
-                        <input id="r-id" type="text" placeholder="Roll No / Staff ID" class="w-full uppercase font-black">
-                        <input id="r-name" type="text" placeholder="Full Name" class="w-full font-semibold">
+                        <input id="r-id" type="text" placeholder="Roll Number" class="w-full uppercase">
+                        <input id="r-name" type="text" placeholder="Full Name" class="w-full">
                         
-                        <!-- Dynamic Student Fields -->
-                        <div id="stu-fields" class="hidden space-y-4">
-                            <select id="r-major" class="w-full text-xs font-bold"><option>Computer Science</option><option>Artificial Intelligence</option></select>
-                            <select id="r-year" class="w-full text-xs font-bold"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+                        <!-- Student Only -->
+                        <div id="stu-fields" class="hidden-view space-y-4">
+                            <select id="r-major" class="w-full"><option>Computer Science</option><option>Artificial Intelligence</option></select>
+                            <select id="r-year" class="w-full"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
                         </div>
-                        
-                        <!-- Dynamic Alumni Fields -->
-                        <div id="alu-fields" class="hidden space-y-4">
+
+                        <!-- Alumni Only -->
+                        <div id="alu-fields" class="hidden-view space-y-4">
                             <input id="r-grad" type="number" placeholder="Year of Graduation" class="w-full">
-                            <input id="r-job" type="text" placeholder="Current Designation / Company" class="w-full">
+                            <input id="r-job" type="text" placeholder="Current Occupation / Study" class="w-full">
                         </div>
 
-                        <button onclick="processRegistration()" class="btn-action mt-4">Bind Sovereign Identity</button>
+                        <button onclick="processRegistration()" class="btn-action">Bind Sovereign Identity</button>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW: DASHBOARD (Unified) -->
-            <div id="tab-dashboard" class="tab-view space-y-6">
-                <!-- AI COMMAND TERMINAL -->
-                <div class="glass p-5 rounded-[2rem] border-indigo-500/30">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
-                        <h4 class="text-[8px] font-black uppercase text-cyan-400 tracking-widest">Sovereign AI Terminal</h4>
-                    </div>
-                    <textarea id="ai-input" class="w-full bg-black/40 p-4 rounded-xl text-xs font-mono text-cyan-100 outline-none h-20 border border-white/5" placeholder="Command logic..."></textarea>
-                    <button onclick="executeAI()" class="mt-2 text-cyan-400 font-bold text-[9px] uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-all">Execute_Command</button>
-                    <div id="ai-response" class="hidden mt-3 p-3 bg-black/60 rounded-xl text-[9px] font-mono text-slate-400 border border-white/5 leading-relaxed"></div>
+            <!-- VIEW: DASHBOARD -->
+            <div id="tab-dashboard" class="hidden-view space-y-6">
+                <!-- BIOMETRIC ATTENDANCE CARD -->
+                <div id="card-attendance" class="glass p-10 rounded-[3rem] text-center border-t-4 border-cyan-500">
+                    <button onclick="runAttendance()" class="btn-action">Verify Daily Presence</button>
                 </div>
 
-                <!-- Identity Summary -->
-                <div class="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <img id="u-photo" src="" class="w-14 h-14 rounded-full border-2 border-cyan-500 object-cover bg-slate-900 shadow-xl">
-                    <div class="text-left">
-                        <h4 id="u-name" class="font-black text-sm uppercase">Candidate</h4>
-                        <p id="u-meta" class="text-[8px] text-slate-500 uppercase font-black"></p>
-                    </div>
-                </div>
-
-                <!-- 10 AM - 5 PM Action Gates -->
-                <div id="module-attendance" class="hidden-view glass p-10 rounded-[3rem] text-center cyber-card space-y-4">
-                    <i data-lucide="map-pin" id="geo-icon" class="w-12 h-12 mx-auto text-slate-600 transition-all"></i>
-                    <p id="geo-msg" class="text-[10px] font-black uppercase text-slate-500">Syncing Campus GPS...</p>
-                    <button id="btn-presence" onclick="triggerAuth()" disabled class="btn-action">Verify Presence</button>
-                    <button onclick="reSyncLocation()" class="text-[8px] font-black uppercase text-cyan-400 underline mt-4">Manual GPS Re-Sync</button>
-                </div>
-
-                <div id="module-lab" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-emerald-500">
-                    <h2 class="text-emerald-400 font-black text-xl mb-4 italic uppercase">Identity Verified</h2>
-                    <button onclick="startLabScan()" class="btn-action !bg-white !text-black">Scan Lab PC QR</button>
-                    <div id="qr-reader" class="mt-4 rounded-3xl overflow-hidden shadow-2xl"></div>
-                </div>
-
-                <div id="module-active-pc" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-orange-500">
-                    <h2 id="active-pc-display" class="text-5xl font-black text-white mb-2 italic">CS-XX</h2>
-                    <p class="text-[10px] text-slate-500 uppercase font-black mb-8">Workstation Session Active</p>
-                    <button onclick="killSession()" class="btn-action !bg-orange-600 !text-white">Close & Lock Session</button>
+                <!-- DELINK DEVICE BUTTON (Settings) -->
+                <div class="glass p-6 rounded-[2rem] border-l-4 border-red-500 mt-10">
+                    <h4 class="text-xs font-black uppercase text-red-500 mb-2">Device Management</h4>
+                    <p class="text-[9px] text-slate-500 uppercase mb-4">Wipe identity from this phone to move to a new device.</p>
+                    <button onclick="delinkDevice()" class="text-xs text-red-400 font-bold underline">Delink Device from Cloud</button>
                 </div>
             </div>
-
-            <!-- VIEW: NEXUS DIRECTORY -->
-            <div id="tab-nexus" class="tab-view space-y-6">
-                <h2 class="text-xl font-black text-indigo-400 uppercase tracking-tighter italic">Nexus Directory</h2>
-                <div id="nexus-container" class="grid grid-cols-1 gap-4"></div>
-            </div>
-
-            <!-- VIEW: DISCUSSIONS -->
-            <div id="tab-discuss" class="tab-view space-y-6">
-                <h2 class="text-xl font-black text-purple-400 uppercase tracking-tighter italic">Discussion Feed</h2>
-                <!-- Topic Architect (Faculty Only) -->
-                <div id="staff-topic-box" class="hidden glass p-6 rounded-3xl border-l-4 border-purple-500">
-                    <h4 class="text-[9px] font-black uppercase text-purple-400 mb-3">AI Topic Architect</h4>
-                    <input type="text" id="raw-topic-title" class="input-vivid mb-3 w-full" placeholder="Enter rough idea...">
-                    <button onclick="publishTopic()" class="btn-action !p-3 !text-[10px]">Publish via AI</button>
-                </div>
-                <div id="discuss-container" class="space-y-4"></div>
-            </div>
-
-            <!-- VIEW: STAFF SUITE (Architect) -->
-            <div id="tab-architect" class="tab-view space-y-6">
-                <div class="glass p-8 rounded-[2.5rem] border-t-4 border-indigo-600">
-                    <h3 class="font-black text-lg uppercase text-cyan-400 mb-6">Academic Architect</h3>
-                    <div class="space-y-4">
-                        <select id="arch-type" class="w-full"><option value="teaching">Teaching Plan</option><option value="exam">Exam Paper</option></select>
-                        <textarea id="arch-syllabus" class="w-full h-40" placeholder="Paste Syllabus text here..."></textarea>
-                        <button onclick="runArchitect()" class="btn-action">Generate Document</button>
-                    </div>
-                </div>
-            </div>
-
         </main>
 
-        <!-- NAVIGATION TAB BAR -->
-        <nav id="nav-bar" class="hidden-view bottom-nav glass">
-            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span class="nav-label mt-1">Sovereign</span></button>
-            <button onclick="switchTab('nexus')" id="btn-nexus" class="nav-item"><i data-lucide="users"></i><span class="nav-label mt-1">Nexus</span></button>
-            <button onclick="switchTab('discuss')" id="btn-discuss" class="nav-item"><i data-lucide="message-square"></i><span class="nav-label mt-1">Feed</span></button>
-            <button onclick="switchTab('architect')" id="btn-architect" class="nav-item hidden"><i data-lucide="sparkles"></i><span class="nav-label mt-1">Tools</span></button>
-        </nav>
-
-        <footer class="app-footer">
-            <p>Copyright © 2026 | Dept of Computer Science</p>
-            <p>Dr. V. S. Krishna Govt. Degree College (Autonomous)</p>
-            <p class="mt-1">Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank">M.Thrinadh</a></p>
-        </footer>
-    </div>
-
-    <!-- AI VISION OVERLAY -->
-    <div id="face-gate" class="hidden fixed inset-0 z-[2000] bg-black/95 flex flex-col items-center justify-center p-10 text-center pointer-events-auto">
-        <div class="video-circle mb-8"><video id="v-auth" autoplay muted playsinline></video></div>
-        <h3 id="face-status" class="text-cyan-400 font-black uppercase text-xs animate-pulse tracking-widest">Validating Identity...</h3>
+        <footer class="app-footer"></footer>
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbx9KZfFxGH8V0XdZjNMeJHO08O3GNUxCXJe96Bi1RsPhUjZ9sl5HfX37fk8CcrNuVdg/exec";
-        const CAMPUS = { lat: 17.7441, lng: 83.3102 };
-        const UUID = btoa(navigator.userAgent + screen.width);
+        const BACKEND = CSYNC_CONFIG.BACKEND_URL;
         let USER = JSON.parse(localStorage.getItem('csync_v1_profile'));
         let regRole = "";
 
-        // 1. SYSTEM BOOT
         async function init() {
             lucide.createIcons();
             if (!USER) {
                 switchView('view-roles');
-                document.getElementById('status-pill').innerText = "NODE UNBOUND";
             } else {
-                setupUserSession();
+                switchView('tab-dashboard');
+                document.getElementById('u-photo-top').src = USER.photo;
             }
-            reSyncLocation(); // Start GPS
-            updateTimeStatus();
-            setInterval(updateTimeStatus, 60000);
         }
 
-        // 2. DISCIPLINARY LOGIC
-        function updateTimeStatus() {
-            const hr = new Date().getHours();
-            const pill = document.getElementById('status-pill');
-            if (hr >= 10 && hr < 17) pill.innerHTML = `<span class="text-cyan-400 pulse">● LIVE: ${hr < 13 ? 'FN' : 'AN'} SESSION</span>`;
-            else pill.innerHTML = `<span class="text-red-500">○ PORTAL LOCKED</span>`;
-        }
-
-        function reSyncLocation() {
-            const msg = document.getElementById('geo-msg');
-            const icon = document.getElementById('geo-icon');
-            const btn = document.getElementById('btn-presence');
-            if (!navigator.geolocation) return;
-            msg.innerText = "LINKING SATELLITE NODES...";
-            navigator.geolocation.getCurrentPosition(pos => {
-                const lat1 = pos.coords.latitude, lon1 = pos.coords.longitude;
-                const p = 0.017453292519943295;
-                const c = Math.cos;
-                const a = 0.5 - c((CAMPUS.lat - lat1) * p)/2 + c(lat1 * p) * c(CAMPUS.lat * p) * (1 - c((CAMPUS.lng - lon1) * p))/2;
-                const dist = 12742 * Math.asin(Math.sqrt(a));
-                if (dist <= 0.8) {
-                    btn.disabled = false;
-                    msg.innerHTML = `<span class="text-emerald-400">PULSE SYNCED: ON CAMPUS</span>`;
-                    icon.style.color = "#10b981";
-                } else {
-                    btn.disabled = true;
-                    msg.innerHTML = `<span class="text-red-500">OUTSIDE CAMPUS: GATE LOCKED</span>`;
-                    icon.style.color = "#ef4444";
-                }
-            }, null, { enableHighAccuracy: true });
-        }
-
-        // 3. ENROLLMENT
         function pickRole(role) {
             regRole = role;
             switchView('view-register');
             document.getElementById('reg-title').innerText = role + " Enrollment";
-            document.getElementById('stu-fields').classList.toggle('hidden', role !== 'Student');
-            document.getElementById('alu-fields').classList.toggle('hidden', role !== 'Alumni');
-            document.getElementById('r-id').placeholder = (role === 'Student' || role === 'Alumni') ? "Roll Number" : "Staff ID";
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }).then(s => document.getElementById('v-reg').srcObject = s);
+            
+            // Fix: Alumni Registration Visibility
+            document.getElementById('stu-fields').classList.toggle('hidden-view', (role !== 'Student'));
+            document.getElementById('alu-fields').classList.toggle('hidden-view', (role !== 'Alumni'));
+            
+            const rId = document.getElementById('r-id');
+            rId.placeholder = (role === 'Student' || role === 'Alumni') ? "Roll Number" : "Staff ID";
+            
+            navigator.mediaDevices.getUserMedia({ video: true }).then(s => document.getElementById('v-reg').srcObject = s);
         }
 
         async function processRegistration() {
@@ -331,51 +119,43 @@
             const photo = canvas.toDataURL('image/jpeg', 0.6);
 
             const payload = {
-                action: "register", role: regRole, id: document.getElementById('r-id').value,
-                name: document.getElementById('r-name').value, major: document.getElementById('r-major').value || "N/A",
-                year: document.getElementById('r-year').value || "0", uuid: UUID, photo: photo
+                action: "register",
+                role: regRole,
+                id: document.getElementById('r-id').value,
+                name: document.getElementById('r-name').value,
+                gradYear: document.getElementById('r-grad')?.value || "",
+                job: document.getElementById('r-job')?.value || "",
+                major: document.getElementById('r-major')?.value || "N/A",
+                year: document.getElementById('r-year')?.value || "0",
+                uuid: btoa(navigator.userAgent + screen.width),
+                photo: photo
             };
 
-            const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const res = await fetch(BACKEND, { method: 'POST', body: JSON.stringify(payload) });
             if ((await res.text()) === "REGISTRATION_SUCCESS") {
                 localStorage.setItem('csync_v1_profile', JSON.stringify(payload));
                 location.reload();
             }
         }
 
-        // 4. MAIN NAVIGATION
+        // --- NEW: MANUAL DELINK FEATURE ---
+        async function delinkDevice() {
+            if (confirm("WARNING: This will unbind your ID from this phone. You will need to register again on a new device. Continue?")) {
+                const res = await fetch(BACKEND, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: "delink_device", id: USER.id, role: USER.role }) 
+                });
+                if ((await res.text()) === "DELINK_SUCCESS") {
+                    localStorage.clear();
+                    alert("Device Unbound Successfully.");
+                    location.reload();
+                }
+            }
+        }
+
         function switchView(id) {
             document.querySelectorAll('main > div').forEach(v => v.classList.add('hidden-view'));
-            const target = document.getElementById(id);
-            if(target) target.classList.remove('hidden-view');
-        }
-
-        function switchTab(t) {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('nav-active'));
-            document.getElementById('btn-'+t).classList.add('nav-active');
-            switchView('tab-'+t);
-            if(t === 'discuss' && (USER.role === 'Lecturer' || USER.role === 'HOD')) document.getElementById('staff-topic-box').classList.remove('hidden');
-        }
-
-        function setupUserSession() {
-            switchView('tab-dashboard');
-            document.getElementById('nav-bar').classList.remove('hidden-view');
-            document.getElementById('u-name').innerText = USER.name;
-            document.getElementById('u-photo').src = USER.photo;
-            document.getElementById('u-photo-top').src = USER.photo;
-            document.getElementById('u-meta').innerText = USER.role === 'Student' ? `${USER.year} Year | ${USER.major}` : USER.role.toUpperCase();
-            document.getElementById('role-tag').innerText = USER.role;
-            if(USER.role === 'Lecturer' || USER.role === 'HOD') document.getElementById('btn-architect').classList.remove('hidden');
-        }
-
-        async function executeAI() {
-            const input = document.getElementById('ai-input');
-            const resp = document.getElementById('ai-response');
-            if(!input.value) return;
-            resp.classList.remove('hidden'); resp.innerText = "Consulting Cloud AI...";
-            const res = await fetch(`${GAS_URL}?action=ai_helpdesk&query=${encodeURIComponent(input.value)}`);
-            resp.innerText = await res.text();
-            input.value = "";
+            document.getElementById(id).classList.remove('hidden-view');
         }
 
         window.onload = init;
