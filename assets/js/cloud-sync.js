@@ -1,37 +1,33 @@
 /**
- * CSync v1.0 - Sovereign Cloud Sync Engine
- * Dr. V.S. Krishna Govt. Degree College (Autonomous)
+ * CSYNC: SOVEREIGN CLOUD SYNC ENGINE v105.0
+ * Institution: Dr. V.S. Krishna Govt. Degree College (Autonomous)
  * Developed by: M. Thrinadh (https://linkedin.com/in/m3nadh)
+ * 
+ * Logic: Biometric Handshaking, AI Architect Tunnel, and Real-time Polling.
  */
 
 const CloudSync = {
-    // Replace with your Google Apps Script Web App URL after Deployment
+    // --- MASTER BACKEND URL ---
     apiUrl: "https://script.google.com/macros/s/AKfycbzuCEHK3h92DIpPwB89dxQdXnfkGyRTm2oOpT-5p2503vsLylptMdzCJfwpXk6Z7O2U/exec",
 
-    // 1. GENERIC POST REQUEST HANDLER (With Timeout Protection)
+    // 1. UNIVERSAL POST HANDLER (Sovereign Security)
     async post(payload) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Timeout
-
         try {
             const response = await fetch(this.apiUrl, {
                 method: 'POST',
-                mode: 'cors', // Crucial for GAS
+                mode: 'cors', // Required for Google Apps Script Web Apps
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload),
-                signal: controller.signal
+                body: JSON.stringify(payload)
             });
-            clearTimeout(timeoutId);
             return await response.text();
         } catch (error) {
-            console.error("CSync Cloud Error:", error);
-            if (error.name === 'AbortError') return "TIMEOUT_ERROR";
-            return "NETWORK_FAILURE";
+            console.error("CSync Cloud Failure:", error);
+            return "NETWORK_ERROR";
         }
     },
 
-    // 2. SOVEREIGN REGISTRATION (Identity + Device Binding)
-    async registerNode(data) {
+    // 2. SOVEREIGN REGISTRATION (Role-Based: Student/Staff/Alumni/HOD)
+    async registerUser(data) {
         return await this.post({
             action: "register",
             role: data.role,
@@ -40,63 +36,96 @@ const CloudSync = {
             major: data.major || "N/A",
             year: data.year || "N/A",
             uuid: data.uuid,
-            photo: data.photo // Compressed Base64 from AuthEngine
+            photo: data.photo, // Base64 Compressed
+            fpId: data.fpId,   // WebAuthn Credential ID
+            pEmail: data.parentEmail || "N/A"
         });
     },
 
-    // 3. BIOMETRIC ATTENDANCE (Dual-Session Logic)
-    async syncAttendance(userId, role, uuid) {
-        return await this.post({
+    // 3. BIOMETRIC ATTENDANCE (Dual-Session Window Validation)
+    async markAttendance(userId, role, uuid) {
+        const response = await this.post({
             action: "attendance",
             id: userId,
             role: role,
-            uuid: uuid,
-            timestamp: new Date().toISOString()
+            uuid: uuid
         });
+        
+        if (response === "SUCCESS") this.triggerHaptic('success');
+        if (response === "PORTAL_LOCKED") this.triggerHaptic('error');
+        
+        return response;
     },
 
-    // 4. LAB PC HANDSHAKE (Cloud-to-Hardware Bridge)
-    async labHandshake(pcId, mac, userId, role, photo) {
+    // 4. LAB PC HANDSHAKE (Hardware Handover)
+    async unlockWorkstation(pcId, mac, userId, role, photo) {
         return await this.post({
             action: "lab_unlock",
             sysId: pcId,
             mac: mac,
             id: userId,
             role: role,
-            photo: photo // Sends the registered photo to the Lab PC monitor
+            photo: photo // Display face on Lab PC monitor
         });
     },
 
-    // 5. TARGETED ANNOUNCEMENT POLLING
+    // 5. AI ACADEMIC ARCHITECT (Massive Data Generation)
+    async generateTeachingPlan(lecturerName, subject, syllabus) {
+        const res = await this.post({
+            action: "gen_teaching_plan",
+            lecturer: lecturerName,
+            subject: subject,
+            syllabus: syllabus
+        });
+        return res; // Returns raw AI text for PDF conversion
+    },
+
+    async generateExamPapers(sub, syllabus, model, sets) {
+        const res = await this.post({
+            action: "gen_exam_papers",
+            sub: sub,
+            syllabus: syllabus,
+            model: model,
+            sets: sets
+        });
+        return res;
+    },
+
+    // 6. AI COMMAND TERMINAL (Groq Llama 3 70B Tunnel)
+    async sendAICommand(query, userProfile) {
+        try {
+            const res = await fetch(`${this.apiUrl}?action=ai_helpdesk&query=${encodeURIComponent(query)}&id=${userProfile.id}&role=${userProfile.role}`);
+            return await res.text();
+        } catch (e) {
+            return "Sovereign AI is currently offline.";
+        }
+    },
+
+    // 7. REAL-TIME DATA FETCHERS (GET requests)
     async fetchAnnouncements(roll, year) {
         try {
             const res = await fetch(`${this.apiUrl}?action=getAnn&roll=${roll}&year=${year}`);
             return await res.json();
-        } catch (e) {
-            return { id: 0 };
-        }
+        } catch (e) { return { id: 0 }; }
     },
 
-    // 6. AI SOVEREIGN HELPDESK (Groq AI Integration)
-    async askAI(query) {
+    async getNexusDirectory() {
         try {
-            const res = await fetch(`${this.apiUrl}?action=ai_helpdesk&query=${encodeURIComponent(query)}`);
-            return await res.text();
-        } catch (e) {
-            return "The AI Helpdesk is currently syncing. Please try again in a moment.";
-        }
+            const res = await fetch(`${this.apiUrl}?action=getNexus`);
+            return await res.json();
+        } catch (e) { return []; }
     },
 
-    // 7. HAPTIC & NOTIFICATION HELPERS
-    triggerSuccess() {
-        if ("vibrate" in navigator) navigator.vibrate([50, 30, 50]);
-        const audio = document.getElementById('ding');
-        if (audio) audio.play().catch(() => console.log("Audio interaction required."));
+    // 8. NATIVE HARDWARE FEEDBACK
+    triggerHaptic(type) {
+        if (!("vibrate" in navigator)) return;
+        if (type === 'success') navigator.vibrate([50, 30, 50]);
+        if (type === 'error') navigator.vibrate([200, 100, 200]);
     }
 };
 
 /**
  * Developed by M. Thrinadh
- * Cloud Integrity Seal for CSync v1.0
+ * Integrity Seal for CSync v1.0
  */
 window.CloudSync = CloudSync;
