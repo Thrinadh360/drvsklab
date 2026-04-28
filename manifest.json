@@ -10,7 +10,10 @@
   "scope": "/",
   "lang": "en-US",
   "dir": "ltr",
-  "categories": ["education", "productivity"],
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "assets/img/icon-192.png",
@@ -41,16 +44,26 @@
     {
       "name": "Mark Attendance",
       "short_name": "Attendance",
-      "description": "Quickly verify your daily presence",
+      "description": "Verify your daily presence via Biometrics",
       "url": "index.html?action=attendance",
-      "icons": [{ "src": "assets/img/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "assets/img/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Scan Lab PC",
-      "short_name": "Lab Scan",
-      "description": "Unlock a lab workstation",
+      "short_name": "Lab Handshake",
+      "description": "Unlock a workstation via QR scan",
       "url": "index.html?action=scan",
-      "icons": [{ "src": "assets/img/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "assets/img/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
   "related_applications": [],
