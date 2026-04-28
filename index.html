@@ -5,121 +5,176 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CSync | Sovereign Portal</title>
     
-    <!-- PWA Standard Meta -->
+    <!-- PWA & Native Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
 
-    <!-- Dependencies -->
+    <!-- Global Config & Dependencies -->
     <script src="assets/js/config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/csync-hud.css">
 
     <style>
-        :root { --accent: #00f2ff; --bg: #020617; --card: rgba(30, 41, 59, 0.7); --input-bg: #1e1b4b; }
+        :root { --accent: #00f2ff; --bg: #020617; --card: rgba(30, 41, 59, 0.4); --input-bg: #1e1b4b; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; user-select: none; overflow: hidden; margin: 0; }
+
+        /* 🛡️ INPUT RESPONSIVENESS & VIVID STYLE */
+        input, textarea, select, button, [contenteditable="true"] {
+            user-select: text !important; -webkit-user-select: text !important;
+            pointer-events: auto !important; touch-action: manipulation !important;
+            background-color: var(--input-bg) !important; border: 2px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px !important; padding: 14px 16px !important; color: #ffffff !important;
+            font-weight: 600 !important; outline: none !important; transition: 0.3s;
+        }
+        input:focus, select:focus { border-color: var(--accent) !important; box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
+        option { background-color: #1e1b4b; color: white; }
+
+        /* HUD Structure */
+        .app-wrapper { height: 100dvh; display: flex; flex-direction: column; }
+        .main-viewport { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 160px; scroll-behavior: smooth; position: relative; z-index: 5; }
         
-        /* 🛡️ INPUT FOCUS PATCH */
-        input, textarea, select, button { user-select: text !important; -webkit-user-select: text !important; pointer-events: auto !important; touch-action: manipulation !important; }
-        
-        /* HUD ELEMENTS */
-        .glass { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
-        .cyber-card { border-top: 3px solid var(--accent); box-shadow: 0 20px 50px rgba(0, 242, 255, 0.15); }
-        .app-wrapper { height: 100dvh; display: flex; flex-direction: column; padding: 20px; padding-top: calc(env(safe-area-inset-top) + 10px); }
-        .main-viewport { flex: 1; overflow-y: auto; padding-bottom: 160px; scroll-behavior: smooth; }
-        
-        /* 📱 INSTAGRAM BOTTOM NAV */
-        .bottom-nav { position: fixed; bottom: 85px; left: 15px; right: 15px; height: 70px; z-index: 1000; border-radius: 28px; display: flex; justify-content: space-around; align-items: center; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); }
+        /* Sidebar Drawer */
+        #sidebar { position: fixed; inset-y: 0; left: 0; width: 280px; background: #05060f; z-index: 2000; transform: translateX(-100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-right: 1px solid rgba(255,255,255,0.05); }
+        #sidebar.open { transform: translateX(0); box-shadow: 20px 0 60px rgba(0,0,0,0.9); }
+
+        /* Nav & Cards */
+        .bottom-nav { position: fixed; bottom: 85px; left: 15px; right: 15px; height: 65px; z-index: 100; border-radius: 24px; display: flex; justify-content: space-around; align-items: center; background: rgba(10, 11, 30, 0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); }
         .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; text-transform: uppercase; transition: 0.3s; border: none; background: none; }
         .nav-active { color: var(--accent) !important; filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
-
-        .hidden-view { display: none !important; }
-        .tab-view { display: none; } .tab-active { display: block !important; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .btn-action { background: var(--accent); color: #000; font-weight: 900; padding: 16px; border-radius: 14px; width: 100%; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; border: none; }
-        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 10px calc(15px + env(safe-area-inset-bottom)); background: #000; text-align: center; font-size: 9px; font-weight: 700; border-top: 1px solid #1e293b; z-index: 900; color: #475569; }
         
+        .hidden-view { display: none !important; }
+        .tab-view { display: none; } .tab-active { display: block !important; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .video-circle { width: 170px; height: 170px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); margin: 0 auto; background: black; position: relative;}
         video { width: 100%; height: 100%; object-fit: cover; }
+        .btn-action { background: var(--accent); color: #000; font-weight: 900; padding: 16px; border-radius: 14px; width: 100%; text-transform: uppercase; border: none; cursor: pointer; font-size: 11px; letter-spacing: 1.5px; }
+        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 10px calc(15px + env(safe-area-inset-bottom)); background: #000; text-align: center; font-size: 9px; font-weight: 700; border-top: 1px solid #1e293b; z-index: 90; color: #475569; }
+        a { color: var(--accent); text-decoration: underline; font-weight: 800; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
+    <!-- DESKTOP ACCESS BLOCKER -->
+    <div id="desktop-blocker" class="hidden fixed inset-0 bg-black z-[9999] flex-col items-center justify-center p-10 text-center">
+        <i data-lucide="smartphone" class="w-20 h-20 text-cyan-400 mb-6"></i>
+        <h1 class="text-3xl font-black uppercase text-white tracking-tighter">Mobile Required</h1>
+        <p class="text-slate-500 mt-4 text-sm max-w-sm">CSync uses native biometric hardware and GPS binding available only on smartphones.</p>
+    </div>
+
+    <!-- SOVEREIGN SIDEBAR -->
+    <div id="sidebar" class="sidebar p-8 flex flex-col">
+        <div class="mb-10 text-center">
+            <h1 style="font-family:'Orbitron'" class="text-2xl text-cyan-400 tracking-tighter uppercase">CSYNC</h1>
+            <p class="text-[8px] font-black text-indigo-500 uppercase tracking-widest mt-1">Sovereign HUB</p>
+        </div>
+        <nav class="space-y-6 flex-1">
+            <button onclick="UIManager.switchTab('dashboard')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-slate-300"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+            <button onclick="UIManager.switchTab('nexus')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-slate-300"><i data-lucide="users"></i> Nexus directory</button>
+            <div id="staff-menu" class="hidden space-y-6 pt-6 border-t border-white/5">
+                <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Faculty Suite</p>
+                <button onclick="UIManager.switchTab('architect')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-indigo-400"><i data-lucide="sparkles"></i> AI Architect</button>
+                <button onclick="UIManager.switchTab('audit')" class="flex items-center gap-4 text-xs font-bold w-full text-left uppercase text-emerald-400"><i data-lucide="shield-check"></i> NAAC Audit</button>
+            </div>
+        </nav>
+        <button onclick="UIManager.delinkDevice()" class="text-red-500 text-[9px] font-black uppercase mt-10 flex items-center gap-2"><i data-lucide="log-out" class="w-3 h-3"></i> Unbind Device</button>
+    </div>
+
     <div class="app-wrapper">
         <!-- HEADER -->
-        <header class="flex justify-between items-center mb-6 pt-10">
-            <button onclick="UIManager.toggleSidebar()"><i data-lucide="menu" class="text-cyan-400"></i></button>
-            <h1 style="font-family:'Orbitron'" class="text-xl font-bold tracking-tighter uppercase text-white">CSYNC</h1>
+        <header class="flex justify-between items-center mb-6 pt-10 px-6 sticky top-0 bg-[#020617] z-50">
+            <button onclick="UIManager.toggleSidebar()" class="p-2 active:scale-90 transition"><i data-lucide="menu" class="text-cyan-400"></i></button>
+            <div class="text-center">
+                <p class="text-[7px] font-bold text-slate-500 uppercase tracking-widest">Dr. V.S. Krishna GDC (A)</p>
+                <h1 style="font-family: 'Orbitron';" class="text-xl font-bold tracking-tighter uppercase text-white">CSYNC</h1>
+            </div>
             <div class="w-10 h-10 rounded-full border-2 border-cyan-400 overflow-hidden bg-slate-900 shadow-lg">
                 <img id="u-photo-top" src="https://ui-avatars.com/api/?name=CS&background=020617&color=00f2ff" class="w-full h-full object-cover">
             </div>
         </header>
 
-        <div id="status-pill" class="mx-4 glass py-2 px-6 rounded-full text-center text-[9px] font-black uppercase tracking-widest mb-6 text-slate-500 border-slate-800">
-            Synchronizing Node...
+        <!-- ANNOUNCEMENTS -->
+        <div id="ann-card" class="hidden glass p-4 mx-6 rounded-2xl mb-6 border-l-4 border-red-500 animate-pulse">
+            <audio id="ding" src="assets/audio/notification.mp3"></audio>
+            <div class="flex items-center gap-2 mb-1">
+                <span id="ann-sender" class="text-[9px] font-black uppercase text-red-500">Notice</span>
+            </div>
+            <p id="ann-body" class="text-xs font-bold text-white leading-tight"></p>
         </div>
 
-        <main class="main-viewport px-2">
+        <div id="status-pill" class="mx-6 glass py-2 px-6 rounded-full text-center text-[9px] font-black uppercase tracking-widest mb-8 text-slate-500 border-slate-800">
+            Node Standby...
+        </div>
+
+        <main class="main-viewport px-5">
             
-            <!-- 1. REGISTRATION GATE (Hidden after setup) -->
+            <!-- VIEW: ROLE SELECTION -->
             <div id="view-roles" class="hidden-view flex flex-col space-y-4 pt-4">
-                <h2 class="text-center text-[10px] font-black text-slate-600 uppercase mb-4 tracking-widest">Enroll Your Identity</h2>
+                <h2 class="text-center text-[10px] font-black text-slate-600 uppercase mb-4 tracking-widest">Identify Your Node</h2>
                 <button onclick="UIManager.openReg('Student')" class="glass p-6 rounded-3xl text-left border-l-4 border-cyan-500 active:scale-95 transition">
                     <h4 class="font-black text-lg text-white">STUDENT</h4><p class="text-[9px] text-slate-400 font-bold uppercase">Batches & Attendance</p>
                 </button>
                 <button onclick="UIManager.openReg('Alumni')" class="glass p-6 rounded-3xl text-left border-l-4 border-emerald-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg text-white uppercase">Alumni</h4><p class="text-[9px] text-slate-400 font-bold uppercase">Nexus Network</p>
+                    <h4 class="font-black text-lg text-white uppercase">ALUMNI</h4><p class="text-[9px] text-slate-400 font-bold uppercase">Nexus Network</p>
                 </button>
                 <button onclick="UIManager.openReg('Lecturer')" class="glass p-6 rounded-3xl text-left border-l-4 border-indigo-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg text-white uppercase">Lecturer</h4><p class="text-[9px] text-slate-400 font-bold uppercase">Academic Suite</p>
+                    <h4 class="font-black text-lg text-white uppercase">LECTURER</h4>
+                </button>
+                <button onclick="UIManager.openReg('LabAssistant')" class="glass p-6 rounded-3xl text-left border-l-4 border-orange-500 active:scale-95 transition">
+                    <h4 class="font-black text-lg text-white uppercase">LAB ASSISTANT</h4>
                 </button>
                 <button onclick="UIManager.openReg('HOD')" class="glass p-6 rounded-3xl text-left border-l-4 border-purple-500 active:scale-95 transition">
                     <h4 class="font-black text-lg text-white uppercase">HOD</h4>
                 </button>
             </div>
 
+            <!-- VIEW: ENROLLMENT FORM -->
             <div id="view-register" class="hidden-view space-y-6">
                 <div class="glass p-8 rounded-[2.5rem] cyber-card text-center">
-                    <div class="video-circle mb-8 border-4 border-cyan-400"><video id="v-reg" autoplay muted playsinline></video></div>
+                    <h2 id="reg-title" class="text-lg font-black text-cyan-400 uppercase mb-6 italic">Enrollment</h2>
+                    <div class="video-circle mb-8"><video id="v-reg" autoplay muted playsinline></video></div>
                     <canvas id="c-resize" class="hidden"></canvas>
                     <div class="space-y-4 text-left">
-                        <input id="r-id" type="text" placeholder="ID Number" class="w-full uppercase font-black">
+                        <input id="r-id" type="text" placeholder="Roll Number / Staff ID" class="w-full uppercase font-black">
                         <input id="r-name" type="text" placeholder="Full Name" class="w-full">
-                        <div id="stu-fields" class="hidden-view space-y-4">
+                        
+                        <div id="stu-fields" class="hidden space-y-4">
                             <select id="r-major" class="w-full font-bold"><option>Computer Science</option><option>Artificial Intelligence</option></select>
                             <select id="r-year" class="w-full font-bold"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+                            <input id="r-pmail" type="email" placeholder="Parent Email (Alerts)" class="w-full">
                         </div>
-                        <div id="alu-fields" class="hidden-view space-y-4">
-                            <input id="r-grad" type="number" placeholder="Graduation Year" class="w-full">
-                            <input id="r-job" type="text" placeholder="Designation / Organization" class="w-full">
+
+                        <div id="alu-fields" class="hidden space-y-4">
+                            <input id="r-grad" type="number" placeholder="Year of Graduation" class="w-full">
+                            <input id="r-job" type="text" placeholder="Current Designation / Company" class="w-full">
                         </div>
-                        <button onclick="UIManager.processRegistration()" class="btn-action w-full mt-4">Bind Sovereign Identity</button>
+
+                        <button id="btn-enroll-master" onclick="UIManager.handleEnrollment()" class="btn-action">Bind Sovereign Identity</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. DASHBOARD TABS -->
-            
-            <!-- DASHBOARD (Attendance & Lab) -->
-            <div id="view-dashboard" class="tab-view space-y-6">
-                <!-- AI TERMINAL -->
+            <!-- TAB: DASHBOARD (MAIN HUB) -->
+            <div id="tab-dashboard" class="tab-view tab-active space-y-6">
+                <!-- AI COMMAND TERMINAL -->
                 <div class="glass p-5 rounded-[2.5rem] border-indigo-500/30">
                     <div class="flex items-center gap-2 mb-3">
                         <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
                         <h4 class="text-[8px] font-black uppercase text-cyan-400 tracking-widest">Sovereign AI Terminal</h4>
                     </div>
-                    <textarea id="ai-input" class="w-full bg-black/40 p-4 rounded-xl text-xs font-mono text-cyan-100 outline-none h-20 border border-white/5" placeholder="Command CSync AI..."></textarea>
-                    <button onclick="UIManager.executeAI()" class="mt-2 text-cyan-400 font-bold text-[9px] uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-all"><i data-lucide="terminal" class="w-3 h-3"></i> Execute</button>
+                    <textarea id="ai-input" class="w-full bg-black/40 p-4 rounded-xl text-xs font-mono text-cyan-100 outline-none h-20 border border-white/5" placeholder="Command AI (e.g. 'Attendance stats')"></textarea>
+                    <button onclick="UIManager.executeAI()" class="mt-2 text-cyan-400 font-bold text-[9px] uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-all"><i data-lucide="terminal" class="w-3 h-3"></i> Execute_Command</button>
                     <div id="ai-response" class="hidden mt-3 p-3 bg-black/60 rounded-xl text-[9px] font-mono text-slate-400 border border-white/5 leading-relaxed"></div>
                 </div>
 
-                <!-- Bento Info Card -->
+                <!-- Identity Summary Bento -->
                 <div class="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
                     <img id="u-photo" src="" class="w-14 h-14 rounded-full border-2 border-cyan-500 object-cover bg-slate-900 shadow-xl">
                     <div class="text-left">
@@ -128,76 +183,72 @@
                     </div>
                 </div>
 
-                <!-- 10-5 Action Gates -->
+                <!-- Campus Lock (Attendance Gate) -->
                 <div id="module-attendance" class="glass p-10 rounded-[3rem] text-center cyber-card space-y-4">
                     <i data-lucide="map-pin" id="geo-icon" class="w-12 h-12 mx-auto text-slate-600 transition-all duration-1000"></i>
-                    <p id="geo-msg" class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Syncing GPS...</p>
-                    <button id="btn-presence" onclick="UIManager.runAttendance()" disabled class="btn-action">Verify Presence</button>
+                    <p id="geo-msg" class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Syncing Campus GPS...</p>
+                    <button id="btn-presence" onclick="UIManager.triggerAuth()" disabled class="btn-action">Verify Presence</button>
+                    <button onclick="UIManager.reSyncLocation()" class="text-[8px] font-black uppercase text-cyan-400 underline mt-4">Manual GPS Re-Sync</button>
                 </div>
-                
+
                 <!-- Lab Handshake -->
                 <div id="module-lab" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-emerald-500">
+                    <h2 class="text-emerald-400 font-black text-xl mb-4 italic uppercase">Identity Verified</h2>
                     <button onclick="UIManager.startLabScan()" class="btn-action !bg-white !text-black">Scan Lab PC QR</button>
                     <div id="qr-reader" class="mt-4 rounded-3xl overflow-hidden shadow-2xl"></div>
                 </div>
+
+                <div id="module-active-pc" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-orange-500">
+                    <h2 id="active-pc-display" class="text-5xl font-black text-white mb-2 italic">CS-XX</h2>
+                    <p class="text-[10px] text-slate-500 uppercase font-black mb-8">Workstation Session Active</p>
+                    <button onclick="UIManager.killSession()" class="btn-action !bg-orange-600 !text-white">Close Session</button>
+                </div>
             </div>
 
-            <!-- NEXUS DIRECTORY -->
+            <!-- TABS: NEXUS & DISCUSS (Logic-wired placeholders) -->
             <div id="view-nexus" class="tab-view space-y-6">
                 <h2 class="text-xl font-black text-indigo-400 uppercase tracking-tighter italic">Nexus Directory</h2>
-                <input type="text" id="nexus-search" oninput="UIManager.filterNexus()" placeholder="Neural Search..." class="w-full">
-                <div id="nexus-container" class="grid grid-cols-1 gap-4"></div>
+                <div id="nexus-container" class="grid grid-cols-1 gap-4 pb-20"></div>
             </div>
 
-            <!-- DISCUSSION HUB -->
             <div id="view-discuss" class="tab-view space-y-6">
                 <h2 class="text-xl font-black text-purple-400 uppercase tracking-tighter italic">Discussion Feed</h2>
-                <div id="discuss-container" class="space-y-4"></div>
+                <div id="topic-container" class="space-y-4 pb-20"></div>
             </div>
-
-            <!-- ACADEMIC ARCHITECT (Staff Only) -->
+            
+            <!-- VIEW: ARCHITECT (Staff Only) -->
             <div id="view-architect" class="tab-view space-y-6">
                 <div class="glass p-8 rounded-[2.5rem] cyber-card">
-                    <h2 class="text-xl font-black text-indigo-400 uppercase mb-6">AI Academic Architect</h2>
+                    <h3 class="font-black text-lg uppercase text-cyan-400 mb-6 italic">Academic Architect</h3>
                     <div class="space-y-4">
                         <select id="arch-type" class="w-full"><option value="teaching">Teaching Plan</option><option value="exam">Exam Paper</option></select>
-                        <textarea id="arch-syllabus" class="w-full h-40" placeholder="Paste syllabus text..."></textarea>
+                        <textarea id="arch-syllabus" class="w-full h-40" placeholder="Paste Syllabus text here..."></textarea>
                         <button onclick="UIManager.runArchitect()" class="btn-action">Generate Document</button>
                     </div>
                 </div>
             </div>
 
-            <!-- REQUESTS & LEAVES -->
-            <div id="view-requests" class="tab-view space-y-6">
-                <div class="glass p-8 rounded-[2.5rem] cyber-card">
-                    <h2 class="text-xl font-black text-red-500 uppercase mb-6">Leave Application</h2>
-                    <textarea id="lv-reason" class="w-full h-32 mb-4" placeholder="State reason for absence..."></textarea>
-                    <button onclick="UIManager.submitLeave()" class="btn-action !bg-red-600 !text-white">Submit to HOD</button>
-                </div>
-            </div>
-
         </main>
 
-        <!-- 📱 NATIVE ICON NAVIGATION BAR -->
+        <!-- NAVIGATION TAB BAR -->
         <nav id="nav-bar" class="hidden-view bottom-nav glass">
-            <button onclick="UIManager.switchTab('dashboard')" id="btn-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span class="nav-label mt-1">Sovereign</span></button>
-            <button onclick="UIManager.switchTab('nexus')" id="btn-nexus" class="nav-item"><i data-lucide="users"></i><span class="nav-label mt-1">Nexus</span></button>
-            <button onclick="UIManager.switchTab('discuss')" id="btn-discuss" class="nav-item"><i data-lucide="message-square"></i><span class="nav-label mt-1">Feed</span></button>
-            <button onclick="UIManager.switchTab('requests')" id="btn-requests" class="nav-item"><i data-lucide="calendar"></i><span class="nav-label mt-1">Request</span></button>
-            <button onclick="UIManager.switchTab('architect')" id="btn-architect" class="nav-item hidden-view"><i data-lucide="sparkles"></i><span class="nav-label mt-1">Tools</span></button>
+            <button onclick="UIManager.switchTab('dashboard')" id="btn-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span class="mt-1 font-black text-[7px]">Home</span></button>
+            <button onclick="UIManager.switchTab('nexus')" id="btn-nexus" class="nav-item"><i data-lucide="users"></i><span class="mt-1 font-black text-[7px]">Nexus</span></button>
+            <button onclick="UIManager.switchTab('discuss')" id="btn-discuss" class="nav-item"><i data-lucide="message-square"></i><span class="mt-1 font-black text-[7px]">Feed</span></button>
         </nav>
 
+        <!-- INSTITUTIONAL FOOTER -->
         <footer class="app-footer dynamic-footer"></footer>
     </div>
 
     <!-- AI VISION OVERLAY -->
     <div id="face-gate" class="hidden fixed inset-0 z-[5000] bg-black/95 flex flex-col items-center justify-center p-10 text-center pointer-events-auto">
         <div class="video-circle mb-8"><video id="v-auth" autoplay muted playsinline></video></div>
-        <h3 id="face-status" class="text-cyan-400 font-black uppercase text-xs animate-pulse tracking-widest">Neural Link...</h3>
-        <p class="text-slate-500 text-[9px] uppercase mt-4 italic">Neural Handshake. Smile or Blink.</p>
+        <h3 id="face-status" class="text-cyan-400 font-black uppercase text-xs animate-pulse tracking-widest">Validating Identity...</h3>
+        <p class="text-slate-500 text-[9px] uppercase mt-4 italic">Neural handshake. Smile or Blink.</p>
     </div>
 
-    <!-- Sovereign Logic v2.0 -->
+    <!-- Sovereign Dependencies & Logic Engine v120.0 -->
     <script src="assets/js/cloud-sync.js"></script>
     <script src="assets/js/auth-engine.js"></script>
     <script src="assets/js/scanner.js"></script>
