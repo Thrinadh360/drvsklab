@@ -5,176 +5,185 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CSync | Sovereign Portal</title>
     
-    <!-- PWA Standard Meta -->
+    <!-- PWA Standard -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
 
-    <!-- Dependencies -->
-    <script src="assets/js/config.js"></script>
+    <!-- Core Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link rel="stylesheet" href="assets/css/csync-hud.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        /* 🛠️ INPUT FOCUS PATCH */
-        input, textarea, select, button { user-select: text !important; -webkit-user-select: text !important; pointer-events: auto !important; touch-action: manipulation !important; }
+        :root { --accent: #00f2ff; --bg: #020617; --card: rgba(255, 255, 255, 0.03); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); color: white; 
+            user-select: none; overflow: hidden; margin: 0;
+        }
 
-        /* TAB MANAGEMENT */
-        .tab-view { display: none; }
-        .tab-active { display: block !important; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* 🛠️ CRITICAL FIX: INPUT RESPONSIVENESS PATCH */
+        input, textarea, select, button, .nav-item {
+            user-select: text !important;
+            -webkit-user-select: text !important;
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
+        }
 
-        /* INSTAGRAM STYLE BOTTOM NAV */
-        .bottom-nav { position: fixed; bottom: 85px; left: 15px; right: 15px; height: 70px; z-index: 1000; border-radius: 24px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -10px 40px rgba(0,0,0,0.6); }
-        .nav-item { @apply flex flex-col items-center justify-center gap-1 transition-all duration-300; color: #475569; }
-        .nav-active { color: #00f2ff !important; filter: drop-shadow(0 0 10px #00f2ff); transform: translateY(-5px); }
-        .nav-label { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .glass { background: var(--card); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
+        .cyber-card { border-top: 3px solid var(--accent); box-shadow: 0 15px 40px rgba(0, 242, 255, 0.1); }
+        
+        .app-wrapper { height: 100dvh; display: flex; flex-direction: column; padding: 20px; padding-top: calc(env(safe-area-inset-top) + 10px); }
+        .main-viewport { flex: 1; overflow-y: auto; padding-bottom: 160px; scroll-behavior: smooth; position: relative; }
+        
+        /* Navigation HUD */
+        .bottom-nav { position: fixed; bottom: 85px; left: 15px; right: 15px; height: 65px; z-index: 1000; border-radius: 24px; display: flex; justify-content: space-around; align-items: center; background: rgba(10, 11, 30, 0.8); border: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; text-transform: uppercase; }
+        .nav-active { color: var(--accent) !important; filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
 
-        .main-viewport { flex: 1; overflow-y: auto; padding-bottom: 180px; }
-        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 10px calc(15px + env(safe-area-inset-bottom)); background: #000; text-align: center; font-size: 9px; font-weight: 700; border-top: 1px solid #1e293b; z-index: 900; color: #475569; }
+        .video-circle { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); margin: 0 auto; background: black; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px 10px calc(15px + env(safe-area-inset-bottom)); background: #000; text-align: center; font-size: 9px; font-weight: 700; border-top: 1px solid #1e293b; z-index: 90; color: #475569; }
+        .hidden-view { display: none !important; }
+        .btn-action { background: var(--accent); color: #000; font-weight: 900; padding: 16px; border-radius: 14px; width: 100%; text-transform: uppercase; border: none; cursor: pointer; }
+        
+        /* Shimmer loading */
+        .shimmer { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+
         @media (min-width: 1024px) { #desktop-blocker { display: flex !important; } .app-wrapper { display: none; } }
     </style>
 </head>
-<body class="bg-[#020617] text-white">
+<body class="min-h-screen flex flex-col">
 
     <!-- DESKTOP GUARD -->
     <div id="desktop-blocker" class="hidden fixed inset-0 bg-black z-[9999] flex-col items-center justify-center p-10 text-center">
         <i data-lucide="smartphone" class="w-20 h-20 text-cyan-400 mb-6"></i>
-        <h1 class="text-3xl font-black uppercase">Mobile Node Required</h1>
-        <p class="text-slate-500 mt-2 text-sm">CSync requires smartphone hardware for sovereign biometric binding.</p>
+        <h1 class="text-3xl font-black uppercase text-white">Mobile Only</h1>
+        <p class="text-slate-500 mt-4 text-sm max-w-sm">CSync requires biometric hardware binding.</p>
     </div>
 
-    <div class="app-wrapper flex flex-col h-screen">
-        <!-- SOVEREIGN HEADER -->
-        <header class="flex justify-between items-center p-6 pt-10 sticky top-0 bg-[#020617] z-50">
-            <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Cloud_Sync</p>
-            </div>
+    <div class="app-wrapper">
+        <header class="flex justify-between items-center p-4">
+            <div class="w-10"></div>
             <div class="text-center">
-                <h1 class="orbitron text-xl font-black tracking-tighter">CSYNC</h1>
+                <p class="text-[7px] font-bold text-slate-500 uppercase tracking-widest">Dr. V.S. Krishna GDC (A)</p>
+                <h1 style="font-family: 'Orbitron';" class="text-xl font-bold tracking-tighter">CSYNC</h1>
             </div>
-            <div class="w-10 h-10 rounded-full border-2 border-cyan-400 overflow-hidden shadow-lg bg-slate-900">
+            <div class="w-10 h-10 rounded-full border border-cyan-400 overflow-hidden bg-slate-900 shadow-lg">
                 <img id="u-photo-top" src="https://ui-avatars.com/api/?name=CS&background=020617&color=00f2ff" class="w-full h-full object-cover">
             </div>
         </header>
 
-        <main class="main-viewport px-5">
-            <!-- STATUS PILL -->
-            <div id="status-pill" class="glass py-2 px-6 rounded-full text-center text-[9px] font-black uppercase tracking-widest mb-8 text-slate-500 border-slate-800">
-                Authenticating Node...
-            </div>
+        <div id="status-pill" class="mx-6 glass py-2 px-6 rounded-full text-center text-[9px] font-black uppercase tracking-widest mb-6 text-slate-400 border-slate-800">
+            Syncing Sovereign Node...
+        </div>
 
-            <!-- VIEW: ENROLLMENT (Registration) -->
-            <div id="view-roles" class="hidden tab-view flex flex-col space-y-4">
-                <h2 class="text-center text-[10px] font-black text-slate-600 uppercase mb-4 tracking-widest">Select Identity</h2>
+        <main class="main-viewport px-5">
+            
+            <!-- VIEW: ROLE SELECTION (Enrollment) -->
+            <div id="view-roles" class="hidden-view flex flex-col space-y-4 pt-4">
+                <h2 class="text-center text-[10px] font-black text-slate-600 uppercase mb-4 tracking-widest">Identify Your Node</h2>
                 <button onclick="UIManager.openReg('Student')" class="glass p-6 rounded-3xl text-left border-l-4 border-cyan-500 active:scale-95 transition">
                     <h4 class="font-black text-lg uppercase">Student</h4>
-                </button>
-                <button onclick="UIManager.openReg('Alumni')" class="glass p-6 rounded-3xl text-left border-l-4 border-emerald-500 active:scale-95 transition">
-                    <h4 class="font-black text-lg uppercase text-emerald-400">Alumni</h4>
+                    <p class="text-[9px] text-slate-400">CS & AI Majors</p>
                 </button>
                 <button onclick="UIManager.openReg('Lecturer')" class="glass p-6 rounded-3xl text-left border-l-4 border-indigo-500 active:scale-95 transition">
                     <h4 class="font-black text-lg uppercase text-indigo-400">Lecturer</h4>
+                    <p class="text-[9px] text-slate-400">Faculty Node</p>
+                </button>
+                <button onclick="UIManager.openReg('LabAssistant')" class="glass p-6 rounded-3xl text-left border-l-4 border-orange-500 active:scale-95 transition">
+                    <h4 class="font-black text-lg uppercase text-orange-400">Lab Assistant</h4>
+                    <p class="text-[9px] text-slate-400">System Support</p>
                 </button>
                 <button onclick="UIManager.openReg('HOD')" class="glass p-6 rounded-3xl text-left border-l-4 border-purple-500 active:scale-95 transition">
                     <h4 class="font-black text-lg uppercase">HOD</h4>
+                    <p class="text-[9px] text-slate-400">Executive Control</p>
                 </button>
             </div>
 
-            <!-- REGISTRATION FORM -->
-            <div id="view-register" class="hidden tab-view space-y-6">
+            <!-- VIEW: ENROLLMENT FORM -->
+            <div id="view-register" class="hidden-view space-y-6">
                 <div class="glass p-8 rounded-[2.5rem] cyber-card text-center">
-                    <h2 id="reg-title" class="text-xl font-black text-cyan-400 uppercase mb-6 italic">Enrollment</h2>
-                    <div class="video-circle mb-8"><video id="v-reg" autoplay muted playsinline></video></div>
+                    <h2 id="reg-title" class="text-lg font-black text-cyan-400 uppercase mb-6 italic">Enrollment</h2>
+                    <div class="video-circle mb-6"><video id="v-reg" autoplay muted playsinline></video></div>
                     <canvas id="c-resize" class="hidden"></canvas>
                     <div class="space-y-4">
-                        <input id="r-id" type="text" placeholder="ID / Employee ID" class="input-vivid uppercase">
-                        <input id="r-name" type="text" placeholder="Full Name" class="input-vivid">
+                        <input id="r-id" type="text" placeholder="Roll No / Employee ID" class="input-vivid uppercase font-black text-sm">
+                        <input id="r-name" type="text" placeholder="Full Name" class="input-vivid font-semibold text-sm">
                         <div id="stu-fields" class="hidden space-y-4">
-                            <select id="r-major" class="input-vivid text-xs"><option>Computer Science</option><option>Artificial Intelligence</option></select>
-                            <select id="r-year" class="input-vivid text-xs"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+                            <select id="r-major" class="input-vivid text-xs font-bold"><option>Computer Science</option><option>Artificial Intelligence</option></select>
+                            <select id="r-year" class="input-vivid text-xs font-bold"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
                         </div>
-                        <button onclick="UIManager.processRegistration()" class="btn-action w-full">Bind Biometrics</button>
+                        <button onclick="UIManager.processRegistration()" class="btn-action">Bind Biometrics</button>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 1: DASHBOARD (Home) -->
-            <div id="view-dashboard" class="tab-view space-y-6">
+            <!-- VIEW: DASHBOARD (MAIN HUB) -->
+            <div id="view-dashboard" class="hidden-view space-y-6">
                 <!-- AI COMMAND TERMINAL -->
-                <div class="glass p-5 rounded-[2.5rem] border-indigo-500/30">
+                <div class="glass p-5 rounded-[2rem] border-indigo-500/30">
                     <div class="flex items-center gap-2 mb-3">
                         <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
                         <h4 class="text-[8px] font-black uppercase text-cyan-400 tracking-widest">Sovereign AI Terminal</h4>
                     </div>
-                    <textarea id="ai-input" class="w-full bg-black/40 p-4 rounded-xl text-xs font-mono text-cyan-100 outline-none h-24 border border-white/5" placeholder="Command logic..."></textarea>
+                    <textarea id="ai-input" class="w-full bg-black/40 p-4 rounded-xl text-xs font-mono text-cyan-100 outline-none h-20 border border-white/5" placeholder="Command logic..."></textarea>
                     <button onclick="UIManager.executeAI()" class="mt-2 text-cyan-400 font-bold text-[9px] uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-all"><i data-lucide="terminal" class="w-3 h-3"></i> Execute_Command</button>
-                    <div id="ai-response" class="hidden mt-3 p-3 bg-black/60 rounded-xl text-[9px] font-mono text-slate-400 border border-white/5"></div>
+                    <div id="ai-response" class="hidden mt-3 p-3 bg-black/60 rounded-xl text-[9px] font-mono text-slate-400 border border-white/5 leading-relaxed"></div>
                 </div>
 
-                <!-- Action Gate -->
+                <!-- Identity Bento Card -->
+                <div class="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <img id="u-photo" src="" class="w-14 h-14 rounded-full border-2 border-cyan-500 object-cover bg-slate-900 shadow-xl">
+                    <div class="text-left">
+                        <h4 id="u-name" class="font-black text-sm uppercase">Candidate</h4>
+                        <p id="u-meta" class="text-[8px] text-slate-500 uppercase font-black"></p>
+                    </div>
+                </div>
+
+                <!-- Attendance Card -->
                 <div id="module-attendance" class="glass p-10 rounded-[3rem] text-center cyber-card space-y-6">
                     <i data-lucide="fingerprint" class="w-12 h-12 mx-auto text-cyan-400"></i>
                     <button onclick="UIManager.triggerAuth()" class="btn-action">Verify Daily Presence</button>
                 </div>
 
+                <!-- Lab Card -->
                 <div id="module-lab" class="hidden-view glass p-10 rounded-[3rem] text-center border-t-4 border-emerald-500">
+                    <h2 class="text-emerald-400 font-black text-xl mb-4 italic uppercase">Access Granted</h2>
                     <button onclick="UIManager.startLabScan()" class="btn-action !bg-white !text-black">Scan Lab PC QR</button>
                     <div id="qr-reader" class="mt-4 rounded-3xl overflow-hidden shadow-2xl"></div>
                 </div>
             </div>
 
-            <!-- TAB 2: NEXUS (Directory) -->
-            <div id="view-nexus" class="tab-view space-y-6">
+            <!-- OTHER VIEWS: NEXUS, DISCUSS (Logic-wired placeholders) -->
+            <div id="view-nexus" class="hidden-view space-y-6">
                 <h2 class="text-xl font-black text-indigo-400 uppercase tracking-tighter">Nexus Directory</h2>
-                <div id="nexus-container" class="grid grid-cols-1 gap-4"></div>
+                <div id="nexus-container" class="grid grid-cols-1 gap-4 pb-20"></div>
             </div>
-
-            <!-- TAB 3: DISCUSS (Feed) -->
-            <div id="view-discuss" class="tab-view space-y-6">
+            <div id="view-discuss" class="hidden-view space-y-6">
                 <h2 class="text-xl font-black text-purple-400 uppercase tracking-tighter">Discussion Feed</h2>
-                <div id="discuss-feed" class="space-y-4"></div>
-            </div>
-
-            <!-- TAB 4: ACADEMIC ARCHITECT (Staff Only) -->
-            <div id="view-architect" class="tab-view space-y-6">
-                <h2 class="text-xl font-black text-indigo-400 uppercase tracking-tighter">AI Architect</h2>
-                <div class="glass p-6 rounded-3xl border-l-4 border-indigo-500">
-                    <h3 class="font-black text-sm uppercase text-indigo-400 mb-4">Teaching Planner</h3>
-                    <textarea id="syllabus-in" class="w-full bg-white/5 p-4 rounded-xl text-xs outline-none h-32" placeholder="Paste syllabus..."></textarea>
-                    <button onclick="UIManager.genTeachingPlan()" class="btn-action mt-4 !bg-indigo-600 !text-white">Generate 2-Page PDF</button>
-                </div>
+                <div id="topic-container" class="space-y-4 pb-20"></div>
             </div>
 
         </main>
 
-        <!-- 📱 INSTAGRAM STYLE BOTTOM NAVIGATION -->
         <nav id="nav-bar" class="hidden-view bottom-nav glass">
-            <button onclick="UIManager.switchTab('dashboard')" id="btn-dashboard" class="nav-item nav-active">
-                <i data-lucide="home"></i>
-                <span class="nav-label">Home</span>
-            </button>
-            <button onclick="UIManager.switchTab('nexus')" id="btn-nexus" class="nav-item">
-                <i data-lucide="users"></i>
-                <span class="nav-label">Nexus</span>
-            </button>
-            <button onclick="UIManager.switchTab('discuss')" id="btn-discuss" class="nav-item">
-                <i data-lucide="message-square"></i>
-                <span class="nav-label">Feed</span>
-            </button>
-            <button onclick="UIManager.switchTab('architect')" id="btn-architect" class="nav-item hidden">
-                <i data-lucide="sparkles"></i>
-                <span class="nav-label">Tools</span>
-            </button>
+            <button onclick="UIManager.switchTab('dashboard')" id="btn-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span class="nav-label mt-1">Sovereign</span></button>
+            <button onclick="UIManager.switchTab('nexus')" id="btn-nexus" class="nav-item"><i data-lucide="users"></i><span class="nav-label mt-1">Nexus</span></button>
+            <button onclick="UIManager.switchTab('discuss')" id="btn-discuss" class="nav-item"><i data-lucide="message-square"></i><span class="nav-label mt-1">Feed</span></button>
         </nav>
 
-        <!-- FOOTER -->
-        <footer class="app-footer dynamic-footer"></footer>
+        <footer class="app-footer">
+            <p>Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna GDC (Autonomous)</p>
+            <p class="mt-1">Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank">M.Thrinadh</a></p>
+        </footer>
     </div>
 
     <!-- AI VISION OVERLAY -->
@@ -183,10 +192,100 @@
         <h3 id="face-status" class="text-cyan-400 font-black uppercase text-xs animate-pulse tracking-widest">Validating Identity...</h3>
     </div>
 
-    <!-- Logic Layers -->
-    <script src="assets/js/cloud-sync.js"></script>
-    <script src="assets/js/auth-engine.js"></script>
-    <script src="assets/js/scanner.js"></script>
-    <script src="assets/js/ui-manager.js"></script>
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwPJVhu3T8NZQScH0MdO1MRWCjjOaHrxGFIuNsyaWAoeROgqlR5xM-eZQ9BSBNRo1c6/exec";
+        const UUID = btoa(navigator.userAgent + screen.width);
+        
+        const UIManager = {
+            user: null,
+
+            async init() {
+                lucide.createIcons();
+                this.user = JSON.parse(localStorage.getItem('csync_v2_profile'));
+                
+                if (!this.user) {
+                    document.getElementById('status-pill').innerText = "ENROLLMENT GATE OPEN";
+                    this.switchView('view-roles');
+                } else {
+                    document.getElementById('status-pill').innerText = "NODE SYNCHRONIZED";
+                    this.setupDashboard();
+                }
+            },
+
+            switchView(id) {
+                document.querySelectorAll('main > div').forEach(v => v.classList.add('hidden-view'));
+                const target = document.getElementById(id);
+                if(target) target.classList.remove('hidden-view');
+            },
+
+            switchTab(tabId) {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('nav-active'));
+                document.getElementById('btn-'+tabId).classList.add('nav-active');
+                this.switchView('view-'+tabId);
+            },
+
+            openReg(role) {
+                this.regRole = role;
+                this.switchView('view-register');
+                document.getElementById('reg-title').innerText = role + " ENROLLMENT";
+                document.getElementById('stu-fields').classList.toggle('hidden', role !== 'Student');
+                const idInp = document.getElementById('r-id');
+                idInp.placeholder = (role === 'Student' || role === 'Alumni') ? "Roll Number" : "Employee ID";
+                
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+                    .then(s => document.getElementById('v-reg').srcObject = s);
+            },
+
+            async processRegistration() {
+                const canvas = document.getElementById('c-resize');
+                const video = document.getElementById('v-reg');
+                canvas.width = 120; canvas.height = 120;
+                canvas.getContext('2d').drawImage(video, 0, 0, 120, 120);
+                const photo = canvas.toDataURL('image/jpeg', 0.6);
+
+                const payload = {
+                    action: "register", role: this.regRole, 
+                    id: document.getElementById('r-id').value,
+                    name: document.getElementById('r-name').value,
+                    major: document.getElementById('r-major').value || "N/A",
+                    year: document.getElementById('r-year').value || "0",
+                    uuid: UUID, photo: photo
+                };
+
+                const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const status = await res.text();
+                if (status === "REGISTRATION_SUCCESS") {
+                    localStorage.setItem('csync_v2_profile', JSON.stringify(payload));
+                    location.reload();
+                } else { alert(status); }
+            },
+
+            setupDashboard() {
+                this.switchView('view-dashboard');
+                document.getElementById('nav-bar').classList.remove('hidden-view');
+                document.getElementById('u-name').innerText = this.user.name;
+                document.getElementById('u-photo').src = this.user.photo;
+                document.getElementById('u-photo-top').src = this.user.photo;
+                document.getElementById('u-meta').innerText = this.user.role === 'Student' ? 
+                    `${this.user.year} Year | ${this.user.major}` : this.user.role.toUpperCase();
+                
+                const isMarked = localStorage.getItem('marked_today') === new Date().toDateString();
+                document.getElementById('module-attendance').classList.toggle('hidden-view', isMarked);
+                document.getElementById('module-lab').classList.toggle('hidden-view', !isMarked);
+            },
+
+            async executeAI() {
+                const input = document.getElementById('ai-input');
+                const resBox = document.getElementById('ai-response');
+                if(!input.value) return;
+                resBox.classList.remove('hidden'); resBox.innerText = "Consulting Groq AI...";
+                const res = await fetch(`${GAS_URL}?action=ai_helpdesk&query=${encodeURIComponent(input.value)}`);
+                resBox.innerText = await res.text();
+                input.value = "";
+            }
+        };
+
+        window.onload = () => UIManager.init();
+    </script>
 </body>
 </html>
