@@ -1,16 +1,19 @@
 /**
- * CSync v1.0 - Sovereign Biometric Engine
+ * CSYNC: MASTER BIOMETRIC ENGINE v105.0
+ * Institution: Dr. V.S. Krishna Government Degree College (Autonomous)
  * Developed by: M. Thrinadh (https://linkedin.com/in/m3nadh)
+ * 
+ * Logic: WebAuthn Fingerprint + Face-api.js Liveness + Device UUID Binding
  */
 
 const AuthEngine = {
     modelsLoaded: false,
-    localStream: null,
 
-    // 1. INITIALIZE AI MODELS (Self-hosted for speed)
+    // 1. INITIALIZE AI VISION MODELS
     async loadModels() {
         if (this.modelsLoaded) return;
-        const MODEL_URL = './models';
+        // Path adjusted for M.Thrinadh's GitHub directory structure
+        const MODEL_URL = './models'; 
         try {
             await Promise.all([
                 faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
@@ -18,31 +21,31 @@ const AuthEngine = {
                 faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
             ]);
             this.modelsLoaded = true;
-            console.log("CSync AI: Vision Models Loaded.");
+            console.log("CSync AI: Neural Grid Initialized.");
         } catch (e) {
-            console.error("CSync AI: Model Load Error", e);
+            console.error("AI Model Load Failure:", e);
+            alert("AI Vision Not Available. Check HTTPS connection.");
         }
     },
 
-    // 2. HARDWARE FINGERPRINT BINDING (WebAuthn)
-    async bindHardware() {
+    // 2. HARDWARE FINGERPRINT ENROLLMENT (WebAuthn)
+    async enrollFingerprint(userId, userName) {
         if (!window.PublicKeyCredential) {
-            alert("This device does not support hardware biometric binding.");
+            alert("Biometric hardware not detected on this device.");
             return null;
         }
 
-        // Generate a random challenge for the hardware handshake
         const challenge = new Uint8Array(32);
         window.crypto.getRandomValues(challenge);
 
-        const createCredentialOptions = {
+        const createOptions = {
             publicKey: {
                 challenge,
                 rp: { name: "CSync Sovereign", id: window.location.hostname },
                 user: {
-                    id: Uint8Array.from(localStorage.getItem('csync_user_id') || 'USER', c => c.charCodeAt(0)),
-                    name: "CSync_Node",
-                    displayName: "CSync Biometric Node"
+                    id: Uint8Array.from(userId, c => c.charCodeAt(0)),
+                    name: userId,
+                    displayName: userName
                 },
                 pubKeyCredParams: [{ alg: -7, type: "public-key" }],
                 authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
@@ -51,69 +54,103 @@ const AuthEngine = {
         };
 
         try {
-            const credential = await navigator.credentials.create(createCredentialOptions);
+            const credential = await navigator.credentials.create(createOptions);
+            // Return Credential ID to be stored in 'FP_ID' column in Google Sheets
             return btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
         } catch (e) {
-            console.error("Hardware Binding Failed", e);
+            console.error("FP Enrollment Error:", e);
             return null;
         }
     },
 
-    // 3. FACE AI LIVENESS DETECTION (Smile/Blink)
-    async startLivenessCheck(videoEl, onVerified) {
+    // 3. HARDWARE FINGERPRINT CHALLENGE (Attendance/Lab)
+    async verifyFingerprint(storedFpId) {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+
+        const getOptions = {
+            publicKey: {
+                challenge,
+                allowCredentials: [{
+                    id: Uint8Array.from(atob(storedFpId), c => c.charCodeAt(0)),
+                    type: 'public-key'
+                }],
+                userVerification: "required"
+            }
+        };
+
+        try {
+            const assertion = await navigator.credentials.get(getOptions);
+            return !!assertion;
+        } catch (e) {
+            console.error("Biometric Mismatch:", e);
+            return false;
+        }
+    },
+
+    // 4. FACE AI LIVENESS DETECTION (Disciplinary Smile Check)
+    async startLivenessCheck(videoEl, callback) {
         if (!this.modelsLoaded) await this.loadModels();
 
-        const canvas = faceapi.createCanvasFromMedia(videoEl);
-        const displaySize = { width: videoEl.width, height: videoEl.height };
-        faceapi.matchDimensions(canvas, displaySize);
+        const statusLabel = document.getElementById('face-status');
+        
+        const checkInterval = setInterval(async () => {
+            const detection = await faceapi.detectSingleFace(
+                videoEl, 
+                new faceapi.TinyFaceDetectorOptions()
+            ).withFaceExpressions();
 
-        const interval = setInterval(async () => {
-            const detections = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions())
-                .withFaceLandmarks()
-                .withFaceExpressions();
-
-            if (detections) {
-                const expressions = detections.expressions;
+            if (detection) {
+                const smileScore = detection.expressions.happy;
                 
-                // DISCIPLINARY LOGIC: Student must SMILE (Happiness > 0.8) to verify
-                if (expressions.happy > 0.85) {
-                    clearInterval(interval);
-                    if ("vibrate" in navigator) navigator.vibrate([100, 50, 100]); // Success Haptic
+                // DISCIPLINARY LOGIC: Mandatory Smile Liveness (Prevents static photo proxy)
+                if (smileScore > 0.85) {
+                    clearInterval(checkInterval);
+                    if ("vibrate" in navigator) navigator.vibrate([100, 50, 100]);
                     
-                    const compressedPhoto = this.captureCompressedPhoto(videoEl);
-                    onVerified(compressedPhoto);
+                    // Capture final high-res compressed snapshot for Lab PC/Admin
+                    const photoBase64 = this.compressFrame(videoEl);
+                    callback(photoBase64);
+                } else {
+                    if (statusLabel) statusLabel.innerText = "SMILE TO VERIFY IDENTITY";
                 }
+            } else {
+                if (statusLabel) statusLabel.innerText = "POSITION FACE IN CIRCLE";
             }
-        }, 600);
+        }, 500);
     },
 
-    // 4. IMAGE COMPRESSION (For Google Sheets performance)
-    captureCompressedPhoto(videoEl) {
+    // 5. IMAGE COMPRESSION (Optimal for Google Sheet Cells)
+    compressFrame(videoEl) {
         const canvas = document.createElement('canvas');
-        canvas.width = 120; // High-res enough for ID, small enough for Sheets
-        canvas.height = 120;
+        // 150px is the "Sweet Spot" for NAAC reports vs Sheet performance
+        canvas.width = 150;
+        canvas.height = 150;
         const ctx = canvas.getContext('2d');
-        
-        // Circular Crop Logic
+
+        // Circular masking for professional HUD look
         ctx.beginPath();
-        ctx.arc(60, 60, 60, 0, Math.PI * 2);
+        ctx.arc(75, 75, 75, 0, Math.PI * 2);
         ctx.clip();
+
+        // Center and draw
+        ctx.drawImage(videoEl, 0, 0, 150, 150);
         
-        // Draw centered video frame
-        ctx.drawImage(videoEl, 0, 0, 120, 120);
-        
-        return canvas.toDataURL('image/jpeg', 0.6); // 60% quality is the sweet spot
+        // 0.6 Quality keeps the string length under 10k characters
+        return canvas.toDataURL('image/jpeg', 0.6);
     },
 
-    // 5. DEVICE UUID GENERATION (The Hardware Lock)
+    // 6. DEVICE UUID GENERATION (Hardware Binding)
     getDeviceUUID() {
-        let uuid = localStorage.getItem('csync_device_uuid');
+        let uuid = localStorage.getItem('csync_device_node');
         if (!uuid) {
-            const platform = navigator.platform;
-            const screenDetails = `${screen.width}x${screen.height}x${screen.colorDepth}`;
-            const randomID = Math.random().toString(36).substring(2, 10).toUpperCase();
-            uuid = btoa(`${platform}-${screenDetails}-${randomID}`);
-            localStorage.setItem('csync_device_uuid', uuid);
+            const core = navigator.hardwareConcurrency || 4;
+            const ram = navigator.deviceMemory || 4;
+            const screen = `${window.screen.width}x${window.screen.height}`;
+            const ts = Date.now().toString(36).toUpperCase();
+            // Cryptographic-style node ID
+            uuid = btoa(`NODE-${core}-${ram}-${screen}-${ts}`).substring(0, 24);
+            localStorage.setItem('csync_device_node', uuid);
         }
         return uuid;
     }
@@ -121,6 +158,6 @@ const AuthEngine = {
 
 /**
  * Developed by M. Thrinadh
- * Verification Seal for CSync v1.0
+ * Sovereign Biometric Protocol for CSync v1.0
  */
 window.AuthEngine = AuthEngine;
