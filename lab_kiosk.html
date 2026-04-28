@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sovereign Station | CSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: white; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .glass-panel { background: rgba(255,255,255,0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-top: 4px solid #00f2ff; }
+        #qrcode { padding: 15px; background: white; border-radius: 20px; box-shadow: 0 0 40px rgba(0, 242, 255, 0.2); }
+        .hidden-node { display: none !important; }
+    </style>
+</head>
+<body class="h-screen w-screen relative">
+
+    <div id="view-lock" class="flex flex-col items-center space-y-10 text-center">
+        <header class="space-y-3">
+            <p class="text-indigo-400 font-bold uppercase tracking-[0.5em] text-[11px]">Dr. V.S. Krishna Govt. Degree College (Autonomous)</p>
+            <h1 style="font-family: 'Orbitron';" class="text-7xl font-black tracking-tighter italic uppercase">CSYNC</h1>
+        </header>
+
+        <div class="glass-panel p-12 rounded-[4.5rem] w-[460px]">
+            <h2 id="pc-id" style="font-family: 'Orbitron';" class="text-4xl font-black text-white mb-8">CS-XX</h2>
+            <div id="qrcode" class="mx-auto inline-block"></div>
+            <p class="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-10">Scan with Native App to Unlock</p>
+        </div>
+        
+        <div id="clock" class="text-3xl font-mono text-slate-700 tracking-widest">00:00:00 AM</div>
+    </div>
+
+    <div id="view-welcome" class="hidden-node flex flex-col items-center text-center">
+        <img id="u-photo" src="" class="w-44 h-44 rounded-full border-8 border-indigo-600 shadow-2xl object-cover mb-8">
+        <h1 style="font-family: 'Orbitron';" class="text-8xl font-black uppercase italic tracking-tighter">Welcome</h1>
+        <h2 id="u-name" class="text-4xl font-bold text-indigo-400 uppercase mt-4 italic">Candidate</h2>
+    </div>
+
+    <footer class="fixed bottom-10 w-full text-center text-[10px] font-bold text-slate-800 uppercase tracking-widest">
+        Copyright © 2026 | Dept of Computer Science | Dr. V. S. Krishna GDC (A) | Developed by <a href="https://linkedin.com/in/m3nadh" target="_blank" style="color:#00f2ff;">M.Thrinadh</a>
+    </footer>
+
+    <script>
+        const BACKEND = "https://script.google.com/macros/s/AKfycbyjlfep_eavyIXgzJ4Ezru3f5odjw4M433R6cWqP419693_tFckIqTzUWsfxrp0tZtg/exec";
+        const params = new URLSearchParams(window.location.search);
+        const SystemID = params.get('sysId') || "CS-01";
+
+        function init() {
+            document.getElementById('pc-id').innerText = SystemID;
+            new QRCode(document.getElementById("qrcode"), {
+                text: `${window.location.origin}${window.location.pathname}?mode=mobile&sysId=${SystemID}`,
+                width: 250, height: 250
+            });
+            setInterval(pollHandshake, 2000);
+            setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
+        }
+
+        async function pollHandshake() {
+            const res = await fetch(`${BACKEND}?action=lab`);
+            const data = await res.json();
+            const pc = data.find(p => p.SystemID === SystemID);
+            if (pc && pc.Command === "UNLOCK") {
+                document.getElementById('view-lock').classList.add('hidden-node');
+                document.getElementById('view-welcome').classList.remove('hidden-node');
+                document.getElementById('u-name').innerText = pc.Status.split('|')[0];
+                document.getElementById('u-photo').src = pc.PhotoBase64;
+                lucide.createIcons();
+            }
+        }
+        window.onload = init;
+    </script>
+</body>
+</html>
