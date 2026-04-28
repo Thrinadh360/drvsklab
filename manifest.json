@@ -1,7 +1,7 @@
 {
   "name": "CSync | Dr. V.S. Krishna GDC (A)",
   "short_name": "CSync",
-  "description": "Sovereign AI Attendance & Lab Management Ecosystem for Dept of Computer Science",
+  "description": "Sovereign AI Attendance & Lab Management Ecosystem for the Dept of Computer Science",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#020617",
@@ -55,7 +55,7 @@
     },
     {
       "name": "Scan Lab PC",
-      "short_name": "Lab Handshake",
+      "short_name": "Lab Scan",
       "description": "Unlock a workstation via QR scan",
       "url": "index.html?action=scan",
       "icons": [
@@ -66,6 +66,6 @@
       ]
     }
   ],
-  "related_applications": [],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "related_applications": []
 }
