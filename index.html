@@ -376,7 +376,7 @@
          * CSYNC: MASTER SOVEREIGN LOGIC ENGINE v200.0
          * Developed by: M. Thrinadh (https://linkedin.com/in/m3nadh)
          */
-        const VSK_COORDS = { lat: 17.7441, lng: 83.3102 };
+        const VSK_COORDS = { lat: 17.7289, lng: 83.3156 };
         const UUID = btoa(navigator.userAgent + screen.width);
         
         let USER = JSON.parse(localStorage.getItem('csync_v1_profile'));
@@ -529,7 +529,7 @@
                     
                     const btn = document.getElementById('btn-presence');
                     const icon = document.getElementById('geo-icon');
-                    if (dist <= 0.8) {
+                    if (dist <= 0.2) {
                         btn.disabled = false;
                         document.getElementById('geo-msg').innerHTML = `<span class="text-emerald-400 pulse">PULSE SYNCED: ON CAMPUS</span>`;
                         icon.style.color = "#10b981";
