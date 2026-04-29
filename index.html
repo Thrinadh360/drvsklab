@@ -520,38 +520,54 @@
             },
 
             reSyncLocation() {
-                if (!navigator.geolocation || USER.role !== 'Student') return;
-                document.getElementById('geo-msg').innerText = "LOCKING SATELLITES...";
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const lat1 = pos.coords.latitude, lon1 = pos.coords.longitude;
-                    const p = 0.017453292519943295, c = Math.cos;
-                    const dist = 12742 * Math.asin(Math.sqrt(0.5 - c((VSK_COORDS.lat - lat1) * p)/2 + c(lat1 * p) * c(VSK_COORDS.lat * p) * (1 - c((VSK_COORDS.lng - lon1) * p))/2));
-                    
-                    const btn = document.getElementById('btn-presence');
-                    const icon = document.getElementById('geo-icon');
-                    if (dist <= 0.2) {
-                        btn.disabled = false;
-                        document.getElementById('geo-msg').innerHTML = `<span class="text-emerald-400 pulse">PULSE SYNCED: ON CAMPUS</span>`;
-                        icon.style.color = "#10b981";
-                    } else {
-                        btn.disabled = true;
-                        document.getElementById('geo-msg').innerHTML = `<span class="text-red-500 font-black">OUTSIDE CAMPUS BOUNDARY</span>`;
-                        icon.style.color = "#ef4444";
-                    }
-                }, null, { enableHighAccuracy: true });
-            },
+    if (!navigator.geolocation || USER.role !== 'Student') return;
 
-            updatePortalTime() {
-                const hr = new Date().getHours();
-                const pill = document.getElementById('status-pill');
-                if (hr >= 10 && hr < 17) {
-                    const session = hr < 13.3 ? 'FN' : 'AN';
-                    pill.innerHTML = `<span class="text-cyan-400 pulse">● LIVE: ${session} SESSION</span>`;
-                } else {
-                    pill.innerHTML = `<span class="text-red-500">○ PORTAL LOCKED</span>`;
-                }
-            },
+    const msg = document.getElementById('geo-msg');
+    const btn = document.getElementById('btn-presence');
+    const icon = document.getElementById('geo-icon');
 
+    msg.innerText = "LOCKING SATELLITES...";
+
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const lat1 = pos.coords.latitude;
+            const lon1 = pos.coords.longitude;
+            const accuracy = pos.coords.accuracy; // 🔥 KEY FIX
+
+            const p = 0.017453292519943295, c = Math.cos;
+            const dist = 12742 * Math.asin(Math.sqrt(
+                0.5 - c((VSK_COORDS.lat - lat1) * p)/2 +
+                c(lat1 * p) * c(VSK_COORDS.lat * p) *
+                (1 - c((VSK_COORDS.lng - lon1) * p))/2
+            ));
+
+            // 🎯 Dynamic Radius (200m + GPS error buffer)
+            const allowedRadius = 0.2 + (accuracy / 1000);
+
+            if (dist <= allowedRadius) {
+                btn.disabled = false;
+                msg.innerHTML = `<span class="text-emerald-400">PULSE SYNCED: ON CAMPUS</span><br>
+                                 <span class="text-[8px] text-slate-500">Accuracy: ${Math.round(accuracy)}m</span>`;
+                icon.style.color = "#10b981";
+            } else {
+                btn.disabled = true;
+                msg.innerHTML = `<span class="text-red-500 font-black">OUTSIDE CAMPUS</span><br>
+                                 <span class="text-[8px] text-slate-500">Distance: ${(dist*1000).toFixed(0)}m</span>`;
+                icon.style.color = "#ef4444";
+            }
+        },
+        err => {
+            msg.innerHTML = `<span class="text-red-500">LOCATION ERROR</span><br>
+                             <span class="text-[8px]">${err.message}</span>`;
+            btn.disabled = true;
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+    );
+}
             // --- LAB CONTROL BRIDGE ---
             startLabScan() {
                 const scanner = new Html5Qrcode("qr-reader");
