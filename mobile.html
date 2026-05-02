@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>C-Sync | Sovereign Personal Node</title>
     
-    <!-- Native PWA Meta -->
+    <!-- PWA & Native App Experience Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
@@ -43,18 +43,22 @@
         input:focus { border-color: var(--accent) !important; box-shadow: 0 0 10px rgba(0,242,255,0.1); }
 
         .bottom-nav { position: fixed; bottom: 40px; left: 20px; right: 20px; height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
-        .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 9px; font-weight: 800; background: none; border: none; transition: 0.3s; }
+        .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; background: none; border: none; transition: 0.3s; }
         .nav-active { color: var(--accent); filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
         
         .tech-footer { position: fixed; bottom: 0; width: 100%; padding: 12px; background: #000; border-top: 1px solid #111; text-align: center; font-size: 7px; color: #444; z-index: 5000; letter-spacing: 1px; }
         .close-reg { position: absolute; top: 25px; right: 25px; cursor: pointer; color: #475569; z-index: 50; transition: 0.3s; }
         .close-reg:hover { color: #ef4444; transform: rotate(90deg); }
 
-        /* Valhalla Elements */
+        /* Rankings / Leaderboard Styles */
         .rank-card { border-left: 4px solid #1e293b; transition: 0.3s; }
+        .rank-1 { border-color: #ffd700; background: rgba(255, 215, 0, 0.05); }
+        .rank-2 { border-color: #c0c0c0; background: rgba(192, 192, 192, 0.05); }
+        .rank-3 { border-color: #cd7f32; background: rgba(205, 127, 50, 0.05); }
         .diamond-status { border-color: var(--accent) !important; background: rgba(0, 242, 255, 0.05) !important; box-shadow: 0 0 20px rgba(0, 242, 255, 0.15); }
-        .shimmer { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
+        
         @keyframes shimmer { to { background-position: -200% 0; } }
+        .shimmer { background: linear-gradient(90deg, #475569 25%, #00f2ff 50%, #475569 75%); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2s infinite; }
 
         @media (min-width: 1025px) { #desktop-blocker { display: flex; } #app-wrapper { display: none; } }
     </style>
@@ -64,8 +68,8 @@
     <!-- HARDWARE GUARD: MOBILE ONLY -->
     <div id="desktop-blocker">
         <i data-lucide="smartphone" class="w-16 h-16 text-cyan-400 mb-6 animate-bounce"></i>
-        <h1 class="font-['Orbitron'] text-white text-xl mb-4 uppercase">Node Locked</h1>
-        <p class="text-slate-500 text-xs uppercase font-bold leading-relaxed max-w-xs">C-Sync requires hardware biometric binding and GPS coordinates. Open this node on your registered smartphone.</p>
+        <h1 class="font-['Orbitron'] text-white text-xl mb-4 uppercase tracking-tighter">Mobile Required</h1>
+        <p class="text-slate-500 text-xs uppercase font-bold leading-relaxed max-w-xs">C-Sync requires hardware biometric sensors and GPS binding. Open this node on your registered smartphone.</p>
     </div>
 
     <div id="app-wrapper" class="flex flex-col h-full">
@@ -76,19 +80,19 @@
             setInterval(() => { (function(){}.constructor("debugger")()) }, 200);
         </script>
 
-        <!-- STATUS OVERLAY: PENDING -->
+        <!-- PENDING OVERLAY -->
         <div id="pending-screen" class="fixed inset-0 bg-black z-[9999] hidden flex flex-col items-center justify-center p-10 text-center">
             <div class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-8"></div>
-            <h2 class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase">Node Restricted</h2>
-            <p class="text-xs text-slate-400 leading-relaxed font-bold uppercase tracking-widest">Your identity has been broadcast. Access will be unlocked once Faculty verifies your node profile.</p>
-            <button onclick="location.reload()" class="mt-12 text-cyan-400 text-[10px] font-black uppercase underline">Check Status</button>
+            <h2 class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter">Awaiting Approval</h2>
+            <p class="text-xs text-slate-400 leading-relaxed font-bold uppercase tracking-widest">Identity broadcast successful. Access will be unlocked once Faculty verifies your node profile.</p>
+            <button onclick="location.reload()" class="mt-12 text-cyan-400 text-[10px] font-black uppercase underline">Refresh Status</button>
         </div>
 
         <!-- BIOMETRIC VERIFICATION GATE -->
         <div id="face-gate" class="face-gate">
             <div class="video-box"><video id="auth-video" autoplay muted playsinline class="w-full h-full object-cover"></video></div>
             <h2 class="font-['Orbitron'] text-cyan-400 text-lg animate-pulse uppercase">Neural Handshake</h2>
-            <p class="text-[9px] text-slate-500 mt-2 uppercase tracking-widest font-black">Syncing Biometrics & GPS Coordinates</p>
+            <p id="biometric-status" class="text-[9px] text-slate-500 mt-2 uppercase tracking-widest font-black">Syncing Biometrics & GPS Pulse</p>
         </div>
 
         <!-- SIDEBAR -->
@@ -117,9 +121,9 @@
 
         <main class="flex-1 px-6 pt-4 overflow-hidden relative">
             
-            <!-- VIEW: HUB (ROLE SELECTION) -->
+            <!-- VIEW: START HUB -->
             <div id="view-roles" class="view-container view-active pt-6">
-                <h2 class="text-center text-[10px] text-slate-500 font-bold uppercase mb-8 tracking-widest">Select Access Node</h2>
+                <h2 class="text-center text-[10px] text-slate-500 font-bold uppercase mb-8 tracking-widest">Identify Node Profile</h2>
                 <div class="grid gap-3">
                     <button onclick="UI.openReg('Student')" class="glass p-5 rounded-2xl text-left border-l-4 border-cyan-500 font-black uppercase text-[10px]">Student (Major)</button>
                     <button onclick="UI.openReg('Minor')" class="glass p-5 rounded-2xl text-left border-l-4 border-emerald-500 font-black uppercase text-[10px]">Minor Student</button>
@@ -132,7 +136,7 @@
                 </div>
             </div>
 
-            <!-- VIEW: REGISTRATION FORM -->
+            <!-- VIEW: ENROLLMENT -->
             <div id="view-register" class="view-container relative">
                 <div class="close-reg" onclick="UI.switchView('view-roles')"><i data-lucide="x-circle" class="w-8 h-8"></i></div>
                 <div class="glass p-8 rounded-[3rem] text-center border-t-2 border-cyan-400">
@@ -141,16 +145,15 @@
                     <div class="flex justify-center gap-4 mb-8">
                         <div class="text-center">
                             <p class="text-[7px] text-cyan-400 font-black mb-2 uppercase">Face Binding</p>
-                            <div class="w-20 h-20 rounded-full border-2 border-cyan-400 overflow-hidden bg-black" onclick="UI.captureFaceKey()">
+                            <div class="w-20 h-20 rounded-full border-2 border-cyan-400 overflow-hidden bg-black shadow-lg" onclick="UI.captureFaceKey()">
                                 <video id="v-reg-cam" autoplay muted playsinline class="w-full h-full object-cover"></video>
                                 <img id="face-captured" class="hidden w-full h-full object-cover">
                             </div>
                         </div>
                         <div class="text-center">
-                            <p class="text-[7px] text-slate-500 font-black mb-2 uppercase">Display Pic</p>
+                            <p class="text-[7px] text-slate-500 font-black mb-2 uppercase">Profile Pic</p>
                             <div class="w-20 h-20 rounded-xl border border-dashed border-slate-700 flex items-center justify-center overflow-hidden" onclick="document.getElementById('f-upload').click()">
-                                <img id="profile-preview" class="hidden w-full h-full object-cover">
-                                <i data-lucide="upload" id="up-ico" class="w-5 h-5 text-slate-700"></i>
+                                <img id="profile-preview" class="hidden w-full h-full object-cover"><i data-lucide="upload" id="up-ico" class="w-5 h-5 text-slate-700"></i>
                             </div>
                         </div>
                     </div>
@@ -167,8 +170,9 @@
                 </div>
             </div>
 
-            <!-- VIEW: DASHBOARD (PRIMARY HUB) -->
+            <!-- VIEW: DASHBOARD (PRIMARY) -->
             <div id="view-dashboard" class="view-container space-y-6">
+                <!-- Status Bento -->
                 <div class="glass p-5 rounded-[2.5rem] flex items-center justify-between border-l-4 border-cyan-400 shimmer">
                     <div class="flex items-center gap-4">
                         <div class="relative">
@@ -192,14 +196,14 @@
 
                 <div id="module-stack" class="space-y-4"></div>
 
-                <!-- NEURAL ORACLE -->
+                <!-- NEURAL ORACLE (LLAMA 3.1 8B INSTANT) -->
                 <div id="ai-mod" class="glass p-5 rounded-[2.5rem]">
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping"></div>
                             <h4 class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Neural Oracle</h4>
                         </div>
-                        <span id="ai-status" class="text-[6px] text-slate-600 font-black uppercase tracking-widest">Instant 8B Core</span>
+                        <span id="ai-status" class="text-[6px] text-slate-600 font-black uppercase tracking-widest">Instant Node Ready</span>
                     </div>
                     <div class="flex gap-2">
                         <input id="ai-q" placeholder="The system is part of my web. Ask..." class="!py-2 !text-xs !bg-black/50">
@@ -209,9 +213,9 @@
                 </div>
             </div>
 
-            <!-- VIEW: NEXUS SEARCH -->
+            <!-- VIEW: SEARCH -->
             <div id="view-search" class="view-container">
-                <h3 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6">Nexus Search</h3>
+                <h3 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase tracking-tighter">Nexus Search</h3>
                 <div class="relative mb-6">
                     <input type="text" id="nexus-q" placeholder="Search Peers or Alumni..." onkeyup="UI.nexusSearch()" class="pl-12">
                     <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4"></i>
@@ -221,22 +225,21 @@
 
             <!-- VIEW: RANKINGS -->
             <div id="view-rankings" class="view-container">
-                <h3 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase">Valhalla Leaderboard</h3>
+                <h3 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase tracking-tighter">Valhalla Leaderboard</h3>
                 <div id="rank-list" class="space-y-3"></div>
             </div>
 
-            <!-- VIEW: HUB FEED -->
+            <!-- VIEW: FEED -->
             <div id="view-discuss" class="view-container">
-                <h3 class="font-['Orbitron'] text-purple-400 text-xl italic mb-6 uppercase">Sovereign Feed</h3>
-                <div class="text-center py-20 text-slate-600 uppercase font-bold text-[10px]">Awaiting Signal Transmission...</div>
+                <h3 class="font-['Orbitron'] text-purple-400 text-xl italic mb-6 uppercase tracking-tighter">Global Hub Feed</h3>
+                <div class="text-center py-20 text-slate-600 uppercase font-bold text-[10px]">Awaiting Hub Pulse...</div>
             </div>
 
         </main>
 
-        <!-- NAVIGATION HUB -->
         <nav id="bottom-nav" class="bottom-nav hidden">
             <button onclick="UI.switchTab('dashboard')" id="nav-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span class="mt-1">HUB</span></button>
-            <button onclick="UI.switchTab('rankings')" id="nav-rankings" class="nav-item"><i data-lucide="trophy"></i><span class="mt-1">RANK</span></button>
+            <button onclick="UI.switchTab('rankings')" id="nav-rankings" class="nav-item"><i data-lucide="trophy"></i><span class="mt-1">VALHALLA</span></button>
             <button onclick="UI.switchTab('search')" id="nav-search" class="nav-item"><i data-lucide="search"></i><span class="mt-1">NEXUS</span></button>
             <button onclick="UI.switchTab('discuss')" id="nav-discuss" class="nav-item"><i data-lucide="message-square"></i><span class="mt-1">FEED</span></button>
         </nav>
@@ -246,20 +249,19 @@
         </footer>
     </div>
 
-    <!-- QR MODAL -->
+    <!-- QR SCANNER OVERLAY -->
     <div id="qr-modal" class="fixed inset-0 bg-black/95 z-[9999] hidden flex flex-col items-center justify-center p-10">
         <button onclick="UI.closeQR()" class="absolute top-10 right-10 text-white"><i data-lucide="x" class="w-8 h-8"></i></button>
-        <div id="qr-reader" class="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-cyan-400 shadow-[0_0_25px_rgba(0,242,255,0.2)]"></div>
-        <p class="text-cyan-400 font-['Orbitron'] mt-8 animate-pulse text-xs uppercase tracking-widest">Handshake Active</p>
+        <div id="qr-reader" class="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-cyan-400 shadow-[0_0_30px_rgba(0,242,255,0.2)]"></div>
+        <p class="text-cyan-400 font-['Orbitron'] mt-8 animate-pulse text-xs uppercase tracking-widest">Scanning Signal...</p>
     </div>
 
     <script>
-        // MASTER BACKEND MAPPING
         const APPS_URL = "https://script.google.com/macros/s/AKfycbx9KZfFxGH8V0XdZjNMeJHO08O3GNUxCXJe96Bi1RsPhUjZ9sl5HfX37fk8CcrNuVdg/exec";
         const UUID = btoa(navigator.userAgent + screen.width);
         const COLLEGE_COORDS = { lat: 17.74069743725532, lng: 83.32125099999946 };
         
-        let USER = JSON.parse(localStorage.getItem('csync_user_v39'));
+        let USER = JSON.parse(localStorage.getItem('csync_user_v40'));
         let faceData = "", profileData = "";
 
         const UI = {
@@ -267,7 +269,7 @@
                 lucide.createIcons();
                 document.getElementById('copy-year').innerText = new Date().getFullYear();
                 
-                // Hardware Binding Gate
+                // Hardware Binding Protection
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 if (!isMobile && window.innerWidth > 1024) {
                     document.getElementById('desktop-blocker').style.display = 'flex';
@@ -281,7 +283,7 @@
                         const res = await fetch(statusUrl, { method: 'GET', redirect: 'follow' });
                         const status = await res.text();
                         if(status === "Pending") document.getElementById('pending-screen').classList.remove('hidden');
-                        else if(status === "DEVICE_MISMATCH") alert("IDENTITY ERROR: Hardware Lockout.");
+                        else if(status === "DEVICE_MISMATCH") alert("IDENTITY ERROR: Node mismatch.");
                         else this.boot();
                     } catch(e) { this.boot(); } 
                 } else { this.checkHOD(); }
@@ -325,7 +327,7 @@
                 const alu = document.getElementById('alu-pro-fields');
                 
                 if(r === 'Guest') {
-                    gate.innerHTML = `<input id="r-org" placeholder="Dept / Organization Name">`;
+                    gate.innerHTML = `<input id="r-org" placeholder="Organization / Dept Name">`;
                     yr.classList.add('hidden'); alu.classList.add('hidden');
                 } else if(r === 'Student') {
                     gate.innerHTML = `<select id="r-dept"><option value="Computer Science">Computer Science</option><option value="Artificial Intelligence">Artificial Intelligence</option></select>`;
@@ -334,7 +336,7 @@
                     gate.innerHTML = `<select id="r-dept"><option value="Mathematics">Mathematics</option><option value="Electronics">Electronics</option></select>`;
                     yr.classList.remove('hidden'); alu.classList.add('hidden');
                 } else if(r === 'Alumni') {
-                    gate.innerHTML = `<input value="Computer Science" disabled class="opacity-50 font-bold">`;
+                    gate.innerHTML = `<input value="Computer Science" disabled class="opacity-50">`;
                     yr.classList.add('hidden'); alu.classList.remove('hidden');
                 } else {
                     gate.innerHTML = `<input value="Computer Science" disabled class="opacity-50 font-bold">`;
@@ -352,7 +354,7 @@
                 
                 const data = { action: 'register', id, name, role: this.regRole, dept, year: document.getElementById('r-year').value, faceKey: faceData, profilePic: profileData, uuid: UUID };
                 await fetch(APPS_URL, { method: 'POST', body: JSON.stringify(data) });
-                localStorage.setItem('csync_user_v39', JSON.stringify({ id, name, role: this.regRole, dept, photo: profileData, year: data.year }));
+                localStorage.setItem('csync_user_v40', JSON.stringify({ id, name, role: this.regRole, dept, photo: profileData, year: data.year }));
                 location.reload();
             },
 
@@ -370,7 +372,8 @@
                 try {
                     const url = `${APPS_URL}?action=groq&query=${encodeURIComponent(q)}&user=${encodeURIComponent(USER.name)}&role=${encodeURIComponent(USER.role)}`;
                     const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-                    r.innerText = await res.text();
+                    let text = await res.text();
+                    r.innerText = text.trim();
                     qInp.value = "";
                     if ("vibrate" in navigator) navigator.vibrate(5);
                 } catch (e) {
@@ -386,8 +389,11 @@
                 const data = await res.json();
                 resBox.innerHTML = data.map(r => `
                     <div class="glass p-4 rounded-2xl flex items-center gap-4">
-                        <img src="${r.pic || 'https://ui-avatars.com/api/?name='+r.name}" class="w-10 h-10 rounded-full border border-white/10 object-cover">
-                        <div class="flex-1"><h5 class="text-[10px] font-black uppercase text-white">${r.name}</h5><p class="text-[7px] text-slate-500 font-bold">${r.id} • ${r.type}</p></div>
+                        <img src="${r.pic || 'https://ui-avatars.com/api/?name='+r.name}" class="w-10 h-10 rounded-full border border-white/10 object-cover shadow-sm">
+                        <div class="flex-1">
+                            <h5 class="text-[10px] font-black uppercase text-white">${r.name}</h5>
+                            <p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest">${r.id} • ${r.type}</p>
+                        </div>
                     </div>
                 `).join('');
             },
@@ -398,7 +404,7 @@
                 document.getElementById('rank-list').innerHTML = data.map((r, i) => `
                     <div class="glass p-4 rounded-2xl flex items-center gap-4 rank-card ${r.status === 'Diamond' ? 'diamond-status' : ''}">
                         <div class="text-xs font-black w-6 text-center">${r.rank}</div>
-                        <img src="${r.pic}" class="w-10 h-10 rounded-full object-cover">
+                        <img src="${r.pic}" class="w-10 h-10 rounded-full object-cover shadow-md">
                         <div class="flex-1"><h5 class="text-[10px] font-black uppercase text-white">${r.name} ${r.status==='Diamond'?'💎':(i===0?'🥇':(i===1?'🥈':(i===2?'🥉':'')))}</h5><p class="text-[7px] text-slate-500 font-bold uppercase">Stars: ${r.stars} • Streak: 🔥${r.streak}</p></div>
                     </div>
                 `).join('');
@@ -410,7 +416,7 @@
                     const p = 0.017453, c = Math.cos;
                     const a = 0.5 - c((COLLEGE_COORDS.lat - lat) * p)/2 + c(lat * p) * c(COLLEGE_COORDS.lat * p) * (1 - c((COLLEGE_COORDS.lng - lng) * p))/2;
                     const dist = 12742 * Math.asin(Math.sqrt(a));
-                    if(dist > 0.4) return alert(`OUTSIDE CAMPUS: Verification Rejected.`);
+                    if(dist > 0.4) return alert(`OUTSIDE RADIUS: Verification rejected.`);
 
                     document.getElementById('face-gate').style.display = 'flex';
                     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -425,7 +431,7 @@
                             action: 'attendance', id: USER.id, name: USER.name, role: USER.role, class: `${USER.dept}_${USER.year}`, 
                             coords: `${lat},${lng}`, photo: canvas.toDataURL('image/jpeg', 0.5), faceMatch: true 
                         })});
-                        alert("Presence Verified.");
+                        alert("Presence Handshake Verified.");
                     }, 3000);
                 }, () => alert("GPS Pulse Lost."));
             },
@@ -434,8 +440,9 @@
                 const c = document.getElementById('module-stack');
                 c.innerHTML = "";
                 if(USER.role !== 'Alumni') c.innerHTML += `<div class="glass p-8 rounded-[2rem] text-center border-t-4 border-emerald-500"><button onclick="UI.openQR('lab')" class="cyber-btn">Secure Station Handshake</button></div>`;
-                if(USER.role.includes('Student') || USER.role === 'Minor') c.innerHTML += `<div class="glass p-8 rounded-[2rem] text-center border-t-4 border-cyan-500"><button onclick="UI.attendance()" class="cyber-btn !bg-white !text-black">Mark Presence</button></div>`;
+                if(USER.role.includes('Student') || USER.role === 'Minor') c.innerHTML += `<div class="glass p-8 rounded-[2rem] text-center border-t-4 border-cyan-500"><button onclick="UI.attendance()" class="cyber-btn !bg-white !text-black">Mark Biometric Presence</button></div>`;
                 if(USER.role === 'Lecturer' || USER.role === 'HOD') c.innerHTML += `<div class="glass p-8 rounded-[2rem] text-center border-t-4 border-yellow-500"><button onclick="UI.openQR('admin')" class="cyber-btn !bg-yellow-500">Authorize Desktop Hub</button></div>`;
+                if(USER.role === 'Lab Assistant') c.innerHTML += `<div class="glass p-6 rounded-3xl border-t-4 border-orange-500"><h4 class="text-[9px] font-bold text-orange-500 mb-4 uppercase text-center shimmer">Infrastructure Pulse</h4><div class="grid grid-cols-10 gap-1">${Array(50).fill(0).map((_,i)=>`<div class="h-4 bg-emerald-500/10 border border-emerald-500/20 rounded-[2px] text-[5px] flex items-center justify-center font-bold">CS-${(i+1).toString().padStart(2,'0')}</div>`).join('')}</div></div>`;
             },
 
             openQR(type) {
@@ -444,7 +451,7 @@
                 this.scanner.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, async (code) => {
                     if(type === 'lab') {
                         await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'lab_session', id: USER.id, pcId: code, photo: USER.photo }) });
-                        alert("Station Unlock Dispatched.");
+                        alert("Station Signal Dispatched.");
                     } else if(type === 'admin') {
                         await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'authorize_desktop', sessionID: code, userName: USER.name, uid: USER.id }) });
                         alert("Desktop Authorized.");
