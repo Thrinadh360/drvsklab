@@ -5,19 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CSYNC | Sovereign Unified Hub</title>
     
-    <!-- PWA & Native App Meta -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#020617">
-
-    <!-- High-Performance Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --accent: #00f2ff; --bg: #020617; --card: rgba(30, 41, 59, 0.4); --primary: #4f46e5; }
+        :root { --accent: #00f2ff; --bg: #020617; --card: rgba(30, 41, 59, 0.4); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; height: 100vh; overflow: hidden; }
         
@@ -31,8 +25,7 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
         input, select, textarea { background: #1e1b4b !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; padding: 12px !important; border-radius: 12px !important; width: 100%; font-size: 14px; }
-        input:focus { border-color: var(--accent) !important; }
-
+        
         .bottom-nav { position: fixed; bottom: 25px; left: 15px; right: 15px; height: 75px; border-radius: 22px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); }
         .nav-item { color: #64748b; display: flex; flex-direction: column; align-items: center; font-size: 9px; font-weight: 800; border: none; background: none; }
         .nav-active { color: var(--accent); filter: drop-shadow(0 0 5px var(--accent)); }
@@ -40,33 +33,33 @@
         #sidebar { position: fixed; inset: 0; right: auto; width: 290px; background: #05060f; z-index: 2000; transform: translateX(-100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-right: 1px solid rgba(255,255,255,0.05); }
         #sidebar.open { transform: translateX(0); box-shadow: 20px 0 60px rgba(0,0,0,0.8); }
 
-        .video-box { width: 140px; height: 140px; border-radius: 50%; border: 3px solid var(--accent); overflow: hidden; margin: 0 auto; background: #000; box-shadow: 0 0 20px rgba(0,242,255,0.3); }
+        .video-box { width: 130px; height: 130px; border-radius: 50%; border: 3px solid var(--accent); overflow: hidden; margin: 0 auto; background: #000; box-shadow: 0 0 20px rgba(0,242,255,0.2); }
         video { width: 100%; height: 100%; object-fit: cover; }
-
-        .ai-bubble { background: rgba(79, 70, 229, 0.15); border-left: 3px solid var(--accent); padding: 12px; border-radius: 10px; font-size: 11px; margin-top: 12px; color: #cbd5e1; line-height: 1.5; font-style: italic; }
+        .ai-bubble { background: rgba(79, 70, 229, 0.15); border-left: 3px solid var(--accent); padding: 12px; border-radius: 10px; font-size: 11px; margin-top: 12px; color: #cbd5e1; line-height: 1.5; }
+        
+        .hod-notice { border-l-4 border-red-500 bg-red-500/10; }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Drawer -->
+    <!-- Sidebar -->
     <div id="sidebar" class="p-8 flex flex-col">
-        <h1 class="font-['Orbitron'] text-xl text-cyan-400 mb-10 tracking-tighter italic uppercase">CSYNC</h1>
+        <h1 class="font-['Orbitron'] text-xl text-cyan-400 mb-10 italic uppercase">CSYNC</h1>
         <nav class="space-y-6 flex-1">
-            <button onclick="UIManager.switchTab('dashboard')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="layout-dashboard"></i> Dashboard</button>
-            <button onclick="UIManager.switchTab('nexus')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="users"></i> Nexus Directory</button>
-            <button onclick="UIManager.switchTab('discuss')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="message-square"></i> Discussion Feed</button>
-            <button onclick="UIManager.switchTab('leave')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="calendar-days"></i> Leave Management</button>
+            <button onclick="UIManager.switchTab('dashboard')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="layout-dashboard"></i> Hub</button>
+            <button onclick="UIManager.switchTab('nexus')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="users"></i> Nexus</button>
+            <button onclick="UIManager.switchTab('discuss')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="message-square"></i> Feed</button>
+            <button onclick="UIManager.switchTab('leave')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="calendar-days"></i> Leave</button>
         </nav>
-        <button onclick="UIManager.logout()" class="text-red-500 font-bold text-[10px] uppercase flex items-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Unbind Device</button>
+        <button onclick="UIManager.logout()" class="text-red-500 font-bold text-[10px] uppercase flex items-center gap-2"><i data-lucide="log-out"></i> Unbind</button>
     </div>
 
-    <!-- Main Wrapper -->
+    <!-- Main App Structure -->
     <div class="flex flex-col h-screen">
-        <!-- Header -->
         <header class="flex justify-between items-center px-6 py-5 bg-[#020617] border-b border-white/5 z-50">
             <button onclick="UIManager.toggleSidebar()"><i data-lucide="menu" class="text-cyan-400"></i></button>
             <div class="text-center">
-                <p class="text-[6px] text-slate-500 tracking-widest font-bold uppercase">Sovereign Unified Node</p>
+                <p class="text-[6px] text-slate-500 tracking-widest font-bold uppercase">Sovereign Unified Hub</p>
                 <h1 class="font-['Orbitron'] text-lg text-white font-black tracking-tighter">CSYNC</h1>
             </div>
             <div class="w-9 h-9 rounded-full border-2 border-cyan-400 overflow-hidden bg-slate-900">
@@ -76,50 +69,44 @@
 
         <main class="flex-1 px-6 pt-4 overflow-hidden relative">
             
-            <!-- View: Role Selection -->
+            <!-- View: Roles -->
             <div id="view-roles" class="view-container view-active pt-6">
-                <h2 class="text-center text-[10px] text-slate-500 font-black uppercase tracking-widest mb-8">Identify Your Node Access</h2>
-                <div class="grid gap-4">
-                    <button onclick="UIManager.openReg('Student')" class="glass p-5 rounded-3xl text-left border-l-4 border-cyan-500">
-                        <h4 class="font-black text-white uppercase text-sm">Student</h4>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase">Attendance & Lab Scan</p>
+                <h2 class="text-center text-[10px] text-slate-500 font-black uppercase tracking-widest mb-8">Identify Node Type</h2>
+                <div class="grid gap-3">
+                    <button onclick="UIManager.openReg('Student')" class="glass p-5 rounded-2xl text-left border-l-4 border-cyan-500">
+                        <h4 class="font-black text-white text-xs uppercase">Student</h4>
                     </button>
-                    <button onclick="UIManager.openReg('Lecturer')" class="glass p-5 rounded-3xl text-left border-l-4 border-indigo-500">
-                        <h4 class="font-black text-white uppercase text-sm">Lecturer</h4>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase">Academic & Leave Approver</p>
+                    <button onclick="UIManager.openReg('Lecturer')" class="glass p-5 rounded-2xl text-left border-l-4 border-indigo-500">
+                        <h4 class="font-black text-white text-xs uppercase">Lecturer</h4>
                     </button>
-                    <button onclick="UIManager.openReg('HOD')" class="glass p-5 rounded-3xl text-left border-l-4 border-purple-500">
-                        <h4 class="font-black text-white uppercase text-sm">HOD</h4>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase">Department Executive</p>
+                    <button onclick="UIManager.openReg('HOD')" class="glass p-5 rounded-2xl text-left border-l-4 border-purple-500">
+                        <h4 class="font-black text-white text-xs uppercase">HOD</h4>
                     </button>
-                    <button onclick="UIManager.openReg('LabAssistant')" class="glass p-5 rounded-3xl text-left border-l-4 border-orange-500">
-                        <h4 class="font-black text-white uppercase text-sm">Lab Assistant</h4>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase">Station Management</p>
+                    <button onclick="UIManager.openReg('LabAssistant')" class="glass p-5 rounded-2xl text-left border-l-4 border-orange-500">
+                        <h4 class="font-black text-white text-xs uppercase">Lab Assistant</h4>
                     </button>
-                    <button onclick="UIManager.openReg('Alumni')" class="glass p-5 rounded-3xl text-left border-l-4 border-emerald-500">
-                        <h4 class="font-black text-white uppercase text-sm">Alumni</h4>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase">Legacy Network</p>
+                    <button onclick="UIManager.openReg('Alumni')" class="glass p-5 rounded-2xl text-left border-l-4 border-emerald-500">
+                        <h4 class="font-black text-white text-xs uppercase">Alumni</h4>
                     </button>
                 </div>
             </div>
 
-            <!-- View: Enrollment Form -->
+            <!-- View: Enrollment -->
             <div id="view-register" class="view-container">
                 <div class="glass p-7 rounded-[2.5rem] text-center border-t-2 border-cyan-500">
-                    <h2 id="reg-title" class="font-['Orbitron'] text-cyan-400 text-lg mb-6 tracking-tighter italic">ENROLLMENT</h2>
+                    <h2 id="reg-title" class="font-['Orbitron'] text-cyan-400 text-lg mb-6 tracking-tighter">ENROLL</h2>
                     <div class="video-box mb-6"><video id="v-reg" autoplay muted playsinline></video></div>
                     <div class="space-y-4 text-left">
-                        <input id="r-id" type="text" placeholder="Roll No / Staff ID">
+                        <input id="r-id" type="text" placeholder="Roll Number / Staff ID">
                         <input id="r-name" type="text" placeholder="Full Name">
                         <div id="role-extra-fields" class="space-y-4"></div>
-                        <button onclick="UIManager.completeRegistration()" class="cyber-btn mt-4">Bind Sovereign Identity</button>
+                        <button onclick="UIManager.completeRegistration()" class="cyber-btn mt-4">Bind Sovereign ID</button>
                     </div>
                 </div>
             </div>
 
             <!-- View: Dashboard -->
             <div id="view-dashboard" class="view-container space-y-6">
-                <!-- User Profile Card -->
                 <div class="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
                     <img id="dash-photo" class="w-12 h-12 rounded-full border-2 border-cyan-500 object-cover">
                     <div>
@@ -128,11 +115,11 @@
                     </div>
                 </div>
 
-                <!-- Groq AI Terminal -->
+                <!-- AI Terminal -->
                 <div class="glass p-5 rounded-[2rem]">
                     <div class="flex items-center gap-2 mb-3">
                         <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
-                        <h4 class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Sovereign Neural AI</h4>
+                        <h4 class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Neural AI Terminal</h4>
                     </div>
                     <div class="flex gap-2">
                         <input id="ai-input" type="text" placeholder="Ask Oracle..." class="!py-2 !text-xs !bg-black/40">
@@ -141,72 +128,56 @@
                     <div id="ai-response" class="ai-bubble hidden"></div>
                 </div>
 
-                <!-- Dynamic Role Modules -->
                 <div id="role-modules" class="space-y-4"></div>
             </div>
 
-            <!-- View: Nexus Directory -->
+            <!-- View: Nexus -->
             <div id="view-nexus" class="view-container space-y-5">
-                <div class="flex justify-between items-end">
-                    <h3 class="font-['Orbitron'] text-indigo-400 text-xl tracking-tighter uppercase italic">Nexus</h3>
-                    <p class="text-[8px] text-slate-500 font-bold uppercase">Peer Directory</p>
-                </div>
+                <h3 class="font-['Orbitron'] text-indigo-400 text-xl tracking-tighter uppercase italic">Nexus</h3>
                 <div id="nexus-list" class="grid gap-3"></div>
             </div>
 
             <!-- View: Discussions -->
             <div id="view-discuss" class="view-container space-y-6">
                 <h3 class="font-['Orbitron'] text-purple-400 text-xl tracking-tighter uppercase italic">Global Feed</h3>
-                <div class="glass p-5 rounded-[2rem]">
-                    <textarea id="post-input" placeholder="Broadcast a pulse to the network..." class="h-20 !text-xs !bg-black/40 mb-3"></textarea>
-                    <button onclick="UIManager.addPost()" class="cyber-btn">Transmit Post</button>
-                </div>
                 <div id="feed-list" class="space-y-4"></div>
             </div>
 
-            <!-- View: Leave Management -->
+            <!-- View: Leave -->
             <div id="view-leave" class="view-container space-y-6">
-                <h3 class="font-['Orbitron'] text-red-400 text-xl tracking-tighter uppercase italic">Leave Ledger</h3>
-                
-                <!-- Submission Form (Everyone except HOD) -->
+                <h3 id="leave-header" class="font-['Orbitron'] text-red-400 text-xl tracking-tighter uppercase italic">Leave Management</h3>
                 <div id="leave-form" class="glass p-6 rounded-[2rem] border-t-4 border-red-500">
-                    <p class="text-[10px] text-slate-500 font-black uppercase mb-4 tracking-widest">Intimate Absence</p>
-                    <textarea id="lv-reason" placeholder="State reason for leave..." class="h-24 mb-4 !text-xs !bg-black/40"></textarea>
-                    <button onclick="UIManager.submitLeave()" class="cyber-btn !bg-red-600 !text-white">Submit to HOD</button>
+                    <p id="leave-instruction" class="text-[10px] text-slate-500 font-black uppercase mb-4 tracking-widest">Absence Entry</p>
+                    <textarea id="lv-reason" placeholder="State reason..." class="h-24 mb-4 !text-xs !bg-black/40"></textarea>
+                    <button id="btn-leave-action" onclick="UIManager.submitLeave()" class="cyber-btn !bg-red-600 !text-white">Submit</button>
                 </div>
-
-                <!-- Approver List (Only HOD / Lecturer) -->
                 <div id="leave-queue-container" class="hidden space-y-4">
-                    <p class="text-[10px] text-yellow-500 font-black uppercase tracking-widest">Pending Approvals</p>
+                    <p class="text-[10px] text-yellow-500 font-black uppercase tracking-widest">Verification Queue</p>
                     <div id="leave-queue" class="space-y-3"></div>
                 </div>
             </div>
 
         </main>
 
-        <!-- Bottom Navigation Hub -->
+        <!-- Nav -->
         <nav id="bottom-nav" class="bottom-nav hidden">
-            <button onclick="UIManager.switchTab('dashboard')" id="btn-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span class="mt-1">HUB</span></button>
-            <button onclick="UIManager.switchTab('nexus')" id="btn-nexus" class="nav-item"><i data-lucide="users"></i><span class="mt-1">NEXUS</span></button>
-            <button onclick="UIManager.switchTab('discuss')" id="btn-discuss" class="nav-item"><i data-lucide="message-square"></i><span class="mt-1">FEED</span></button>
-            <button onclick="UIManager.switchTab('leave')" id="btn-leave" class="nav-item"><i data-lucide="calendar"></i><span class="mt-1">LEAVE</span></button>
+            <button onclick="UIManager.switchTab('dashboard')" id="btn-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span>HUB</span></button>
+            <button onclick="UIManager.switchTab('nexus')" id="btn-nexus" class="nav-item"><i data-lucide="users"></i><span>NEXUS</span></button>
+            <button onclick="UIManager.switchTab('discuss')" id="btn-discuss" class="nav-item"><i data-lucide="message-square"></i><span>FEED</span></button>
+            <button onclick="UIManager.switchTab('leave')" id="btn-leave" class="nav-item"><i data-lucide="calendar"></i><span>LEAVE</span></button>
         </nav>
     </div>
 
-    <!-- UI Core Logic -->
     <script>
-        // CONFIGURATION: Map your Deployed Apps Script URL here
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_REPLACEME_YOUR_SCRIPT_ID/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9KZfFxGH8V0XdZjNMeJHO08O3GNUxCXJe96Bi1RsPhUjZ9sl5HfX37fk8CcrNuVdg/exec";
         
-        let USER = JSON.parse(localStorage.getItem('csync_v3_user'));
+        let USER = JSON.parse(localStorage.getItem('csync_v5_user'));
         let currentRole = "";
 
         const UIManager = {
             init() {
                 lucide.createIcons();
-                if (USER) {
-                    this.setupSession();
-                }
+                if (USER) this.setupSession();
             },
 
             toggleSidebar() {
@@ -221,7 +192,7 @@
                 
                 if (tab === 'nexus') this.renderNexus();
                 if (tab === 'discuss') this.renderFeed();
-                if (tab === 'leave') this.renderLeaveQueue();
+                if (tab === 'leave') this.setupLeaveView();
                 
                 document.getElementById('sidebar').classList.remove('open');
                 lucide.createIcons();
@@ -234,41 +205,37 @@
                 document.getElementById('reg-title').innerText = role + " ENROLL";
                 
                 const extra = document.getElementById('role-extra-fields');
-                extra.innerHTML = "";
-                if (role === 'Student') {
-                    extra.innerHTML = `
-                        <select id="r-dept"><option>B.Sc Computer Science</option><option>AI & Data Science</option></select>
-                        <select id="r-year"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option></select>
-                    `;
-                } else {
-                    extra.innerHTML = `<input id="r-dept" placeholder="Department / Specialization">`;
-                }
+                extra.innerHTML = `<input id="r-dept" placeholder="Department (e.g. Computer Science)">`;
+
+                const idInp = document.getElementById('r-id');
+                idInp.placeholder = (role === 'Student' || role === 'Alumni') ? "Enter Roll Number" : "Enter Staff ID";
 
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-                    .then(s => document.getElementById('v-reg').srcObject = s)
-                    .catch(() => alert("Camera permission required for Identity Binding."));
+                    .then(s => document.getElementById('v-reg').srcObject = s);
             },
 
             completeRegistration() {
-                const name = document.getElementById('r-name').value;
-                const id = document.getElementById('r-id').value;
-                if (!name || !id) return alert("All identity nodes must be populated.");
+                const id = document.getElementById('r-id').value.trim().toUpperCase();
+                const name = document.getElementById('r-name').value.trim();
+                if (!id || !name) return alert("Fill all Identity Nodes.");
+
+                // DUPLICATE PREVENTION
+                let registry = JSON.parse(localStorage.getItem('csync_registry') || '[]');
+                if (registry.includes(id)) {
+                    return alert(`IDENTITY BLOCKED: ID ${id} is already bound to a Sovereign device.`);
+                }
 
                 const canvas = document.createElement('canvas');
                 const video = document.getElementById('v-reg');
                 canvas.width = 150; canvas.height = 150;
                 canvas.getContext('2d').drawImage(video, 0, 0, 150, 150);
 
-                USER = {
-                    id, name, role: currentRole,
-                    photo: canvas.toDataURL('image/jpeg', 0.6),
-                    dept: document.getElementById('r-dept')?.value || "General",
-                    year: document.getElementById('r-year')?.value || "Staff"
-                };
+                USER = { id, name, role: currentRole, photo: canvas.toDataURL('image/jpeg', 0.6), dept: document.getElementById('r-dept').value };
 
-                localStorage.setItem('csync_v3_user', JSON.stringify(USER));
+                registry.push(id);
+                localStorage.setItem('csync_registry', JSON.stringify(registry));
+                localStorage.setItem('csync_v5_user', JSON.stringify(USER));
                 
-                // Save to local peer database
                 let nexus = JSON.parse(localStorage.getItem('csync_nexus') || '[]');
                 nexus.push(USER);
                 localStorage.setItem('csync_nexus', JSON.stringify(nexus));
@@ -284,7 +251,7 @@
                 document.getElementById('top-avatar').src = USER.photo;
                 document.getElementById('dash-photo').src = USER.photo;
                 document.getElementById('dash-name').innerText = USER.name;
-                document.getElementById('dash-role').innerText = `${USER.role} • ${USER.dept}`;
+                document.getElementById('dash-role').innerText = `${USER.role} Node • ${USER.dept}`;
 
                 this.renderModules();
                 lucide.createIcons();
@@ -294,131 +261,114 @@
                 const container = document.getElementById('role-modules');
                 container.innerHTML = "";
 
-                if (USER.role === 'Student') {
-                    container.innerHTML = `
-                        <div class="glass p-6 rounded-[2rem] text-center border-t-4 border-indigo-500">
-                            <i data-lucide="map-pin" class="w-8 h-8 mx-auto mb-2 text-indigo-400"></i>
-                            <p class="text-[10px] font-black uppercase text-slate-400 mb-6 tracking-widest">Campus GPS Handshake</p>
-                            <button onclick="UIManager.markAttendance()" class="cyber-btn">Mark Attendance</button>
-                        </div>
-                        <div id="lab-module" class="glass p-6 rounded-[2rem] text-center border-t-4 border-emerald-500">
+                // LAB SCAN Logic (Excludes Alumni)
+                if (USER.role !== 'Alumni') {
+                    container.innerHTML += `
+                        <div class="glass p-6 rounded-[2rem] text-center border-t-4 border-emerald-500">
                             <i data-lucide="qr-code" class="w-8 h-8 mx-auto mb-2 text-emerald-400"></i>
-                            <p class="text-[10px] font-black uppercase text-slate-400 mb-6 tracking-widest">Workstation Scan</p>
-                            <button onclick="UIManager.startScan()" class="cyber-btn">Scan Lab PC</button>
+                            <p class="text-[10px] font-black uppercase text-slate-400 mb-6 tracking-widest">Lab PC Handshake</p>
+                            <button onclick="UIManager.startScan()" class="cyber-btn">Scan Station QR</button>
                             <div id="qr-box" class="mt-4 hidden rounded-2xl overflow-hidden"></div>
                         </div>
                     `;
-                } else if (USER.role === 'LabAssistant') {
-                    container.innerHTML = `
-                        <div class="glass p-6 rounded-[2rem] border-t-4 border-orange-500">
-                            <h5 class="text-[10px] font-black text-orange-500 uppercase mb-4 tracking-widest">Lab Station Pulse</h5>
-                            <div class="grid grid-cols-4 gap-2">
-                                ${Array(12).fill(0).map((_, i) => `<div class="h-8 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center justify-center text-[8px] font-bold">PC-${i+1}</div>`).join('')}
-                            </div>
+                }
+
+                if (USER.role === 'Student') {
+                    container.innerHTML += `
+                        <div class="glass p-6 rounded-[2rem] text-center border-t-4 border-indigo-500">
+                            <i data-lucide="map-pin" class="w-8 h-8 mx-auto mb-2 text-indigo-400"></i>
+                            <p class="text-[10px] font-black uppercase text-slate-400 mb-6 tracking-widest">Verify Presence</p>
+                            <button onclick="UIManager.markAttendance()" class="cyber-btn">Mark Attendance</button>
                         </div>
                     `;
-                } else if (USER.role === 'HOD' || USER.role === 'Lecturer') {
-                    container.innerHTML = `
+                }
+                
+                if (USER.role === 'HOD' || USER.role === 'Lecturer') {
+                    container.innerHTML += `
                         <div class="glass p-6 rounded-[2rem] border-t-4 border-purple-500">
-                            <h5 class="text-[10px] font-black text-purple-500 uppercase mb-4 tracking-widest">Executive Dashboard</h5>
+                            <h5 class="text-[10px] font-black text-purple-500 uppercase mb-4 tracking-widest">Management Terminal</h5>
                             <div class="flex justify-between items-center bg-black/30 p-4 rounded-xl">
-                                <span class="text-[10px] font-bold">Pending Leave Requests</span>
+                                <span class="text-[10px] font-bold">Pending Approvals</span>
                                 <span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black" id="req-count">0</span>
                             </div>
-                            <button onclick="UIManager.switchTab('leave')" class="w-full mt-4 text-purple-400 text-[10px] font-black uppercase tracking-widest">Open Ledger →</button>
                         </div>
                     `;
                     this.updateLeaveCount();
                 }
+                lucide.createIcons();
             },
 
-            // GPS Attendance Simulation
-            markAttendance() {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    alert("Attendance Verified. GPS Handshake Successful.");
-                    localStorage.setItem('last_att', new Date().toDateString());
-                }, () => alert("GPS Timeout. Please ensure you are in the Computer Lab."));
-            },
-
-            // QR PC Handshake
             startScan() {
                 const box = document.getElementById('qr-box');
                 box.classList.remove('hidden');
                 const scanner = new Html5Qrcode("qr-box");
                 scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 200 }, (decoded) => {
-                    alert("PC Handshake Successful. Session Started for ID: " + decoded);
-                    scanner.stop();
-                    box.classList.add('hidden');
-                }).catch(() => alert("Scanner Access Denied."));
+                    alert("STATION SECURED: " + decoded);
+                    scanner.stop(); box.classList.add('hidden');
+                });
             },
 
-            // Nexus Rendering
-            renderNexus() {
-                const nexus = JSON.parse(localStorage.getItem('csync_nexus') || '[]');
-                const list = document.getElementById('nexus-list');
-                list.innerHTML = nexus.map(n => `
-                    <div class="glass p-4 rounded-2xl flex items-center gap-4">
-                        <img src="${n.photo}" class="w-10 h-10 rounded-full object-cover border border-white/5">
-                        <div>
-                            <h5 class="text-[11px] font-black uppercase">${n.name}</h5>
-                            <p class="text-[8px] text-slate-500 font-bold uppercase">${n.role} • ${n.dept}</p>
-                        </div>
-                        <button class="ml-auto text-cyan-400"><i data-lucide="message-square" class="w-4 h-4"></i></button>
-                    </div>
-                `).join('') || '<p class="text-center text-slate-600 text-[10px] uppercase py-10">Nexus is empty...</p>';
-                lucide.createIcons();
+            markAttendance() {
+                navigator.geolocation.getCurrentPosition(() => alert("Presence verified via GPS Pulse."), () => alert("GPS Signal Denied."));
             },
 
-            // Post Logic
-            addPost() {
-                const txt = document.getElementById('post-input').value;
-                if (!txt) return;
-                let feed = JSON.parse(localStorage.getItem('csync_feed') || '[]');
-                feed.unshift({ name: USER.name, role: USER.role, text: txt, time: new Date().toLocaleTimeString() });
-                localStorage.setItem('csync_feed', JSON.stringify(feed));
-                document.getElementById('post-input').value = "";
-                this.renderFeed();
+            setupLeaveView() {
+                const h1 = document.getElementById('leave-header');
+                const instr = document.getElementById('leave-instruction');
+                const btn = document.getElementById('btn-leave-action');
+                
+                if (USER.role === 'HOD') {
+                    h1.innerText = "HOD INTIMATION";
+                    h1.className = "font-['Orbitron'] text-emerald-400 text-xl tracking-tighter uppercase italic";
+                    instr.innerText = "Broadcast Absence Notice";
+                    btn.innerText = "Broadcast to Hub Feed";
+                } else {
+                    h1.innerText = "LEAVE LEDGER";
+                    instr.innerText = "Request Absence";
+                    btn.innerText = "Submit to HOD";
+                }
+
+                if (USER.role === 'HOD' || USER.role === 'Lecturer') {
+                    this.renderLeaveQueue();
+                }
             },
 
-            renderFeed() {
-                const feed = JSON.parse(localStorage.getItem('csync_feed') || '[]');
-                document.getElementById('feed-list').innerHTML = feed.map(f => `
-                    <div class="glass p-5 rounded-2xl">
-                        <div class="flex justify-between items-center mb-3">
-                            <h5 class="text-[10px] font-black text-cyan-400 uppercase">${f.name} <span class="text-slate-600">[${f.role}]</span></h5>
-                            <span class="text-[8px] text-slate-500">${f.time}</span>
-                        </div>
-                        <p class="text-xs text-slate-300 leading-relaxed">${f.text}</p>
-                    </div>
-                `).join('') || '<p class="text-center text-slate-600 text-[10px] uppercase py-10">Feed is silent...</p>';
-            },
-
-            // Leave Mgmt Logic
             submitLeave() {
-                const reason = document.getElementById('lv-reason').value;
+                const reason = document.getElementById('lv-reason').value.trim();
                 if (!reason) return;
-                let leaves = JSON.parse(localStorage.getItem('csync_leaves') || '[]');
-                leaves.push({ id: Date.now(), user: USER.name, role: USER.role, reason, status: 'Pending' });
-                localStorage.setItem('csync_leaves', JSON.stringify(leaves));
+
+                if (USER.role === 'HOD') {
+                    let feed = JSON.parse(localStorage.getItem('csync_feed') || '[]');
+                    // Intimation notice
+                    feed.unshift({ 
+                        name: "OFFICIAL HOD NOTICE", 
+                        role: "Sovereign Priority", 
+                        text: `HoD Leave Intimation: ${reason}. This is an official notice to all Students, Lecturers and Staff.`, 
+                        time: new Date().toLocaleTimeString(), 
+                        isHoD: true 
+                    });
+                    localStorage.setItem('csync_feed', JSON.stringify(feed));
+                    alert("Intimation broadcasted successfully.");
+                } else {
+                    let leaves = JSON.parse(localStorage.getItem('csync_leaves') || '[]');
+                    leaves.push({ id: Date.now(), user: USER.name, role: USER.role, reason, status: 'Pending' });
+                    localStorage.setItem('csync_leaves', JSON.stringify(leaves));
+                    alert("Request dispatched to HOD desk.");
+                }
                 document.getElementById('lv-reason').value = "";
-                alert("Leave request dispatched to HOD desk.");
             },
 
             renderLeaveQueue() {
-                if (USER.role !== 'HOD' && USER.role !== 'Lecturer') return;
                 document.getElementById('leave-queue-container').classList.remove('hidden');
                 const leaves = JSON.parse(localStorage.getItem('csync_leaves') || '[]');
                 const queue = document.getElementById('leave-queue');
                 queue.innerHTML = leaves.filter(l => l.status === 'Pending').map(l => `
                     <div class="glass p-4 rounded-2xl border-l-4 border-yellow-500">
-                        <h5 class="text-[10px] font-black uppercase mb-1">${l.user} <span class="text-slate-500 text-[8px]">(${l.role})</span></h5>
-                        <p class="text-[10px] text-slate-400 italic mb-4">"${l.reason}"</p>
-                        <div class="flex gap-2">
-                            <button onclick="UIManager.updateLeave(${l.id}, 'Approved')" class="bg-emerald-600 text-[8px] px-3 py-1.5 rounded-lg font-black">APPROVE</button>
-                            <button onclick="UIManager.updateLeave(${l.id}, 'Rejected')" class="bg-red-600 text-[8px] px-3 py-1.5 rounded-lg font-black">REJECT</button>
-                        </div>
+                        <h5 class="text-[10px] font-black uppercase mb-1">${l.user} Node</h5>
+                        <p class="text-[10px] text-slate-400 italic mb-3">"${l.reason}"</p>
+                        <button onclick="UIManager.updateLeave(${l.id}, 'Approved')" class="bg-emerald-600 text-[8px] px-3 py-1.5 rounded-lg font-black uppercase">Approve Request</button>
                     </div>
-                `).join('') || '<p class="text-[9px] text-slate-600 uppercase italic">Ledger is clear.</p>';
+                `).join('') || '<p class="text-[8px] text-slate-500 uppercase">Queue is clear.</p>';
             },
 
             updateLeave(id, status) {
@@ -436,32 +386,54 @@
                 if (el) el.innerText = count;
             },
 
-            // Groq AI Logic
+            renderNexus() {
+                const nexus = JSON.parse(localStorage.getItem('csync_nexus') || '[]');
+                document.getElementById('nexus-list').innerHTML = nexus.map(n => `
+                    <div class="glass p-4 rounded-2xl flex items-center gap-4">
+                        <img src="${n.photo}" class="w-10 h-10 rounded-full border border-white/5">
+                        <div><h5 class="text-[11px] font-black uppercase">${n.name}</h5><p class="text-[8px] text-slate-500 uppercase">${n.role}</p></div>
+                    </div>
+                `).join('');
+            },
+
+            renderFeed() {
+                const feed = JSON.parse(localStorage.getItem('csync_feed') || '[]');
+                // Exclude HOD notices for Alumni
+                const filteredFeed = USER.role === 'Alumni' ? feed.filter(f => !f.isHoD) : feed;
+
+                document.getElementById('feed-list').innerHTML = filteredFeed.map(f => `
+                    <div class="glass p-5 rounded-2xl ${f.isHoD ? 'hod-notice' : ''}">
+                        <h5 class="text-[10px] font-black ${f.isHoD ? 'text-red-500' : 'text-cyan-400'} uppercase">${f.name}</h5>
+                        <p class="text-xs text-slate-300 mt-2">${f.text}</p>
+                        <p class="text-[7px] text-slate-600 mt-4 font-bold uppercase">${f.time}</p>
+                    </div>
+                `).join('') || '<p class="text-center text-slate-600 text-[10px] uppercase py-10">Hub feed is silent...</p>';
+            },
+
             async askAI() {
                 const query = document.getElementById('ai-input').value;
                 const respBox = document.getElementById('ai-response');
                 if (!query) return;
-
                 respBox.classList.remove('hidden');
-                respBox.innerText = "Consulting Sovereign Oracle via Groq Neural Cloud...";
-
+                respBox.innerText = "Consulting Groq Neural Cloud...";
+                
                 try {
-                    const response = await fetch(APPS_SCRIPT_URL, {
-                        method: "POST",
-                        body: JSON.stringify({ action: "groq_query", query: query, user: USER.name, role: USER.role })
+                    const res = await fetch(APPS_SCRIPT_URL, { 
+                        method: "POST", 
+                        body: JSON.stringify({ action: "groq", query, user: USER.name, role: USER.role }) 
                     });
-                    const data = await response.text();
-                    respBox.innerText = data;
-                } catch (e) {
-                    respBox.innerText = `[Oracle]: Connection to Apps Script backend failed. Please verify APPS_SCRIPT_URL is configured correctly.`;
+                    const text = await res.text();
+                    respBox.innerText = text;
+                } catch (e) { 
+                    respBox.innerText = "Error connecting to Sovereign Backend."; 
                 }
             },
 
-            logout() {
-                if (confirm("Terminate Sovereign Link and Unbind this device?")) {
-                    localStorage.removeItem('csync_v3_user');
-                    location.reload();
-                }
+            logout() { 
+                if (confirm("DANGER: Wiping Sovereign ID will unbind this device. Proceed?")) { 
+                    localStorage.removeItem('csync_v5_user'); 
+                    location.reload(); 
+                } 
             }
         };
 
