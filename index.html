@@ -14,360 +14,452 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { 
-            --accent: #00f2ff; 
-            --bg: #020617; 
-            --card: rgba(30, 41, 59, 0.4); 
-            --input-bg: #1e1b4b; 
-            --primary: #4f46e5;
-            --success: #10b981;
-            --danger: #ef4444;
-        }
-
+        :root { --accent: #00f2ff; --bg: #020617; --card: rgba(30, 41, 59, 0.4); --primary: #4f46e5; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; height: 100vh; overflow: hidden; }
         
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg); color: white; 
-            margin: 0; height: 100vh; width: 100vw;
-            overflow: hidden;
-        }
+        .glass { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .cyber-btn { background: var(--accent); color: black; font-weight: 800; border-radius: 14px; padding: 12px; transition: 0.2s; text-transform: uppercase; font-size: 11px; width: 100%; border: none; cursor: pointer; }
+        .cyber-btn:active { transform: scale(0.96); }
+        .cyber-btn:disabled { opacity: 0.4; filter: grayscale(1); }
 
-        /* Sovereign UI Components */
-        .glass { background: var(--card); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        
-        input, select, textarea {
-            background: var(--input-bg) !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            border-radius: 12px !important;
-            padding: 12px !important;
-            color: white !important;
-            width: 100%;
-        }
+        .view-container { display: none; height: 100%; overflow-y: auto; padding-bottom: 140px; scroll-behavior: smooth; }
+        .view-active { display: block; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        .btn-action {
-            background: var(--accent);
-            color: #000;
-            font-weight: 800;
-            padding: 14px;
-            border-radius: 16px;
-            width: 100%;
-            text-transform: uppercase;
-            transition: 0.2s;
-        }
-        .btn-action:active { transform: scale(0.98); opacity: 0.9; }
-        .btn-action:disabled { background: #334155; color: #94a3b8; }
+        input, select, textarea { background: #1e1b4b !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; padding: 12px !important; border-radius: 12px !important; width: 100%; font-size: 14px; }
+        input:focus { border-color: var(--accent) !important; }
 
-        .main-viewport { height: 100vh; overflow-y: auto; padding-bottom: 120px; }
+        .bottom-nav { position: fixed; bottom: 25px; left: 15px; right: 15px; height: 75px; border-radius: 22px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); }
+        .nav-item { color: #64748b; display: flex; flex-direction: column; align-items: center; font-size: 9px; font-weight: 800; border: none; background: none; }
+        .nav-active { color: var(--accent); filter: drop-shadow(0 0 5px var(--accent)); }
 
-        /* Navigation HUD */
-        .bottom-nav { 
-            position: fixed; bottom: 30px; left: 20px; right: 20px; 
-            height: 70px; z-index: 1000; border-radius: 24px; 
-            display: flex; justify-content: space-around; align-items: center; 
-            background: rgba(10, 11, 30, 0.9); border: 1px solid rgba(255,255,255,0.1); 
-            backdrop-filter: blur(15px);
-        }
-        .nav-item { color: #64748b; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; }
-        .nav-active { color: var(--accent); }
+        #sidebar { position: fixed; inset: 0; right: auto; width: 290px; background: #05060f; z-index: 2000; transform: translateX(-100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-right: 1px solid rgba(255,255,255,0.05); }
+        #sidebar.open { transform: translateX(0); box-shadow: 20px 0 60px rgba(0,0,0,0.8); }
 
-        /* View States */
-        .view-container { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .view-active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        #sidebar { 
-            position: fixed; inset-y: 0; left: 0; width: 280px; 
-            background: #05060f; z-index: 2000; 
-            transform: translateX(-100%); transition: 0.3s; 
-            border-right: 1px solid rgba(255,255,255,0.1);
-        }
-        #sidebar.open { transform: translateX(0); }
-
-        .video-circle { width: 140px; height: 140px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent); margin: 0 auto 20px; background: #000; }
+        .video-box { width: 140px; height: 140px; border-radius: 50%; border: 3px solid var(--accent); overflow: hidden; margin: 0 auto; background: #000; box-shadow: 0 0 20px rgba(0,242,255,0.3); }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        #qr-reader { width: 100%; border-radius: 20px; overflow: hidden; display: none; }
-        
-        .shimmer { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
-        @keyframes shimmer { to { background-position: -200% 0; } }
+        .ai-bubble { background: rgba(79, 70, 229, 0.15); border-left: 3px solid var(--accent); padding: 12px; border-radius: 10px; font-size: 11px; margin-top: 12px; color: #cbd5e1; line-height: 1.5; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR -->
+    <!-- Sidebar Drawer -->
     <div id="sidebar" class="p-8 flex flex-col">
-        <h1 class="font-black text-cyan-400 text-2xl italic mb-10 tracking-tighter uppercase font-['Orbitron']">CSYNC</h1>
+        <h1 class="font-['Orbitron'] text-xl text-cyan-400 mb-10 tracking-tighter italic uppercase">CSYNC</h1>
         <nav class="space-y-6 flex-1">
             <button onclick="UIManager.switchTab('dashboard')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="layout-dashboard"></i> Dashboard</button>
-            <button onclick="UIManager.switchTab('nexus')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="users"></i> Nexus</button>
-            <button onclick="UIManager.delinkDevice()" class="text-red-500 text-xs font-bold uppercase mt-10 flex items-center gap-2"><i data-lucide="log-out"></i> Unbind Node</button>
+            <button onclick="UIManager.switchTab('nexus')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="users"></i> Nexus Directory</button>
+            <button onclick="UIManager.switchTab('discuss')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="message-square"></i> Discussion Feed</button>
+            <button onclick="UIManager.switchTab('leave')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="calendar-days"></i> Leave Management</button>
         </nav>
+        <button onclick="UIManager.logout()" class="text-red-500 font-bold text-[10px] uppercase flex items-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Unbind Device</button>
     </div>
 
-    <div class="app-wrapper flex flex-col h-screen">
-        <!-- HEADER -->
-        <header class="flex justify-between items-center px-6 py-5 bg-[#020617] z-50 border-b border-white/5">
-            <button onclick="UIManager.toggleSidebar()" class="p-1"><i data-lucide="menu" class="text-cyan-400"></i></button>
+    <!-- Main Wrapper -->
+    <div class="flex flex-col h-screen">
+        <!-- Header -->
+        <header class="flex justify-between items-center px-6 py-5 bg-[#020617] border-b border-white/5 z-50">
+            <button onclick="UIManager.toggleSidebar()"><i data-lucide="menu" class="text-cyan-400"></i></button>
             <div class="text-center">
-                <p class="text-[6px] font-bold text-slate-500 uppercase tracking-widest">DR. VS KRISHNA GDC (A)</p>
-                <h1 class="font-['Orbitron'] text-lg font-bold tracking-tighter text-white">CSYNC</h1>
+                <p class="text-[6px] text-slate-500 tracking-widest font-bold uppercase">Sovereign Unified Node</p>
+                <h1 class="font-['Orbitron'] text-lg text-white font-black tracking-tighter">CSYNC</h1>
             </div>
-            <div class="w-8 h-8 rounded-full border border-cyan-400 overflow-hidden">
-                <img id="u-photo-top" src="https://ui-avatars.com/api/?name=User&background=020617&color=00f2ff" class="w-full h-full object-cover">
+            <div class="w-9 h-9 rounded-full border-2 border-cyan-400 overflow-hidden bg-slate-900">
+                <img id="top-avatar" class="w-full h-full object-cover hidden">
             </div>
         </header>
 
-        <main class="main-viewport px-6 pt-4">
+        <main class="flex-1 px-6 pt-4 overflow-hidden relative">
             
-            <!-- VIEW: ROLE SELECTION -->
-            <div id="view-roles" class="view-container space-y-4 pt-10">
-                <h2 class="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Select Identity Node</h2>
-                <button onclick="UIManager.openReg('Student')" class="glass p-6 rounded-3xl w-full text-left border-l-4 border-cyan-500">
-                    <h4 class="font-black text-lg uppercase">Student</h4>
-                    <p class="text-[9px] text-slate-400 uppercase font-bold">Attendance & Lab Access</p>
-                </button>
-                <button onclick="UIManager.openReg('Lecturer')" class="glass p-6 rounded-3xl w-full text-left border-l-4 border-indigo-500">
-                    <h4 class="font-black text-lg uppercase">Lecturer</h4>
-                    <p class="text-[9px] text-slate-400 uppercase font-bold">Faculty Management</p>
-                </button>
+            <!-- View: Role Selection -->
+            <div id="view-roles" class="view-container view-active pt-6">
+                <h2 class="text-center text-[10px] text-slate-500 font-black uppercase tracking-widest mb-8">Identify Your Node Access</h2>
+                <div class="grid gap-4">
+                    <button onclick="UIManager.openReg('Student')" class="glass p-5 rounded-3xl text-left border-l-4 border-cyan-500">
+                        <h4 class="font-black text-white uppercase text-sm">Student</h4>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">Attendance & Lab Scan</p>
+                    </button>
+                    <button onclick="UIManager.openReg('Lecturer')" class="glass p-5 rounded-3xl text-left border-l-4 border-indigo-500">
+                        <h4 class="font-black text-white uppercase text-sm">Lecturer</h4>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">Academic & Leave Approver</p>
+                    </button>
+                    <button onclick="UIManager.openReg('HOD')" class="glass p-5 rounded-3xl text-left border-l-4 border-purple-500">
+                        <h4 class="font-black text-white uppercase text-sm">HOD</h4>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">Department Executive</p>
+                    </button>
+                    <button onclick="UIManager.openReg('LabAssistant')" class="glass p-5 rounded-3xl text-left border-l-4 border-orange-500">
+                        <h4 class="font-black text-white uppercase text-sm">Lab Assistant</h4>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">Station Management</p>
+                    </button>
+                    <button onclick="UIManager.openReg('Alumni')" class="glass p-5 rounded-3xl text-left border-l-4 border-emerald-500">
+                        <h4 class="font-black text-white uppercase text-sm">Alumni</h4>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">Legacy Network</p>
+                    </button>
+                </div>
             </div>
 
-            <!-- VIEW: REGISTRATION -->
+            <!-- View: Enrollment Form -->
             <div id="view-register" class="view-container">
-                <div class="glass p-8 rounded-[2.5rem] text-center border-t-2 border-cyan-500">
-                    <h2 id="reg-title" class="text-lg font-black text-cyan-400 uppercase mb-6 italic font-['Orbitron']">Enrollment</h2>
-                    <div class="video-circle"><video id="v-reg" autoplay muted playsinline></video></div>
-                    <div class="space-y-4">
-                        <input id="r-id" type="text" placeholder="Roll Number / Staff ID">
+                <div class="glass p-7 rounded-[2.5rem] text-center border-t-2 border-cyan-500">
+                    <h2 id="reg-title" class="font-['Orbitron'] text-cyan-400 text-lg mb-6 tracking-tighter italic">ENROLLMENT</h2>
+                    <div class="video-box mb-6"><video id="v-reg" autoplay muted playsinline></video></div>
+                    <div class="space-y-4 text-left">
+                        <input id="r-id" type="text" placeholder="Roll No / Staff ID">
                         <input id="r-name" type="text" placeholder="Full Name">
-                        
-                        <div id="stu-fields" class="hidden space-y-4">
-                            <select id="r-major"><option value="CS">Computer Science</option><option value="AI">AI & Data Science</option></select>
-                            <select id="r-year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option></select>
-                        </div>
-
-                        <button id="btn-enroll" onclick="UIManager.handleEnrollment()" class="btn-action mt-4">Bind Sovereign ID</button>
+                        <div id="role-extra-fields" class="space-y-4"></div>
+                        <button onclick="UIManager.completeRegistration()" class="cyber-btn mt-4">Bind Sovereign Identity</button>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW: DASHBOARD -->
+            <!-- View: Dashboard -->
             <div id="view-dashboard" class="view-container space-y-6">
-                <!-- Profile Bento -->
+                <!-- User Profile Card -->
                 <div class="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <img id="u-photo" src="" class="w-12 h-12 rounded-full border border-cyan-500 object-cover bg-slate-900">
+                    <img id="dash-photo" class="w-12 h-12 rounded-full border-2 border-cyan-500 object-cover">
                     <div>
-                        <h4 id="u-name" class="font-black text-sm uppercase">Candidate</h4>
-                        <p id="u-meta" class="text-[8px] text-slate-500 uppercase font-black"></p>
+                        <h4 id="dash-name" class="font-black text-white text-sm uppercase">...</h4>
+                        <p id="dash-role" class="text-[8px] text-slate-500 font-black uppercase tracking-widest"></p>
                     </div>
                 </div>
 
-                <!-- GPS Attendance Block -->
-                <div id="module-attendance" class="glass p-10 rounded-[3rem] text-center border-t-4 border-indigo-500">
-                    <i data-lucide="map-pin" id="geo-icon" class="w-10 h-10 mx-auto text-slate-600 mb-4 transition-all"></i>
-                    <p id="geo-msg" class="text-[10px] font-black uppercase text-slate-500 mb-6">Checking GPS Pulse...</p>
-                    <button id="btn-presence" onclick="UIManager.markAttendance()" disabled class="btn-action">Verify Presence</button>
+                <!-- Groq AI Terminal -->
+                <div class="glass p-5 rounded-[2rem]">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
+                        <h4 class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Sovereign Neural AI</h4>
+                    </div>
+                    <div class="flex gap-2">
+                        <input id="ai-input" type="text" placeholder="Ask Oracle..." class="!py-2 !text-xs !bg-black/40">
+                        <button onclick="UIManager.askAI()" class="bg-cyan-500 text-black px-4 rounded-xl text-[10px] font-black uppercase">Ask</button>
+                    </div>
+                    <div id="ai-response" class="ai-bubble hidden"></div>
                 </div>
 
-                <!-- Lab PC QR Block -->
-                <div id="module-lab" class="hidden glass p-10 rounded-[3rem] text-center border-t-4 border-emerald-500">
-                    <h2 class="text-emerald-400 font-black text-lg mb-4 italic uppercase">Presence Verified</h2>
-                    <p class="text-[9px] text-slate-400 uppercase mb-6 font-bold">Scan PC to begin session</p>
-                    <button onclick="UIManager.startLabScan()" class="btn-action !bg-white !text-black">Scan Lab PC QR</button>
-                    <div id="qr-reader" class="mt-4"></div>
-                </div>
-
-                <!-- Active Session Block -->
-                <div id="module-active-pc" class="hidden glass p-10 rounded-[3rem] text-center border-t-4 border-orange-500">
-                    <p class="text-[10px] text-slate-500 uppercase font-black mb-2">Active Workstation</p>
-                    <h2 id="active-pc-display" class="text-5xl font-black text-white mb-8 italic">CS-00</h2>
-                    <button onclick="UIManager.killSession()" class="btn-action !bg-red-600 !text-white">Close Session</button>
-                </div>
+                <!-- Dynamic Role Modules -->
+                <div id="role-modules" class="space-y-4"></div>
             </div>
 
-            <!-- VIEW: NEXUS -->
-            <div id="view-nexus" class="view-container space-y-4">
-                <h2 class="text-xl font-black text-indigo-400 uppercase italic">Nexus Directory</h2>
-                <div id="nexus-list" class="space-y-3">
-                    <p class="text-center text-slate-500 text-[10px] py-10 uppercase">Accessing peer nodes...</p>
+            <!-- View: Nexus Directory -->
+            <div id="view-nexus" class="view-container space-y-5">
+                <div class="flex justify-between items-end">
+                    <h3 class="font-['Orbitron'] text-indigo-400 text-xl tracking-tighter uppercase italic">Nexus</h3>
+                    <p class="text-[8px] text-slate-500 font-bold uppercase">Peer Directory</p>
+                </div>
+                <div id="nexus-list" class="grid gap-3"></div>
+            </div>
+
+            <!-- View: Discussions -->
+            <div id="view-discuss" class="view-container space-y-6">
+                <h3 class="font-['Orbitron'] text-purple-400 text-xl tracking-tighter uppercase italic">Global Feed</h3>
+                <div class="glass p-5 rounded-[2rem]">
+                    <textarea id="post-input" placeholder="Broadcast a pulse to the network..." class="h-20 !text-xs !bg-black/40 mb-3"></textarea>
+                    <button onclick="UIManager.addPost()" class="cyber-btn">Transmit Post</button>
+                </div>
+                <div id="feed-list" class="space-y-4"></div>
+            </div>
+
+            <!-- View: Leave Management -->
+            <div id="view-leave" class="view-container space-y-6">
+                <h3 class="font-['Orbitron'] text-red-400 text-xl tracking-tighter uppercase italic">Leave Ledger</h3>
+                
+                <!-- Submission Form (Everyone except HOD) -->
+                <div id="leave-form" class="glass p-6 rounded-[2rem] border-t-4 border-red-500">
+                    <p class="text-[10px] text-slate-500 font-black uppercase mb-4 tracking-widest">Intimate Absence</p>
+                    <textarea id="lv-reason" placeholder="State reason for leave..." class="h-24 mb-4 !text-xs !bg-black/40"></textarea>
+                    <button onclick="UIManager.submitLeave()" class="cyber-btn !bg-red-600 !text-white">Submit to HOD</button>
+                </div>
+
+                <!-- Approver List (Only HOD / Lecturer) -->
+                <div id="leave-queue-container" class="hidden space-y-4">
+                    <p class="text-[10px] text-yellow-500 font-black uppercase tracking-widest">Pending Approvals</p>
+                    <div id="leave-queue" class="space-y-3"></div>
                 </div>
             </div>
 
         </main>
 
-        <!-- NAVIGATION -->
-        <nav id="nav-bar" class="bottom-nav hidden">
-            <button onclick="UIManager.switchTab('dashboard')" id="btn-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span class="mt-1">DASHBOARD</span></button>
+        <!-- Bottom Navigation Hub -->
+        <nav id="bottom-nav" class="bottom-nav hidden">
+            <button onclick="UIManager.switchTab('dashboard')" id="btn-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span class="mt-1">HUB</span></button>
             <button onclick="UIManager.switchTab('nexus')" id="btn-nexus" class="nav-item"><i data-lucide="users"></i><span class="mt-1">NEXUS</span></button>
             <button onclick="UIManager.switchTab('discuss')" id="btn-discuss" class="nav-item"><i data-lucide="message-square"></i><span class="mt-1">FEED</span></button>
-            <button onclick="UIManager.switchTab('support')" id="btn-support" class="nav-item"><i data-lucide="help-circle"></i><span class="mt-1">UTILITY</span></button>
+            <button onclick="UIManager.switchTab('leave')" id="btn-leave" class="nav-item"><i data-lucide="calendar"></i><span class="mt-1">LEAVE</span></button>
         </nav>
     </div>
 
+    <!-- UI Core Logic -->
     <script>
-        const CAMPUS_COORDS = { lat: 17.740697, lng: 83.321251 };
-        const ALLOWED_RADIUS = 0.3; // 300 meters
-
-        let USER = JSON.parse(localStorage.getItem('csync_user'));
-        let isSidebarOpen = false;
-        let regRole = "";
+        // CONFIGURATION: Map your Deployed Apps Script URL here
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_REPLACEME_YOUR_SCRIPT_ID/exec";
+        
+        let USER = JSON.parse(localStorage.getItem('csync_v3_user'));
+        let currentRole = "";
 
         const UIManager = {
             init() {
                 lucide.createIcons();
-                if (!USER) {
-                    this.switchView('view-roles');
-                } else {
+                if (USER) {
                     this.setupSession();
                 }
             },
 
             toggleSidebar() {
-                isSidebarOpen = !isSidebarOpen;
-                document.getElementById('sidebar').classList.toggle('open', isSidebarOpen);
-            },
-
-            switchView(id) {
-                document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active'));
-                document.getElementById(id).classList.add('view-active');
-                this.toggleSidebar(false);
+                document.getElementById('sidebar').classList.toggle('open');
             },
 
             switchTab(tab) {
-                const map = { 'dashboard': 'view-dashboard', 'nexus': 'view-nexus' };
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('nav-active'));
+                document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active'));
+                document.getElementById('view-' + tab).classList.add('view-active');
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
                 document.getElementById('btn-' + tab)?.classList.add('nav-active');
-                if (map[tab]) this.switchView(map[tab]);
-                if (tab === 'nexus') this.loadNexus();
-                if ("vibrate" in navigator) navigator.vibrate(10);
-            },
-
-            // REGISTRATION
-            openReg(role) {
-                regRole = role;
-                this.switchView('view-register');
-                document.getElementById('reg-title').innerText = role + " Enroll";
-                document.getElementById('stu-fields').style.display = (role === 'Student') ? 'block' : 'none';
                 
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-                    .then(s => document.getElementById('v-reg').srcObject = s);
+                if (tab === 'nexus') this.renderNexus();
+                if (tab === 'discuss') this.renderFeed();
+                if (tab === 'leave') this.renderLeaveQueue();
+                
+                document.getElementById('sidebar').classList.remove('open');
+                lucide.createIcons();
             },
 
-            async handleEnrollment() {
-                const id = document.getElementById('r-id').value;
+            openReg(role) {
+                currentRole = role;
+                document.getElementById('view-roles').classList.remove('view-active');
+                document.getElementById('view-register').classList.add('view-active');
+                document.getElementById('reg-title').innerText = role + " ENROLL";
+                
+                const extra = document.getElementById('role-extra-fields');
+                extra.innerHTML = "";
+                if (role === 'Student') {
+                    extra.innerHTML = `
+                        <select id="r-dept"><option>B.Sc Computer Science</option><option>AI & Data Science</option></select>
+                        <select id="r-year"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option></select>
+                    `;
+                } else {
+                    extra.innerHTML = `<input id="r-dept" placeholder="Department / Specialization">`;
+                }
+
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+                    .then(s => document.getElementById('v-reg').srcObject = s)
+                    .catch(() => alert("Camera permission required for Identity Binding."));
+            },
+
+            completeRegistration() {
                 const name = document.getElementById('r-name').value;
-                if (!id || !name) return alert("Fill all fields");
+                const id = document.getElementById('r-id').value;
+                if (!name || !id) return alert("All identity nodes must be populated.");
 
                 const canvas = document.createElement('canvas');
                 const video = document.getElementById('v-reg');
                 canvas.width = 150; canvas.height = 150;
                 canvas.getContext('2d').drawImage(video, 0, 0, 150, 150);
-                
+
                 USER = {
-                    id, name, role: regRole,
-                    photo: canvas.toDataURL('image/jpeg', 0.7),
-                    major: document.getElementById('r-major').value,
-                    year: document.getElementById('r-year').value
+                    id, name, role: currentRole,
+                    photo: canvas.toDataURL('image/jpeg', 0.6),
+                    dept: document.getElementById('r-dept')?.value || "General",
+                    year: document.getElementById('r-year')?.value || "Staff"
                 };
 
-                localStorage.setItem('csync_user', JSON.stringify(USER));
+                localStorage.setItem('csync_v3_user', JSON.stringify(USER));
+                
+                // Save to local peer database
+                let nexus = JSON.parse(localStorage.getItem('csync_nexus') || '[]');
+                nexus.push(USER);
+                localStorage.setItem('csync_nexus', JSON.stringify(nexus));
+
                 location.reload();
             },
 
             setupSession() {
-                this.switchTab('dashboard');
-                document.getElementById('nav-bar').classList.remove('hidden');
-                document.getElementById('u-name').innerText = USER.name;
-                document.getElementById('u-photo').src = USER.photo;
-                document.getElementById('u-photo-top').src = USER.photo;
-                document.getElementById('u-meta').innerText = USER.role === 'Student' ? `${USER.year} Year | ${USER.major}` : USER.role;
-                
-                this.refreshDashboard();
-                this.checkLocation();
+                document.getElementById('view-roles').classList.remove('view-active');
+                document.getElementById('view-dashboard').classList.add('view-active');
+                document.getElementById('bottom-nav').classList.remove('hidden');
+                document.getElementById('top-avatar').classList.remove('hidden');
+                document.getElementById('top-avatar').src = USER.photo;
+                document.getElementById('dash-photo').src = USER.photo;
+                document.getElementById('dash-name').innerText = USER.name;
+                document.getElementById('dash-role').innerText = `${USER.role} • ${USER.dept}`;
+
+                this.renderModules();
+                lucide.createIcons();
             },
 
-            refreshDashboard() {
-                const marked = localStorage.getItem('last_attendance') === new Date().toDateString();
-                const activePC = localStorage.getItem('active_pc');
+            renderModules() {
+                const container = document.getElementById('role-modules');
+                container.innerHTML = "";
 
-                document.getElementById('module-attendance').style.display = (!marked && USER.role === 'Student') ? 'block' : 'none';
-                document.getElementById('module-lab').style.display = (marked && !activePC && USER.role === 'Student') ? 'block' : 'none';
-                document.getElementById('module-active-pc').style.display = activePC ? 'block' : 'none';
-                if(activePC) document.getElementById('active-pc-display').innerText = activePC;
-            },
-
-            // GPS
-            checkLocation() {
-                if (!navigator.geolocation || USER.role !== 'Student') return;
-                
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const lat1 = pos.coords.latitude;
-                    const lon1 = pos.coords.longitude;
-                    const p = 0.017453292519943295;
-                    const c = Math.cos;
-                    const a = 0.5 - c((CAMPUS_COORDS.lat - lat1) * p)/2 + c(lat1 * p) * c(CAMPUS_COORDS.lat * p) * (1 - c((CAMPUS_COORDS.lng - lon1) * p))/2;
-                    const d = 12742 * Math.asin(Math.sqrt(a));
-
-                    if (d <= ALLOWED_RADIUS + (pos.coords.accuracy/1000)) {
-                        document.getElementById('btn-presence').disabled = false;
-                        document.getElementById('geo-msg').innerHTML = "<span class='text-emerald-400 font-bold'>CAMPUS SIGNAL LOCKED</span>";
-                        document.getElementById('geo-icon').style.color = "#10b981";
-                    } else {
-                        document.getElementById('geo-msg').innerHTML = `<span class='text-red-500'>OUTSIDE CAMPUS (${(d*1000).toFixed(0)}m)</span>`;
-                    }
-                }, null, { enableHighAccuracy: true });
-            },
-
-            markAttendance() {
-                localStorage.setItem('last_attendance', new Date().toDateString());
-                if ("vibrate" in navigator) navigator.vibrate([50, 30, 50]);
-                this.refreshDashboard();
-            },
-
-            // QR SCAN
-            startLabScan() {
-                const reader = document.getElementById('qr-reader');
-                reader.style.display = 'block';
-                const scanner = new Html5Qrcode("qr-reader");
-                
-                scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-                    const pcId = new URLSearchParams(text.split('?')[1]).get('sysId') || "LAB-PC";
-                    localStorage.setItem('active_pc', pcId);
-                    scanner.stop();
-                    reader.style.display = 'none';
-                    this.refreshDashboard();
-                });
-            },
-
-            killSession() {
-                if(confirm("End current session?")) {
-                    localStorage.removeItem('active_pc');
-                    this.refreshDashboard();
+                if (USER.role === 'Student') {
+                    container.innerHTML = `
+                        <div class="glass p-6 rounded-[2rem] text-center border-t-4 border-indigo-500">
+                            <i data-lucide="map-pin" class="w-8 h-8 mx-auto mb-2 text-indigo-400"></i>
+                            <p class="text-[10px] font-black uppercase text-slate-400 mb-6 tracking-widest">Campus GPS Handshake</p>
+                            <button onclick="UIManager.markAttendance()" class="cyber-btn">Mark Attendance</button>
+                        </div>
+                        <div id="lab-module" class="glass p-6 rounded-[2rem] text-center border-t-4 border-emerald-500">
+                            <i data-lucide="qr-code" class="w-8 h-8 mx-auto mb-2 text-emerald-400"></i>
+                            <p class="text-[10px] font-black uppercase text-slate-400 mb-6 tracking-widest">Workstation Scan</p>
+                            <button onclick="UIManager.startScan()" class="cyber-btn">Scan Lab PC</button>
+                            <div id="qr-box" class="mt-4 hidden rounded-2xl overflow-hidden"></div>
+                        </div>
+                    `;
+                } else if (USER.role === 'LabAssistant') {
+                    container.innerHTML = `
+                        <div class="glass p-6 rounded-[2rem] border-t-4 border-orange-500">
+                            <h5 class="text-[10px] font-black text-orange-500 uppercase mb-4 tracking-widest">Lab Station Pulse</h5>
+                            <div class="grid grid-cols-4 gap-2">
+                                ${Array(12).fill(0).map((_, i) => `<div class="h-8 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center justify-center text-[8px] font-bold">PC-${i+1}</div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else if (USER.role === 'HOD' || USER.role === 'Lecturer') {
+                    container.innerHTML = `
+                        <div class="glass p-6 rounded-[2rem] border-t-4 border-purple-500">
+                            <h5 class="text-[10px] font-black text-purple-500 uppercase mb-4 tracking-widest">Executive Dashboard</h5>
+                            <div class="flex justify-between items-center bg-black/30 p-4 rounded-xl">
+                                <span class="text-[10px] font-bold">Pending Leave Requests</span>
+                                <span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black" id="req-count">0</span>
+                            </div>
+                            <button onclick="UIManager.switchTab('leave')" class="w-full mt-4 text-purple-400 text-[10px] font-black uppercase tracking-widest">Open Ledger →</button>
+                        </div>
+                    `;
+                    this.updateLeaveCount();
                 }
             },
 
-            loadNexus() {
-                const list = document.getElementById('nexus-list');
-                // Display user as the first node
-                list.innerHTML = `
-                    <div class="glass p-4 rounded-2xl flex items-center gap-4">
-                        <img src="${USER.photo}" class="w-10 h-10 rounded-full border border-cyan-500">
-                        <div>
-                            <h5 class="text-xs font-bold uppercase">${USER.name} (YOU)</h5>
-                            <p class="text-[8px] text-slate-500 uppercase">${USER.major}</p>
-                        </div>
-                    </div>
-                `;
+            // GPS Attendance Simulation
+            markAttendance() {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    alert("Attendance Verified. GPS Handshake Successful.");
+                    localStorage.setItem('last_att', new Date().toDateString());
+                }, () => alert("GPS Timeout. Please ensure you are in the Computer Lab."));
             },
 
-            delinkDevice() {
-                if(confirm("Unbind identity from this node?")) {
-                    localStorage.clear();
+            // QR PC Handshake
+            startScan() {
+                const box = document.getElementById('qr-box');
+                box.classList.remove('hidden');
+                const scanner = new Html5Qrcode("qr-box");
+                scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 200 }, (decoded) => {
+                    alert("PC Handshake Successful. Session Started for ID: " + decoded);
+                    scanner.stop();
+                    box.classList.add('hidden');
+                }).catch(() => alert("Scanner Access Denied."));
+            },
+
+            // Nexus Rendering
+            renderNexus() {
+                const nexus = JSON.parse(localStorage.getItem('csync_nexus') || '[]');
+                const list = document.getElementById('nexus-list');
+                list.innerHTML = nexus.map(n => `
+                    <div class="glass p-4 rounded-2xl flex items-center gap-4">
+                        <img src="${n.photo}" class="w-10 h-10 rounded-full object-cover border border-white/5">
+                        <div>
+                            <h5 class="text-[11px] font-black uppercase">${n.name}</h5>
+                            <p class="text-[8px] text-slate-500 font-bold uppercase">${n.role} • ${n.dept}</p>
+                        </div>
+                        <button class="ml-auto text-cyan-400"><i data-lucide="message-square" class="w-4 h-4"></i></button>
+                    </div>
+                `).join('') || '<p class="text-center text-slate-600 text-[10px] uppercase py-10">Nexus is empty...</p>';
+                lucide.createIcons();
+            },
+
+            // Post Logic
+            addPost() {
+                const txt = document.getElementById('post-input').value;
+                if (!txt) return;
+                let feed = JSON.parse(localStorage.getItem('csync_feed') || '[]');
+                feed.unshift({ name: USER.name, role: USER.role, text: txt, time: new Date().toLocaleTimeString() });
+                localStorage.setItem('csync_feed', JSON.stringify(feed));
+                document.getElementById('post-input').value = "";
+                this.renderFeed();
+            },
+
+            renderFeed() {
+                const feed = JSON.parse(localStorage.getItem('csync_feed') || '[]');
+                document.getElementById('feed-list').innerHTML = feed.map(f => `
+                    <div class="glass p-5 rounded-2xl">
+                        <div class="flex justify-between items-center mb-3">
+                            <h5 class="text-[10px] font-black text-cyan-400 uppercase">${f.name} <span class="text-slate-600">[${f.role}]</span></h5>
+                            <span class="text-[8px] text-slate-500">${f.time}</span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">${f.text}</p>
+                    </div>
+                `).join('') || '<p class="text-center text-slate-600 text-[10px] uppercase py-10">Feed is silent...</p>';
+            },
+
+            // Leave Mgmt Logic
+            submitLeave() {
+                const reason = document.getElementById('lv-reason').value;
+                if (!reason) return;
+                let leaves = JSON.parse(localStorage.getItem('csync_leaves') || '[]');
+                leaves.push({ id: Date.now(), user: USER.name, role: USER.role, reason, status: 'Pending' });
+                localStorage.setItem('csync_leaves', JSON.stringify(leaves));
+                document.getElementById('lv-reason').value = "";
+                alert("Leave request dispatched to HOD desk.");
+            },
+
+            renderLeaveQueue() {
+                if (USER.role !== 'HOD' && USER.role !== 'Lecturer') return;
+                document.getElementById('leave-queue-container').classList.remove('hidden');
+                const leaves = JSON.parse(localStorage.getItem('csync_leaves') || '[]');
+                const queue = document.getElementById('leave-queue');
+                queue.innerHTML = leaves.filter(l => l.status === 'Pending').map(l => `
+                    <div class="glass p-4 rounded-2xl border-l-4 border-yellow-500">
+                        <h5 class="text-[10px] font-black uppercase mb-1">${l.user} <span class="text-slate-500 text-[8px]">(${l.role})</span></h5>
+                        <p class="text-[10px] text-slate-400 italic mb-4">"${l.reason}"</p>
+                        <div class="flex gap-2">
+                            <button onclick="UIManager.updateLeave(${l.id}, 'Approved')" class="bg-emerald-600 text-[8px] px-3 py-1.5 rounded-lg font-black">APPROVE</button>
+                            <button onclick="UIManager.updateLeave(${l.id}, 'Rejected')" class="bg-red-600 text-[8px] px-3 py-1.5 rounded-lg font-black">REJECT</button>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-[9px] text-slate-600 uppercase italic">Ledger is clear.</p>';
+            },
+
+            updateLeave(id, status) {
+                let leaves = JSON.parse(localStorage.getItem('csync_leaves') || '[]');
+                leaves = leaves.map(l => l.id === id ? { ...l, status } : l);
+                localStorage.setItem('csync_leaves', JSON.stringify(leaves));
+                this.renderLeaveQueue();
+                this.updateLeaveCount();
+            },
+
+            updateLeaveCount() {
+                const leaves = JSON.parse(localStorage.getItem('csync_leaves') || '[]');
+                const count = leaves.filter(l => l.status === 'Pending').length;
+                const el = document.getElementById('req-count');
+                if (el) el.innerText = count;
+            },
+
+            // Groq AI Logic
+            async askAI() {
+                const query = document.getElementById('ai-input').value;
+                const respBox = document.getElementById('ai-response');
+                if (!query) return;
+
+                respBox.classList.remove('hidden');
+                respBox.innerText = "Consulting Sovereign Oracle via Groq Neural Cloud...";
+
+                try {
+                    const response = await fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({ action: "groq_query", query: query, user: USER.name, role: USER.role })
+                    });
+                    const data = await response.text();
+                    respBox.innerText = data;
+                } catch (e) {
+                    respBox.innerText = `[Oracle]: Connection to Apps Script backend failed. Please verify APPS_SCRIPT_URL is configured correctly.`;
+                }
+            },
+
+            logout() {
+                if (confirm("Terminate Sovereign Link and Unbind this device?")) {
+                    localStorage.removeItem('csync_v3_user');
                     location.reload();
                 }
             }
