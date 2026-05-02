@@ -367,18 +367,56 @@
             },
 
             async askAI() {
-                const q = document.getElementById('ai-q').value;
-                const r = document.getElementById('ai-res');
-                if(!q) return;
-                r.classList.remove('hidden'); r.innerHTML = `<span class="animate-pulse">Consulting Neural Oracle (Llama 3.3)...</span>`;
-                try {
-                    const queryUrl = `${APPS_URL}?action=groq&query=${encodeURIComponent(q)}&user=${encodeURIComponent(USER.name)}&role=${encodeURIComponent(USER.role)}`;
-                    const res = await fetch(queryUrl, { method: 'GET', redirect: 'follow' });
-                    r.innerText = await res.text();
-                    document.getElementById('ai-q').value = "";
-                } catch(e) { r.innerText = "Sync Error. Check Core Hub."; }
-            },
+    const q = document.getElementById('ai-q').value.trim();
+    const r = document.getElementById('ai-res');
+    const b = document.getElementById('ai-btn');
 
+    // ✅ Prevent empty queries
+    if (!q || q.length < 2) {
+        alert("Enter a valid question");
+        return;
+    }
+
+    // UI loading state
+    r.classList.remove('hidden');
+    r.innerHTML = `<span class="animate-pulse">⚡ Syncing Neural Oracle...</span>`;
+    b.disabled = true;
+
+    try {
+        const url = `${APPS_URL}?action=groq&query=${encodeURIComponent(q)}&user=${encodeURIComponent(USER.name)}&role=${encodeURIComponent(USER.role)}`;
+
+        const res = await fetch(url, {
+            method: 'GET',
+            redirect: 'follow'
+        });
+
+        // ✅ Handle HTTP errors
+        if (!res.ok) {
+            throw new Error("Server not responding");
+        }
+
+        let text = await res.text();
+
+        // ✅ Handle empty response
+        if (!text || text.trim().length === 0) {
+            text = "⚠️ Empty response from Oracle.";
+        }
+
+        // ✅ Final output
+        r.innerText = text;
+
+        // clear input
+        document.getElementById('ai-q').value = "";
+
+    } catch (e) {
+        console.error("Oracle Error:", e);
+
+        // ✅ Proper error message
+        r.innerText = "⚠️ Connection lost. Try again.";
+    } finally {
+        b.disabled = false;
+    }
+}
             async nexusSearch() {
                 const q = document.getElementById('nexus-q').value;
                 const resBox = document.getElementById('search-results');
