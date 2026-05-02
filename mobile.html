@@ -366,33 +366,73 @@
             },
 
             async askAI() {
-                const qInp = document.getElementById('ai-q');
-                const q = qInp.value.trim();
-                const r = document.getElementById('ai-res');
-                const b = document.getElementById('ai-btn');
-                const statusTag = document.getElementById('ai-status');
+    const qInp = document.getElementById('ai-q');
+    const q = qInp.value.trim();
+    const r = document.getElementById('ai-res');
+    const b = document.getElementById('ai-btn');
+    const statusTag = document.getElementById('ai-status');
 
-                if (!q || q.length < 2) return alert("Enter valid query");
-                r.classList.remove('hidden');
-                r.innerHTML = `<div class="flex items-center gap-2"><div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div><span class="text-[9px] font-black uppercase shimmer">Neural Handshake...</span></div>`;
-                b.disabled = true;
+    // ✅ Input validation
+    if (!q || q.length < 2) {
+        alert("Enter valid query");
+        return;
+    }
 
-                try {
-                    const url = `${APPS_URL}?action=groq&query=${encodeURIComponent(q)}&user=${encodeURIComponent(USER.name)}&role=${encodeURIComponent(USER.role)}`;
-                    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-                    let text = await res.text();
-                    
-                    if (text.includes('[BRAIN]')) { if(statusTag) statusTag.innerText = "70B Brain Active"; text = text.replace('[BRAIN]', ''); }
-                    else { if(statusTag) statusTag.innerText = "8B Backbone Active"; text = text.replace('[BACKBONE]', ''); }
+    r.classList.remove('hidden');
+    r.innerHTML = `<div class="flex items-center gap-2">
+        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+        <span class="text-[9px] font-black uppercase shimmer">Neural Handshake...</span>
+    </div>`;
 
-                    r.innerText = text.trim();
-                    qInp.value = "";
-                    if ("vibrate" in navigator) navigator.vibrate(10);
-                } catch (e) {
-                    r.innerHTML = `<span class="text-red-500 font-bold uppercase text-[9px]">⚠️ Neural Hub Sync Failure.</span>`;
-                } finally { b.disabled = false; }
-            },
+    b.disabled = true;
 
+    try {
+        const url = `${APPS_URL}?action=groq&query=${encodeURIComponent(q)}&user=${encodeURIComponent(USER.name)}&role=${encodeURIComponent(USER.role)}`;
+
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+
+        // ✅ HTTP error handling
+        if (!res.ok) {
+            throw new Error("Server not reachable");
+        }
+
+        let text = await res.text();
+
+        // ✅ Empty / invalid response handling
+        if (!text || text.trim().length === 0) {
+            text = "⚠️ Empty response from Oracle.";
+        }
+
+        // ✅ Clean model indicator (safe)
+        if (text.includes('[BRAIN]')) {
+            statusTag && (statusTag.innerText = "70B Brain Active");
+            text = text.replace('[BRAIN]', '');
+        } else if (text.includes('[BACKBONE]')) {
+            statusTag && (statusTag.innerText = "8B Backbone Active");
+            text = text.replace('[BACKBONE]', '');
+        } else {
+            statusTag && (statusTag.innerText = "Oracle Active");
+        }
+
+        // ✅ Final output
+        r.innerText = text.trim();
+
+        // clear input
+        qInp.value = "";
+
+        // vibration feedback
+        if ("vibrate" in navigator) navigator.vibrate(10);
+
+    } catch (e) {
+        console.error("Oracle Error:", e);
+
+        r.innerHTML = `<span class="text-red-500 font-bold uppercase text-[9px]">
+            ⚠️ Neural Hub Sync Failure. Retry.
+        </span>`;
+    } finally {
+        b.disabled = false;
+    }
+}
             async nexusSearch() {
                 const q = document.getElementById('nexus-q').value;
                 const resBox = document.getElementById('search-results');
