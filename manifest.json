@@ -1,71 +1,37 @@
 {
-  "name": "CSync | Dr. V.S. Krishna GDC (A)",
-  "short_name": "CSync",
-  "description": "Sovereign AI Attendance & Lab Management Ecosystem for the Dept of Computer Science",
-  "start_url": "index.html",
+  "name": "C-Sync Sovereign Hub",
+  "short_name": "C-Sync",
+  "description": "Institutional Management Ecosystem for Dr. VSK GDC (A)",
+  "start_url": "mobile.html",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#020617",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "portrait",
   "scope": "/",
-  "lang": "en-US",
-  "dir": "ltr",
-  "categories": [
-    "education",
-    "productivity"
-  ],
   "icons": [
     {
-      "src": "assets/img/icon-192.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/1162/1162456.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
-      "src": "assets/img/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/img/icon-512.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/1162/1162456.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "assets/img/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
     {
       "name": "Mark Attendance",
-      "short_name": "Attendance",
-      "description": "Verify your daily presence via Biometrics",
-      "url": "index.html?action=attendance",
-      "icons": [
-        {
-          "src": "assets/img/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "url": "mobile.html#attendance",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/1162/1162456.png", "sizes": "192x192" }]
     },
     {
-      "name": "Scan Lab PC",
-      "short_name": "Lab Scan",
-      "description": "Unlock a workstation via QR scan",
-      "url": "index.html?action=scan",
-      "icons": [
-        {
-          "src": "assets/img/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "name": "Search Nexus",
+      "url": "mobile.html#search",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/1162/1162456.png", "sizes": "192x192" }]
     }
-  ],
-  "prefer_related_applications": false,
-  "related_applications": []
+  ]
 }
