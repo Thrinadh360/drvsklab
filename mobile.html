@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>C-Sync | Sovereign Personal Node</title>
     
-    <!-- PWA & Native Meta -->
+    <!-- Native App Experience Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
 
-    <!-- Sovereign Dependencies -->
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -28,57 +28,51 @@
         .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 14px; padding: 14px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-transform: uppercase; font-size: 10px; width: 100%; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(0,242,255,0.15); }
         .cyber-btn:active { transform: scale(0.96); opacity: 0.8; }
 
-        /* View Navigation */
+        /* Navigation Architecture */
         .view-container { display: none; height: 100%; overflow-y: auto; padding-bottom: 240px; scroll-behavior: smooth; }
         .view-active { display: block !important; animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Biometric HUDs */
+        /* Biometric Overlays */
         .face-gate { position: fixed; inset: 0; background: black; z-index: 9000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .video-box { width: 320px; height: 320px; border-radius: 50%; border: 3px solid var(--accent); overflow: hidden; margin-bottom: 20px; background: #000; position: relative; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
-        .video-box::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--accent); animation: scan 2s infinite linear; }
+        .big-cam-box { width: 320px; height: 320px; border-radius: 50%; border: 4px solid var(--accent); overflow: hidden; margin-bottom: 20px; background: #000; position: relative; box-shadow: 0 0 30px rgba(0,242,255,0.3); }
+        .big-cam-box::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--accent); animation: scan 2s infinite linear; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         
-        input, select, textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 14px !important; border-radius: 12px !important; width: 100%; font-size: 14px; }
-        
+        input, select, textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 14px !important; border-radius: 12px !important; width: 100%; font-size: 14px; transition: 0.3s; }
+        input:focus { border-color: var(--accent) !important; box-shadow: 0 0 10px rgba(0,242,255,0.1); }
+
         .bottom-nav { position: fixed; bottom: 40px; left: 20px; right: 20px; height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
         .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; background: none; border: none; transition: 0.3s; }
         .nav-active { color: var(--accent); filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
         
         .tech-footer { position: fixed; bottom: 0; width: 100%; padding: 12px; background: #000; border-top: 1px solid #111; text-align: center; font-size: 7px; color: #444; z-index: 5000; letter-spacing: 1px; }
-        .close-reg { position: absolute; top: 25px; right: 25px; cursor: pointer; color: #475569; z-index: 50; transition: 0.3s; }
-        .close-reg:hover { color: #ef4444; transform: rotate(90deg); }
-
+        .close-view { position: absolute; top: 25px; right: 25px; cursor: pointer; color: #475569; z-index: 100; }
+        
         /* Oracle Chat Scroller */
         #ai-chat-scroller { height: calc(100dvh - 350px); overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .ai-msg { align-self: flex-start; background: rgba(0, 242, 255, 0.05); border-left: 2px solid var(--accent); padding: 15px; border-radius: 0 15px 15px 15px; font-size: 12px; line-height: 1.6; color: #cbd5e1; max-width: 85%; }
         .user-msg { align-self: flex-end; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 15px 15px 0 15px; font-size: 12px; color: #fff; max-width: 85%; text-align: right; }
 
         .rank-card { border-left: 4px solid #1e293b; transition: 0.3s; }
-        .rank-1 { border-color: #ffd700; background: rgba(255, 215, 0, 0.05); }
-        .rank-2 { border-color: #c0c0c0; background: rgba(192, 192, 192, 0.05); }
-        .rank-3 { border-color: #cd7f32; background: rgba(205, 127, 50, 0.05); }
-        .diamond-status { border-color: var(--accent) !important; background: rgba(0, 242, 255, 0.05) !important; box-shadow: 0 0 20px rgba(0, 242, 255, 0.15); }
-        
-        .shimmer { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
-        @keyframes shimmer { to { background-position: -200% 0; } }
+        .diamond-status { border-color: var(--accent) !important; background: rgba(0, 242, 255, 0.05) !important; }
 
         @media (min-width: 1025px) { #desktop-blocker { display: flex; } #app-wrapper { display: none; } }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- 1. HARDWARE PERIMETER -->
+    <!-- HARDWARE GUARD: MOBILE ONLY -->
     <div id="desktop-blocker">
         <i data-lucide="smartphone" class="w-16 h-16 text-cyan-400 mb-6 animate-bounce"></i>
-        <h1 class="font-['Orbitron'] text-white text-xl mb-4 uppercase tracking-tighter">Mobile Only</h1>
+        <h1 class="font-['Orbitron'] text-white text-xl mb-4 uppercase">Node Locked</h1>
         <p class="text-slate-500 text-xs uppercase font-bold max-w-xs">C-Sync requires hardware biometric binding. Please open this node on your registered smartphone.</p>
     </div>
 
     <div id="app-wrapper" class="flex flex-col h-full">
 
-        <!-- CLOSED SOURCE PROTECTION -->
+        <!-- CLOSED SOURCE PERIMETER -->
         <script>
             document.onkeydown = e => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) return false; };
             setInterval(() => { (function(){}.constructor("debugger")()) }, 200);
@@ -87,16 +81,16 @@
         <!-- STATUS OVERLAY: PENDING -->
         <div id="pending-screen" class="fixed inset-0 bg-black z-[9999] hidden flex flex-col items-center justify-center p-10 text-center">
             <div class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-8"></div>
-            <h2 class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter">Verification Required</h2>
-            <p class="text-xs text-slate-400 leading-relaxed font-bold uppercase tracking-widest">Broadcast successful. Access will be unlocked once Faculty verifies your node profile.</p>
-            <button onclick="location.reload()" class="mt-12 text-cyan-400 text-[10px] font-black uppercase underline">Check Sync</button>
+            <h2 class="font-['Orbitron'] text-cyan-400 text-xl mb-4">Node Pending</h2>
+            <p class="text-xs text-slate-400 leading-relaxed font-bold uppercase">Identity broadcast complete. Awaiting faculty verification.</p>
+            <button onclick="location.reload()" class="mt-12 text-cyan-400 text-[10px] font-black uppercase underline">Check Status</button>
         </div>
 
-        <!-- BIOMETRIC VERIFICATION HUD -->
+        <!-- BIOMETRIC AUTH OVERLAY -->
         <div id="face-gate" class="face-gate">
-            <div class="video-box"><video id="auth-video" autoplay muted playsinline class="w-full h-full object-cover"></video></div>
+            <div class="video-box" style="width:280px; height:280px;"><video id="auth-video" autoplay muted playsinline class="w-full h-full object-cover"></video></div>
             <h2 class="font-['Orbitron'] text-cyan-400 text-lg animate-pulse uppercase">Neural Handshake</h2>
-            <p class="text-[9px] text-slate-500 mt-2 uppercase tracking-widest font-black">Syncing Face & GPS Coordinates</p>
+            <p class="text-[9px] text-slate-500 mt-2 uppercase tracking-widest font-black">Syncing Biometrics & GPS coordinates</p>
         </div>
 
         <!-- SIDEBAR -->
@@ -109,11 +103,12 @@
                 <button onclick="UI.switchTab('dashboard')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Hub</button>
                 <button id="side-search" onclick="UI.switchTab('search')" class="hidden flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="search" class="w-4 h-4"></i> Nexus Search</button>
                 <button id="side-rank" onclick="UI.switchTab('rankings')" class="hidden flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="trophy" class="w-4 h-4"></i> Valhalla</button>
-                <button id="side-id" onclick="UI.showIDCard()" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="contact-2" class="w-4 h-4"></i> Digital ID</button>
+                <button onclick="UI.switchTab('profile')" class="flex items-center gap-4 text-xs font-bold uppercase"><i data-lucide="user-cog" class="w-4 h-4"></i> Profile Settings</button>
             </nav>
             <button onclick="UI.logout()" class="text-red-500 font-bold text-[10px] mt-10 uppercase flex items-center gap-2"><i data-lucide="log-out" class="w-3 h-3"></i> Unbind Device</button>
         </div>
 
+        <!-- HEADER -->
         <header class="flex justify-between items-center px-6 py-6 border-b border-white/5 bg-[#000000] z-[1002]">
             <div id="h-left">
                 <button id="btn-menu" onclick="UI.toggleSidebar()"><i data-lucide="menu" class="text-cyan-400"></i></button>
@@ -125,66 +120,46 @@
 
         <main class="flex-1 px-6 pt-4 overflow-hidden relative">
             
-            <!-- VIEW: START HUB -->
+            <!-- VIEW: HUB (ROLE SELECTION) -->
             <div id="view-roles" class="view-container view-active pt-6">
                 <h2 class="text-center text-[10px] text-slate-500 font-bold uppercase mb-8 tracking-widest">Identify Node Profile</h2>
-                <div class="grid gap-3">
-                    <button onclick="UI.openReg('Student')" class="glass p-5 rounded-2xl text-left border-l-4 border-cyan-500 font-black uppercase text-[10px]">Student (Major)</button>
-                    <button onclick="UI.openReg('Minor')" class="glass p-5 rounded-2xl text-left border-l-4 border-emerald-500 font-black uppercase text-[10px]">Minor Student</button>
-                    <button onclick="UI.openReg('Guest')" class="glass p-5 rounded-2xl text-left border-l-4 border-slate-400 font-black uppercase text-[10px]">Guest Node</button>
-                    <div class="border-t border-white/5 my-2"></div>
-                    <button onclick="UI.openReg('Lecturer')" class="glass p-5 rounded-2xl text-left border-l-4 border-indigo-500 font-black uppercase text-[10px]">Lecturer</button>
-                    <button onclick="UI.openReg('Lab Assistant')" class="glass p-5 rounded-2xl text-left border-l-4 border-orange-500 font-black uppercase text-[10px]">Lab Assistant</button>
-                    <button id="btn-hod-reg" onclick="UI.openReg('HOD')" class="glass p-5 rounded-2xl text-left border-l-4 border-purple-500 font-black uppercase text-[10px]">HOD</button>
-                    <button onclick="UI.openReg('Alumni')" class="glass p-5 rounded-2xl text-left border-l-4 border-slate-700 font-black uppercase text-[10px]">Alumni</button>
+                <div class="grid gap-3" id="role-grid">
+                    <!-- Standard roles injected here -->
                 </div>
             </div>
 
-            <!-- VIEW: ENROLLMENT -->
+            <!-- VIEW: REGISTRATION -->
             <div id="view-register" class="view-container relative">
-                <div class="close-reg" onclick="UI.switchView('view-roles')"><i data-lucide="x-circle" class="w-8 h-8"></i></div>
+                <div class="close-view" onclick="UI.switchView('view-roles')"><i data-lucide="x-circle" class="w-8 h-8"></i></div>
                 <div class="glass p-8 rounded-[3rem] text-center border-t-2 border-cyan-400">
                     <h2 id="reg-title" class="font-['Orbitron'] text-cyan-400 text-lg mb-6 uppercase tracking-widest italic">Enroll</h2>
                     
-                    <div class="flex justify-center gap-4 mb-8">
-                        <div class="text-center" onclick="UI.captureFaceKey()">
-                            <p class="text-[7px] text-cyan-400 font-black mb-2 uppercase">Biometrics</p>
-                            <div class="video-box" style="width:100px; height:100px; border-width:2px; margin-bottom:10px;">
-                                <video id="v-reg-cam" autoplay muted playsinline></video>
-                                <img id="face-captured" class="hidden w-full h-full object-cover">
-                            </div>
-                            <p id="face-stat" class="text-[6px] text-red-500 font-black uppercase animate-pulse">Tap Circle</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-[7px] text-slate-500 font-black mb-2 uppercase">Profile Pic</p>
-                            <div class="video-box" style="width:100px; height:100px; border-width:2px; border-style:dashed; margin-bottom:10px;" onclick="document.getElementById('f-upload').click()">
-                                <img id="profile-preview" class="hidden w-full h-full object-cover"><i data-lucide="upload" id="up-ico" class="w-5 h-5 text-slate-700"></i>
-                            </div>
-                            <p id="prof-stat" class="text-[6px] text-slate-500 font-black uppercase">Upload</p>
-                        </div>
+                    <div class="big-cam-box" onclick="UI.captureFaceKey()">
+                        <video id="v-reg-cam" autoplay muted playsinline></video>
+                        <img id="face-captured" class="hidden w-full h-full object-cover">
                     </div>
-                    <input type="file" id="f-upload" class="hidden" accept="image/*" onchange="UI.previewProfile(this)">
+                    <p id="face-stat" class="text-[7px] text-red-500 font-black uppercase mb-8 animate-pulse">Tap camera to bind face key</p>
 
-                    <div class="space-y-4">
+                    <div class="space-y-4 text-left">
                         <input id="r-id" placeholder="Roll No / Staff ID">
                         <input id="r-name" placeholder="Full Name">
                         <div id="dept-gate"></div>
                         <select id="r-year" class="hidden"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
-                        <input id="r-phone" type="tel" placeholder="Your Mobile Number">
+                        <input id="r-phone" type="tel" placeholder="Mobile Number">
                         <div id="parent-tg-gate" class="hidden"><input id="r-parent-tg" placeholder="Guardian Telegram ID"></div>
-                        <button onclick="UI.register()" class="cyber-btn mt-6 shadow-[0_0_20px_rgba(0,242,255,0.2)]">Initialize Node</button>
+                        <button onclick="UI.register()" id="btn-reg-main" class="cyber-btn mt-6">Initialize Node</button>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW: DASHBOARD (PRIMARY) -->
+            <!-- VIEW: DASHBOARD -->
             <div id="view-dashboard" class="view-container space-y-6">
                 <div class="glass p-5 rounded-[2.5rem] flex items-center justify-between border-l-4 border-cyan-400 shimmer">
                     <div class="flex items-center gap-4">
                         <img id="d-avatar" class="w-16 h-16 rounded-full border-2 border-white/10 object-cover shadow-xl">
                         <div>
                             <h4 id="d-greet" class="text-[9px] text-slate-500 font-black uppercase tracking-tighter">Welcome</h4>
-                            <h4 id="d-name" class="font-black text-sm uppercase text-white">Candidate</h4>
+                            <h4 id="d-name" class="font-black text-sm uppercase text-white">...</h4>
                             <p id="d-meta" class="text-[8px] text-slate-400 font-bold uppercase"></p>
                         </div>
                     </div>
@@ -193,17 +168,25 @@
                         <div id="d-stars" class="text-[9px] text-yellow-500 font-black">⭐ 0</div>
                     </div>
                 </div>
+
+                <!-- Active Workstation Module -->
+                <div id="active-pc-mod" class="hidden glass p-6 rounded-[2rem] text-center border-t-4 border-orange-500">
+                    <p class="text-[8px] text-slate-500 font-bold uppercase mb-1">Active Session</p>
+                    <h2 id="active-pc-id" class="text-3xl font-black text-white italic mb-6">CS-XX</h2>
+                    <button onclick="UI.remoteLogout()" class="cyber-btn !bg-red-600 !text-white">Terminate Session</button>
+                </div>
+
                 <div id="module-stack" class="space-y-4"></div>
             </div>
 
             <!-- VIEW: NEURAL ORACLE (FULL CHAT) -->
             <div id="view-oracle" class="view-container !p-0">
                 <div id="ai-chat-scroller">
-                    <div class="ai-msg">Neural Link Active. Logic by M. Thrinadh for Dr. VSK GDC (A). Responses align to top for precision.</div>
+                    <div class="ai-msg">Neural Hub Active. Oracle logic by M. Thrinadh for Dr. VSK GDC (A). Responses align to top for precision.</div>
                 </div>
                 <div class="fixed bottom-[130px] left-6 right-6 flex gap-2 glass p-2 rounded-2xl backdrop-blur-3xl border-t border-white/10">
-                    <input id="ai-q" placeholder="Neural command..." class="!py-3 !text-xs !bg-black/40 border-none text-white rounded-xl px-4 flex-1">
-                    <button onclick="UI.askAI()" id="ai-btn" class="bg-cyan-500 text-black px-6 rounded-xl text-[10px] font-black uppercase shadow-lg">Sync</button>
+                    <input id="ai-q" placeholder="Enter command..." class="!py-3 !text-xs !bg-black/40 border-none text-white rounded-xl px-4 flex-1">
+                    <button onclick="UI.askAI()" id="ai-btn" class="bg-cyan-500 text-black px-6 rounded-xl text-[10px] font-black uppercase">Sync</button>
                 </div>
             </div>
 
@@ -217,10 +200,28 @@
                 <div id="search-results" class="space-y-3"></div>
             </div>
 
-            <!-- VIEW: RANKINGS -->
+            <!-- VIEW: VALHALLA RANKINGS -->
             <div id="view-rankings" class="view-container">
-                <h3 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase tracking-tighter">Valhalla Leaderboard</h3>
+                <h3 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase tracking-tighter">Valhalla Rankings</h3>
                 <div id="rank-list" class="space-y-3"></div>
+            </div>
+
+            <!-- VIEW: PROFILE SETTINGS (EDITOR) -->
+            <div id="view-profile" class="view-container">
+                <h3 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase">Profile Control</h3>
+                <div class="glass p-8 rounded-[2.5rem] space-y-6">
+                    <div class="text-center relative">
+                        <img id="edit-preview" class="w-32 h-32 mx-auto rounded-full border-2 border-cyan-400 object-cover shadow-2xl">
+                        <button onclick="document.getElementById('edit-f-up').click()" class="absolute bottom-0 right-1/2 translate-x-12 bg-black p-2 rounded-full border border-white/10"><i data-lucide="camera" class="w-4 h-4 text-cyan-400"></i></button>
+                        <input type="file" id="edit-f-up" class="hidden" accept="image/*" onchange="UI.previewEdit(this)">
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex flex-col gap-1"><label class="text-[8px] font-black text-slate-500 px-2 uppercase">Full Name</label><input id="edit-name" placeholder="Name"></div>
+                        <div class="flex flex-col gap-1"><label class="text-[8px] font-black text-slate-500 px-2 uppercase">Contact No</label><input id="edit-phone" placeholder="Phone"></div>
+                        <div id="edit-alu-fields" class="hidden flex flex-col gap-1"><label class="text-[8px] font-black text-slate-500 px-2 uppercase">Telegram ID</label><input id="edit-tg" placeholder="Telegram ID"></div>
+                    </div>
+                    <button onclick="UI.submitProfileUpdate()" id="btn-edit-save" class="cyber-btn mt-4">Save Hub Node Changes</button>
+                </div>
             </div>
 
         </main>
@@ -229,34 +230,37 @@
             <button onclick="UI.switchTab('dashboard')" id="nav-dashboard" class="nav-item nav-active"><i data-lucide="shield-check"></i><span class="mt-1 text-[7px]">HUB</span></button>
             <button onclick="UI.switchTab('oracle')" id="nav-oracle" class="nav-item"><i data-lucide="zap"></i><span class="mt-1 text-[7px]">ORACLE</span></button>
             <button onclick="UI.switchTab('search')" id="nav-search" class="nav-item"><i data-lucide="search"></i><span class="mt-1 text-[7px]">NEXUS</span></button>
+            <button onclick="UI.switchTab('rankings')" id="nav-rankings" class="nav-item"><i data-lucide="trophy"></i><span class="mt-1 text-[7px]">RANK</span></button>
         </nav>
 
         <footer class="tech-footer">
-            &copy; <span id="copy-year"></span> | Developer: M. Thrinadh | Dr. VSK GDC (A).
+            &copy; <span id="copy-year"></span> | Developer: M. Thrinadh | Dept. of CS | Dr. VSK GDC (A).
         </footer>
     </div>
 
     <!-- QR OVERLAY -->
     <div id="qr-modal" class="fixed inset-0 bg-black/95 z-[9999] hidden flex flex-col items-center justify-center p-10">
         <button onclick="UI.closeQR()" class="absolute top-10 right-10 text-white"><i data-lucide="x" class="w-8 h-8"></i></button>
-        <div id="qr-reader" class="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-cyan-400"></div>
-        <p class="text-cyan-400 font-['Orbitron'] mt-8 animate-pulse text-xs uppercase tracking-widest text-center">Handshake Active</p>
+        <div id="qr-reader" class="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-cyan-400 shadow-[0_0_25px_rgba(0,242,255,0.2)]"></div>
+        <p id="qr-status" class="text-cyan-400 font-['Orbitron'] mt-8 animate-pulse text-xs uppercase tracking-widest text-center">Handshake Active</p>
     </div>
 
     <script>
         const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
         const UUID = btoa(navigator.userAgent + screen.width + screen.height);
-        const COLLEGE_COORDS = { lat: 17.740697, lng: 83.321251 };
+        const COLLEGE_COORDS = { lat: 17.74069743725532, lng: 83.32125099999946 };
         
         let USER = JSON.parse(localStorage.getItem('csync_v105_user'));
-        let faceData = "", profileData = "", isArchived = false;
+        let faceData = "", profileData = "", isArchived = false, newEditPhoto = null;
 
         const UI = {
             async init() {
                 lucide.createIcons();
                 document.getElementById('copy-year').innerText = new Date().getFullYear();
                 
-                if (!(/Android|iPhone|iPad/i.test(navigator.userAgent)) && window.innerWidth > 1024) {
+                // Hardware Check
+                const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                if (!isMobile && window.innerWidth > 1024) {
                     document.getElementById('desktop-blocker').style.display = 'flex';
                     document.getElementById('app-wrapper').remove(); return;
                 }
@@ -268,44 +272,15 @@
                         const status = await res.text();
                         if(status === "Approved") this.boot();
                         else if(status === "Archived") { isArchived = true; this.boot(); }
-                        else if(status === "Pending") this.lockScreen("Awaiting Verification", "Node profile requires faculty authorization.");
-                        else if(status === "DEVICE_MISMATCH") this.lockScreen("Hardware Locked", "This Roll No is bound to another hardware UUID.");
+                        else if(status === "Pending") this.lockScreen("Awaiting Verification", "Node profile requires authorization.");
+                        else if(status === "DEVICE_MISMATCH") this.lockScreen("Hardware Locked", "This node is bound to another hardware node.");
                     } catch(e) { this.boot(); } 
                 } else {
                     const idRes = await fetch(`${APPS_URL}?action=identify_device&uuid=${UUID}`);
                     const idData = await idRes.json();
-                    if(idData.status === "BOUND") { USER = idData; this.boot(); }
-                    else { this.checkHOD(); }
+                    if(idData.status === "BOUND") { USER = idData; localStorage.setItem('csync_v105_user', JSON.stringify(USER)); this.boot(); }
+                    else { this.checkHOD(); this.renderRoles(); }
                 }
-            },
-
-            async askAI() {
-                const qInp = document.getElementById('ai-q');
-                const q = qInp.value.trim();
-                const r = document.getElementById('ai-chat-scroller');
-                const b = document.getElementById('ai-btn');
-                if (!q) return;
-
-                r.innerHTML += `<div class="user-msg">${q}</div>`;
-                qInp.value = "";
-                const tempId = "ai-" + Date.now();
-                r.innerHTML += `<div class="ai-msg" id="${tempId}"><span class="animate-pulse italic text-cyan-400">Syncing with Oracle...</span></div>`;
-                r.scrollTop = r.scrollHeight;
-                b.disabled = true;
-
-                try {
-                    const s = isArchived ? "Archived" : "Approved";
-                    const url = `${APPS_URL}?action=groq&query=${encodeURIComponent(q)}&user=${encodeURIComponent(USER.name)}&role=${encodeURIComponent(USER.role)}&status=${s}`;
-                    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-                    const text = await res.text();
-                    
-                    const el = document.getElementById(tempId);
-                    el.innerText = text;
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    if ("vibrate" in navigator) navigator.vibrate(5);
-                } catch (e) {
-                    document.getElementById(tempId).innerText = "Hub Sync failure.";
-                } finally { b.disabled = false; }
             },
 
             boot() {
@@ -320,56 +295,27 @@
                 this.renderRankings();
             },
 
-            renderModules() {
-                const c = document.getElementById('module-stack');
-                c.innerHTML = "";
-                if (isArchived) { c.innerHTML = `<div class="glass p-8 border-t-4 border-red-500 text-center uppercase text-[10px] font-black">Node Archived</div>`; return; }
-                if(USER.role !== 'Alumni') c.innerHTML += `<div class="glass p-8 rounded-[2rem] text-center border-t-4 border-emerald-500"><button onclick="UI.openQR()" class="cyber-btn">Station Handshake</button></div>`;
-                if(USER.role.includes('Student')) c.innerHTML += `<div class="glass p-8 rounded-[2rem] text-center border-t-4 border-cyan-500"><button onclick="UI.attendance()" class="cyber-btn !bg-white !text-black">Mark Biometric Presence</button></div>`;
-                if(['Lecturer','HOD'].includes(USER.role)) c.innerHTML += `<div class="glass p-8 rounded-[2rem] text-center border-t-4 border-yellow-500"><button onclick="UI.openQR()" class="cyber-btn !bg-yellow-500">Authorize Desktop Hub</button></div>`;
+            renderRoles() {
+                const g = document.getElementById('role-grid');
+                g.innerHTML = "";
+                ['Student', 'Minor', 'Guest', 'Lecturer', 'Lab Assistant', 'HOD', 'Alumni'].forEach(r => {
+                    g.innerHTML += `<button onclick="UI.openReg('${r}')" class="glass p-5 rounded-2xl text-left border-l-4 border-cyan-500 font-bold uppercase text-[10px]">${r}</button>`;
+                });
+                this.switchView('view-roles');
             },
 
-            async nexusSearch() {
-                const q = document.getElementById('nexus-q').value;
-                const resBox = document.getElementById('search-results');
-                if(q.length < 2) { resBox.innerHTML = ""; return; }
-                const res = await fetch(`${APPS_URL}?action=search_nexus&query=${q}`);
-                const data = await res.json();
-                resBox.innerHTML = data.map(r => `
-                    <div class="glass p-4 rounded-2xl flex items-center gap-4">
-                        <img src="${r.pic || 'https://ui-avatars.com/api/?name='+r.name}" class="w-10 h-10 rounded-full border border-white/10 object-cover">
-                        <div class="flex-1"><h5 class="text-[10px] font-black uppercase text-white">${r.name}</h5><p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest">${r.id} • ${r.type}</p></div>
-                    </div>
-                `).join('');
-            },
-
-            async renderRankings() {
-                const res = await fetch(`${APPS_URL}?action=get_rankings&dept=${USER.dept}&year=${USER.year}`);
-                const data = await res.json();
-                document.getElementById('rank-list').innerHTML = data.map((r, i) => `
-                    <div class="glass p-4 rounded-2xl flex items-center gap-4 rank-card ${r.status === 'Diamond' ? 'diamond-status' : ''}">
-                        <div class="text-xs font-black w-6 text-center">${r.rank}</div>
-                        <img src="${r.pic}" class="w-10 h-10 rounded-full object-cover">
-                        <div class="flex-1"><h5 class="text-[10px] font-black uppercase text-white">${r.name} ${r.status==='Diamond'?'💎':(i===0?'🥇':(i===1?'🥈':(i===2?'🥉':'')))}</h5><p class="text-[7px] text-slate-500 font-bold uppercase">Stars: ${r.stars} • Streak: 🔥${r.streak}</p></div>
-                    </div>
-                `).join('');
-            },
-
-            switchTab(t) {
-                this.switchView('view-' + t);
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
-                document.querySelector(`[onclick*="${t}"]`).classList.add('nav-active');
-                const isDash = t === 'dashboard';
-                document.getElementById('btn-menu').classList.toggle('hidden', !isDash);
-                document.getElementById('btn-back').classList.toggle('hidden', isDash);
-            },
-
-            switchView(id) { document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active')); document.getElementById(id).classList.add('view-active'); },
-            openReg(r) { 
+            openReg(r) {
                 this.regRole = r; this.switchView('view-register');
-                document.getElementById('r-year').classList.toggle('hidden', !r.includes('Student') && r !== 'Minor');
+                document.getElementById('reg-title').innerText = `${r} Node`;
+                const gate = document.getElementById('dept-gate');
+                const yr = document.getElementById('r-year');
+                if(r === 'Guest') { gate.innerHTML = `<input id="r-org" placeholder="Org Name">`; yr.classList.add('hidden'); }
+                else if(r === 'Student') { gate.innerHTML = `<select id="r-dept"><option value="Computer Science">Computer Science</option><option value="Artificial Intelligence">Artificial Intelligence</option></select>`; yr.classList.remove('hidden'); }
+                else if(r === 'Minor') { gate.innerHTML = `<select id="r-dept"><option value="Mathematics">Mathematics</option><option value="Electronics">Electronics</option></select>`; yr.classList.remove('hidden'); }
+                else { gate.innerHTML = `<input value="Computer Science" disabled class="opacity-50 font-bold">`; yr.classList.add('hidden'); }
                 navigator.mediaDevices.getUserMedia({video:true}).then(s => document.getElementById('v-reg-cam').srcObject = s);
             },
+
             captureFaceKey() {
                 const v = document.getElementById('v-reg-cam');
                 const c = document.createElement('canvas');
@@ -381,19 +327,91 @@
                 document.getElementById('face-captured').classList.remove('hidden');
                 document.getElementById('face-stat').innerText = "BOUND ✅";
             },
+
             previewProfile(inp) {
                 const reader = new FileReader();
                 reader.onload = e => { profileData = e.target.result; document.getElementById('profile-preview').src = profileData; document.getElementById('profile-preview').classList.remove('hidden'); document.getElementById('up-ico').classList.add('hidden'); };
                 reader.readAsDataURL(inp.files[0]);
             },
+
             async register() {
                 const id = document.getElementById('r-id').value.trim();
                 const name = document.getElementById('r-name').value.trim();
-                if(!id || !name || !faceData) return alert("Identify Markers missing.");
-                const data = { action: 'register', id, name, role: this.regRole, dept: 'CS', year: document.getElementById('r-year').value, faceKey: faceData, profilePic: profileData || faceData, uuid: UUID, phone: document.getElementById('r-phone').value, telegramId: 'N/A' };
+                if(!id || !name || !faceData) return alert("Biometric Identity markers missing.");
+                const data = { action: 'register', id, name, role: this.regRole, dept: 'CS', year: document.getElementById('r-year').value, faceKey: faceData, profilePic: profileData || faceData, uuid: UUID, phone: document.getElementById('r-phone').value };
                 await fetch(APPS_URL, { method: 'POST', body: JSON.stringify(data), mode: 'no-cors' });
-                setTimeout(() => location.reload(), 2000);
+                location.reload();
             },
+
+            // --- ORACLE ---
+            async askAI() {
+                const qInp = document.getElementById('ai-q');
+                const q = qInp.value.trim();
+                const r = document.getElementById('ai-chat-scroller');
+                const b = document.getElementById('ai-btn');
+                if (!q) return;
+                r.innerHTML += `<div class="user-msg">${q}</div>`;
+                qInp.value = "";
+                const tempId = "ai-" + Date.now();
+                r.innerHTML += `<div class="ai-msg" id="${tempId}"><span class="animate-pulse italic">Connecting...</span></div>`;
+                r.scrollTop = r.scrollHeight; b.disabled = true;
+                try {
+                    const s = isArchived ? "Archived" : "Approved";
+                    const url = `${APPS_URL}?action=groq&query=${encodeURIComponent(q)}&user=${encodeURIComponent(USER.name)}&role=${encodeURIComponent(USER.role)}&status=${s}`;
+                    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+                    const text = await res.text();
+                    const el = document.getElementById(tempId);
+                    el.innerText = text;
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } catch (e) { document.getElementById(tempId).innerText = "Hub Sync failure."; }
+                finally { b.disabled = false; }
+            },
+
+            // --- PROFILE EDIT ---
+            previewEdit(inp) {
+                const reader = new FileReader();
+                reader.onload = e => { 
+                    newEditPhoto = e.target.result;
+                    document.getElementById('edit-preview').src = newEditPhoto; 
+                };
+                reader.readAsDataURL(inp.files[0]);
+            },
+
+            async submitProfileUpdate() {
+                const btn = document.getElementById('btn-edit-save');
+                const name = document.getElementById('edit-name').value.trim();
+                const phone = document.getElementById('edit-phone').value.trim();
+                if(!name || !phone) return alert("Name and Phone required.");
+                
+                btn.disabled = true; btn.innerText = "SAVING...";
+                const data = { action: 'update_profile', id: USER.id, role: USER.role, name, phone, photo: newEditPhoto };
+                const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify(data), mode: 'no-cors' });
+                
+                setTimeout(() => {
+                    USER.name = name; USER.phone = phone; if(newEditPhoto) USER.photo = newEditPhoto;
+                    localStorage.setItem('csync_v105_user', JSON.stringify(USER));
+                    location.reload();
+                }, 2000);
+            },
+
+            // --- UTILS ---
+            switchTab(t) {
+                if(t === 'profile') {
+                    document.getElementById('edit-name').value = USER.name;
+                    document.getElementById('edit-phone').value = USER.phone || "";
+                    document.getElementById('edit-preview').src = USER.photo;
+                }
+                document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active'));
+                document.getElementById('view-' + t).classList.add('view-active');
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
+                document.querySelector(`[onclick*="${t}"]`)?.classList.add('nav-active');
+                const isDash = t === 'dashboard';
+                document.getElementById('btn-menu').classList.toggle('hidden', !isDash);
+                document.getElementById('btn-back').classList.toggle('hidden', isDash);
+            },
+            
+            switchView(id) { document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active')); document.getElementById(id).classList.add('view-active'); },
+            toggleSidebar() { const sb = document.getElementById('sidebar'); const isOpen = sb.style.transform === 'translateX(0px)'; sb.style.transform = isOpen ? 'translateX(-100%)' : 'translateX(0px)'; },
             logout() { localStorage.clear(); location.reload(); }
         };
         window.onload = () => UI.init();
