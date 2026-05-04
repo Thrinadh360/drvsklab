@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --accent: #00f2ff; --accent-minor: #10b981; --bg: #000; }
+        :root { --accent: #00f2ff; --bg: #000; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; min-height: 100dvh; overflow-x: hidden; user-select: none; }
         
         .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.05); }
@@ -48,14 +48,14 @@
     <!-- STEP 1: ROLE SELECTION -->
     <div id="step-roles" class="view-step view-active pt-12">
         <h1 class="font-['Orbitron'] text-4xl font-black italic tracking-tighter mb-2">C-SYNC</h1>
-        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mb-12">Select Sovereign Node Type</p>
+        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mb-12">Initialize Personal Node</p>
         
         <div class="grid gap-3">
             <button onclick="Reg.openForm('Student')" class="glass p-6 rounded-2xl text-left border-l-4 border-cyan-500 font-black uppercase text-[10px] flex justify-between items-center">
-                Student Node (Major) <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                Student Node (Major) <i data-lucide="chevron-right" class="w-4 h-4 text-cyan-400"></i>
             </button>
             <button onclick="Reg.openForm('Minor')" class="glass p-6 rounded-2xl text-left border-l-4 border-emerald-500 font-black uppercase text-[10px] flex justify-between items-center">
-                Minor Student Node <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                Minor Student Node <i data-lucide="chevron-right" class="w-4 h-4 text-emerald-400"></i>
             </button>
             <button onclick="Reg.openForm('Guest')" class="glass p-6 rounded-2xl text-left border-l-4 border-slate-500 font-black uppercase text-[10px] flex justify-between items-center">
                 Guest Node <i data-lucide="chevron-right" class="w-4 h-4"></i>
@@ -68,15 +68,15 @@
                 Lab Assistant <i data-lucide="chevron-right" class="w-4 h-4"></i>
             </button>
             <button onclick="Reg.openForm('HOD')" class="glass p-6 rounded-2xl text-left border-l-4 border-purple-500 font-black uppercase text-[10px] flex justify-between items-center">
-                HOD <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                HOD <i data-lucide="chevron-right" class="w-4 h-4 text-purple-400"></i>
             </button>
             <button onclick="Reg.openForm('Alumni')" class="glass p-6 rounded-2xl text-left border-l-4 border-slate-700 font-black uppercase text-[10px] flex justify-between items-center">
-                Alumni <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                Alumni <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
             </button>
         </div>
     </div>
 
-    <!-- STEP 2: REGISTRATION FORM -->
+    <!-- STEP 2: FORM ENTRY -->
     <div id="step-form" class="view-step pt-4 pb-20">
         <button onclick="location.reload()" class="mb-10 text-slate-500 flex items-center gap-2 text-xs font-bold uppercase">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
@@ -85,7 +85,7 @@
         <h2 id="form-title" class="font-['Orbitron'] text-cyan-400 text-2xl italic uppercase mb-8 tracking-tighter">Register</h2>
         
         <div class="space-y-6">
-            <!-- Biometric Preview -->
+            <!-- Biometric Capture -->
             <div class="flex justify-center mb-8">
                 <div onclick="Reg.startCamera()" class="relative group cursor-pointer text-center">
                     <div id="face-indicator" class="w-28 h-28 rounded-full border-2 border-dashed border-slate-700 flex items-center justify-center overflow-hidden bg-slate-900/50">
@@ -97,21 +97,21 @@
             </div>
 
             <div class="space-y-4">
-                <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Core Identity</p>
+                <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Identity Tokens</p>
                 <input id="f-id" placeholder="Roll No / Staff ID">
                 <input id="f-name" placeholder="Full Name">
                 
                 <div id="dynamic-fields" class="space-y-4"></div>
                 
-                <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Contact Handshake</p>
-                <input id="f-phone" type="tel" placeholder="India Mobile (mandatory)">
+                <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Communication Pulse</p>
+                <input id="f-phone" type="tel" placeholder="India Mobile (e.g. 8500xxxxxx)">
                 
                 <div id="intl-gate" class="hidden">
                     <div class="p-5 glass rounded-3xl border-l-4 border-cyan-400">
                         <p class="text-[9px] text-cyan-400 font-black uppercase mb-3">Abroad Contact (Optional)</p>
                         <div class="flex gap-2">
                             <select id="f-intl-code" class="!w-1/3 !text-[11px]"></select>
-                            <input id="f-intl-num" placeholder="International No" class="flex-1">
+                            <input id="f-intl-num" placeholder="International Mobile No" class="flex-1">
                         </div>
                     </div>
                 </div>
@@ -120,12 +120,12 @@
             <div class="p-5 glass rounded-2xl border-l-4 border-yellow-500">
                 <div class="flex items-center gap-3 mb-2">
                     <i data-lucide="cpu" class="w-4 h-4 text-yellow-500"></i>
-                    <p class="text-[9px] text-yellow-500 font-black uppercase">Hardware Bound</p>
+                    <p class="text-[9px] text-yellow-500 font-black uppercase">Hardware DNA Binding</p>
                 </div>
-                <p class="text-[10px] text-slate-400 leading-relaxed">This node will be cryptographically locked to this physical hardware DNA.</p>
+                <p class="text-[10px] text-slate-400 leading-relaxed font-medium">This node will be cryptographically locked to this physical device hardware.</p>
             </div>
 
-            <button id="submit-btn" onclick="Reg.submit()" class="cyber-btn shadow-lg shadow-cyan-500/20">Initialize Hub Node</button>
+            <button id="submit-btn" onclick="Reg.submit()" class="cyber-btn shadow-lg shadow-cyan-500/20">Initialize Sovereign Node</button>
         </div>
     </div>
 
@@ -135,7 +135,7 @@
             <video id="v-stream" autoplay muted playsinline class="w-full h-full object-cover"></video>
         </div>
         <div class="text-center mb-16">
-            <h3 class="font-['Orbitron'] text-cyan-400 text-xl animate-pulse mb-2 uppercase italic">Neural Capture</h3>
+            <h3 class="font-['Orbitron'] text-cyan-400 text-xl animate-pulse mb-2 uppercase italic">Neural Sync</h3>
             <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Center face in the portal</p>
         </div>
         <button onclick="Reg.takeSnap()" class="w-20 h-20 bg-white rounded-full border-8 border-white/20 active:scale-90 transition-transform"></button>
@@ -145,7 +145,7 @@
     <script>
         const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
 
-        // FUZZY HARDWARE FINGERPRINTING (v600.0)
+        // --- SELF-HEALING FUZZY FINGERPRINTING ---
         const generateFuzzyUUID = () => {
             const dna = [
                 navigator.platform,
@@ -154,7 +154,7 @@
                 navigator.language,
                 (() => {
                     const canvas = document.createElement('canvas');
-                    const gl = canvas.getContext('webgl');
+                    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
                     const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
                     return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'generic';
                 })()
@@ -183,14 +183,14 @@
                     dynamic.innerHTML = `
                         <p class="text-[9px] text-cyan-500 font-black uppercase ml-1">Major Subject</p>
                         <select id="f-dept"><option value="Computer Science">Computer Science</option><option value="Artificial Intelligence">Artificial Intelligence</option></select>
-                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1 mt-4">Academic Year</p>
+                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1 mt-4">Current Year</p>
                         <select id="f-year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
                     `;
                 } else if (role === 'Minor') {
                     dynamic.innerHTML = `
                         <p class="text-[9px] text-emerald-500 font-black uppercase ml-1">Minor Subject</p>
                         <select id="f-dept"><option value="Mathematics">Mathematics</option><option value="Electronics">Electronics</option></select>
-                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1 mt-4">Academic Year</p>
+                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1 mt-4">Current Year</p>
                         <select id="f-year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
                     `;
                 } else if (role === 'Guest') {
@@ -205,7 +205,7 @@
                     dynamic.innerHTML = `
                         <input id="f-grad" placeholder="Graduation Year (YYYY)">
                         <input id="f-comp" placeholder="Current Organization">
-                        <input id="f-loc" placeholder="Current Location (City)">
+                        <input id="f-loc" placeholder="Current City/Location">
                         <input id="f-higher" placeholder="Higher Studies Pursued">
                         <input id="f-dept" type="hidden" value="Alumni_CS">
                     `;
@@ -220,7 +220,7 @@
                     document.getElementById('camera-gate').style.display = 'flex';
                     this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                     document.getElementById('v-stream').srcObject = this.stream;
-                } catch(e) { alert("Camera Denied."); this.stopCamera(); }
+                } catch(e) { alert("Biometric Access Denied."); this.stopCamera(); }
             },
 
             stopCamera() {
@@ -248,15 +248,15 @@
                 let phone = document.getElementById('f-phone').value.trim();
                 const btn = document.getElementById('submit-btn');
 
-                if(!id || !name || !phone || !this.faceData) return alert("Fill all markers and bind biometrics.");
+                if(!id || !name || !phone || !this.faceData) return alert("All identity markers are mandatory.");
 
-                // Phone Sanitization (+91 auto-prepend)
+                // India Number Sanitization
                 phone = phone.replace(/[^0-9]/g, '');
                 if (phone.length === 10) phone = '+91' + phone;
                 else if (phone.length === 12 && phone.startsWith('91')) phone = '+' + phone;
 
                 btn.disabled = true;
-                btn.innerText = "SPLICING NODE...";
+                btn.innerText = "SPLICING HUB NODE...";
 
                 const payload = {
                     action: 'register',
@@ -274,13 +274,17 @@
                 };
 
                 try {
+                    // Google Apps Script usually needs no-cors for simple POST to work reliably
                     await fetch(APPS_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
-                    localStorage.setItem('csync_user_v600', JSON.stringify(payload));
+                    
+                    // Temporary local save so mobile.html can pick it up instantly
+                    localStorage.setItem('csync_user_v700', JSON.stringify(payload));
+                    
                     setTimeout(() => {
-                        alert("Node Initialized. Pending Sovereign Authorization.");
+                        alert("Registry Initialized. Hub Node will activate upon Departmental Verification.");
                         location.href = 'mobile.html';
                     }, 2000);
-                } catch(e) { alert("Registry Sync Fail."); btn.disabled = false; }
+                } catch(e) { alert("Handshake Fail. Check Registry Connection."); btn.disabled = false; }
             }
         };
         window.onload = () => lucide.createIcons();
