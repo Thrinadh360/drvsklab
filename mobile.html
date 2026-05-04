@@ -428,7 +428,7 @@
                     const p = 0.017453, c = Math.cos;
                     const a = 0.5 - c((COLLEGE_COORDS.lat - lat) * p)/2 + c(lat * p) * c(COLLEGE_COORDS.lat * p) * (1 - c((COLLEGE_COORDS.lng - lng) * p))/2;
                     const dist = 12742 * Math.asin(Math.sqrt(a));
-                    if(dist > 0.4) return alert(`OUTSIDE RADIUS: Handshake rejected.`);
+                    if(dist > 0.32) return alert(`OUTSIDE RADIUS: Handshake rejected.`);
 
                     document.getElementById('face-gate').style.display = 'flex';
                     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
