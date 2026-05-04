@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --accent: #00f2ff; --bg: #000; }
+        :root { --accent: #00f2ff; --accent-minor: #10b981; --bg: #000; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; min-height: 100dvh; overflow-x: hidden; user-select: none; }
         
         .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.05); }
@@ -41,6 +41,9 @@
         .view-step { display: none; animation: slideUp 0.5s ease; }
         .view-active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .profile-upload-area { border: 2px dashed #1e293b; transition: 0.3s; }
+        .profile-upload-area.active { border-color: var(--accent); background: rgba(0, 242, 255, 0.05); }
     </style>
 </head>
 <body class="p-8" oncontextmenu="return false;">
@@ -48,7 +51,7 @@
     <!-- STEP 1: ROLE SELECTION -->
     <div id="step-roles" class="view-step view-active pt-12">
         <h1 class="font-['Orbitron'] text-4xl font-black italic tracking-tighter mb-2">C-SYNC</h1>
-        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mb-12">Initialize Personal Node</p>
+        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mb-12">Initialize Sovereign Hub Node</p>
         
         <div class="grid gap-3">
             <button onclick="Reg.openForm('Student')" class="glass p-6 rounded-2xl text-left border-l-4 border-cyan-500 font-black uppercase text-[10px] flex justify-between items-center">
@@ -68,10 +71,10 @@
                 Lab Assistant <i data-lucide="chevron-right" class="w-4 h-4"></i>
             </button>
             <button onclick="Reg.openForm('HOD')" class="glass p-6 rounded-2xl text-left border-l-4 border-purple-500 font-black uppercase text-[10px] flex justify-between items-center">
-                HOD <i data-lucide="chevron-right" class="w-4 h-4 text-purple-400"></i>
+                HOD (Sovereign) <i data-lucide="chevron-right" class="w-4 h-4 text-purple-400"></i>
             </button>
             <button onclick="Reg.openForm('Alumni')" class="glass p-6 rounded-2xl text-left border-l-4 border-slate-700 font-black uppercase text-[10px] flex justify-between items-center">
-                Alumni <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+                Alumni Node <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
             </button>
         </div>
     </div>
@@ -85,33 +88,54 @@
         <h2 id="form-title" class="font-['Orbitron'] text-cyan-400 text-2xl italic uppercase mb-8 tracking-tighter">Register</h2>
         
         <div class="space-y-6">
-            <!-- Biometric Capture -->
-            <div class="flex justify-center mb-8">
-                <div onclick="Reg.startCamera()" class="relative group cursor-pointer text-center">
-                    <div id="face-indicator" class="w-28 h-28 rounded-full border-2 border-dashed border-slate-700 flex items-center justify-center overflow-hidden bg-slate-900/50">
-                        <img id="face-preview" class="hidden w-full h-full object-cover">
-                        <i data-lucide="camera" id="cam-icon" class="w-8 h-8 text-slate-700"></i>
+            
+            <!-- IDENTITY PHOTO (For Lab PC Welcome Screen) -->
+            <div class="space-y-4">
+                <p class="text-[9px] text-cyan-400 font-black uppercase ml-1">Identity Photo (Kiosk Profile)</p>
+                <div onclick="document.getElementById('p-upload').click()" class="w-full h-44 glass rounded-3xl profile-upload-area flex flex-col items-center justify-center overflow-hidden relative">
+                    <img id="p-preview" class="hidden w-full h-full object-cover">
+                    <div id="p-placeholder" class="text-center">
+                        <i data-lucide="user-plus" class="mx-auto mb-2 text-slate-600"></i>
+                        <p class="text-[8px] text-slate-500 uppercase font-black">Upload High-Resolution Face Photo</p>
                     </div>
-                    <p id="face-stat" class="text-[8px] mt-3 font-black uppercase text-red-500 tracking-[0.2em]">Bind Neural Signature</p>
+                </div>
+                <input type="file" id="p-upload" class="hidden" accept="image/*" onchange="Reg.previewPhoto(this)">
+            </div>
+
+            <!-- BIOMETRIC SIGNATURE BINDING -->
+            <div class="space-y-4">
+                <p class="text-[9px] text-cyan-400 font-black uppercase ml-1">Neural Handshake Binding</p>
+                <div onclick="Reg.startCamera()" class="p-5 glass rounded-2xl border-l-4 border-red-500 flex items-center justify-between group active:scale-95 transition-transform">
+                    <div class="flex items-center gap-4">
+                        <div id="face-indicator" class="w-10 h-10 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center overflow-hidden">
+                            <img id="face-captured-preview" class="hidden w-full h-full object-cover">
+                            <i data-lucide="scan" id="face-icon" class="text-slate-500"></i>
+                        </div>
+                        <div>
+                            <p id="face-stat" class="text-[10px] font-black uppercase text-red-500">Bind Biometric Data</p>
+                            <p class="text-[7px] text-slate-500 uppercase">Hardware Hardware Secure</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-700"></i>
                 </div>
             </div>
 
             <div class="space-y-4">
-                <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Identity Tokens</p>
-                <input id="f-id" placeholder="Roll No / Staff ID">
+                <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Registry Tokens</p>
+                <input id="f-id" placeholder="Roll Number / Staff ID">
                 <input id="f-name" placeholder="Full Name">
                 
                 <div id="dynamic-fields" class="space-y-4"></div>
                 
                 <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Communication Pulse</p>
-                <input id="f-phone" type="tel" placeholder="India Mobile (e.g. 8500xxxxxx)">
+                <input id="f-phone" type="tel" placeholder="India Mobile (OTP linked)">
                 
                 <div id="intl-gate" class="hidden">
                     <div class="p-5 glass rounded-3xl border-l-4 border-cyan-400">
                         <p class="text-[9px] text-cyan-400 font-black uppercase mb-3">Abroad Contact (Optional)</p>
                         <div class="flex gap-2">
                             <select id="f-intl-code" class="!w-1/3 !text-[11px]"></select>
-                            <input id="f-intl-num" placeholder="International Mobile No" class="flex-1">
+                            <input id="f-intl-num" placeholder="Intl Mobile Number" class="flex-1">
                         </div>
                     </div>
                 </div>
@@ -120,32 +144,32 @@
             <div class="p-5 glass rounded-2xl border-l-4 border-yellow-500">
                 <div class="flex items-center gap-3 mb-2">
                     <i data-lucide="cpu" class="w-4 h-4 text-yellow-500"></i>
-                    <p class="text-[9px] text-yellow-500 font-black uppercase">Hardware DNA Binding</p>
+                    <p class="text-[9px] text-yellow-500 font-black uppercase">Hardware DNA Lock</p>
                 </div>
-                <p class="text-[10px] text-slate-400 leading-relaxed font-medium">This node will be cryptographically locked to this physical device hardware.</p>
+                <p class="text-[10px] text-slate-400 leading-relaxed font-medium">This node will be cryptographically locked to this smartphone's hardware ID.</p>
             </div>
 
-            <button id="submit-btn" onclick="Reg.submit()" class="cyber-btn shadow-lg shadow-cyan-500/20">Initialize Sovereign Node</button>
+            <button id="submit-btn" onclick="Reg.submit()" class="cyber-btn shadow-lg shadow-cyan-500/20">Initialize Hub Node</button>
         </div>
     </div>
 
-    <!-- CAMERA OVERLAY -->
+    <!-- CAMERA PORTAL OVERLAY -->
     <div id="camera-gate">
         <div class="video-box mb-12">
             <video id="v-stream" autoplay muted playsinline class="w-full h-full object-cover"></video>
         </div>
         <div class="text-center mb-16">
-            <h3 class="font-['Orbitron'] text-cyan-400 text-xl animate-pulse mb-2 uppercase italic">Neural Sync</h3>
-            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Center face in the portal</p>
+            <h3 class="font-['Orbitron'] text-cyan-400 text-xl animate-pulse mb-2 uppercase italic">Neural Splicing</h3>
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Maintain still focus in the portal</p>
         </div>
         <button onclick="Reg.takeSnap()" class="w-20 h-20 bg-white rounded-full border-8 border-white/20 active:scale-90 transition-transform"></button>
-        <button onclick="Reg.stopCamera()" class="mt-10 text-slate-500 text-[10px] font-black uppercase tracking-widest">Cancel</button>
+        <button onclick="Reg.stopCamera()" class="mt-10 text-slate-500 text-[10px] font-black uppercase tracking-widest">Abort</button>
     </div>
 
     <script>
-        const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
+        const APPS_URL = "YOUR_DEPLOYED_WEB_APP_URL";
 
-        // --- SELF-HEALING FUZZY FINGERPRINTING ---
+        // --- FUZZY HARDWARE FINGERPRINTING (SELF-HEALING) ---
         const generateFuzzyUUID = () => {
             const dna = [
                 navigator.platform,
@@ -164,9 +188,9 @@
         const UUID = generateFuzzyUUID();
 
         const Reg = {
-            role: '', faceData: null, stream: null,
+            role: '', faceData: null, profileData: null, stream: null,
             countries: [
-                {n:"Afghanistan", c:"+93"}, {n:"Albania", c:"+355"}, {n:"Algeria", c:"+213"}, {n:"Australia", c:"+61"}, {n:"Austria", c:"+43"}, {n:"Bahrain", c:"+973"}, {n:"Bangladesh", c:"+880"}, {n:"Belgium", c:"+32"}, {n:"Brazil", c:"+55"}, {n:"Canada", c:"+1"}, {n:"China", c:"+86"}, {n:"France", c:"+33"}, {n:"Germany", c:"+49"}, {n:"India", c:"+91"}, {n:"Indonesia", c:"+62"}, {n:"Ireland", c:"+353"}, {n:"Italy", c:"+39"}, {n:"Japan", c:"+81"}, {n:"Kuwait", c:"+965"}, {n:"Malaysia", c:"+60"}, {n:"Netherlands", c:"+31"}, {n:"New Zealand", c:"+64"}, {n:"Oman", c:"+968"}, {n:"Pakistan", c:"+92"}, {n:"Philippines", c:"+63"}, {n:"Qatar", c:"+974"}, {n:"Russia", c:"+7"}, {n:"Saudi Arabia", c:"+966"}, {n:"Singapore", c:"+65"}, {n:"South Africa", c:"+27"}, {n:"South Korea", c:"+82"}, {n:"Spain", c:"+34"}, {n:"Sri Lanka", c:"+94"}, {n:"Switzerland", c:"+41"}, {n:"UAE", c:"+971"}, {n:"UK", c:"+44"}, {n:"USA", c:"+1"}
+                {n:"Afghanistan", c:"+93"}, {n:"Albania", c:"+355"}, {n:"Algeria", c:"+213"}, {n:"Andorra", c:"+376"}, {n:"Angola", c:"+244"}, {n:"Argentina", c:"+54"}, {n:"Australia", c:"+61"}, {n:"Austria", c:"+43"}, {n:"Bahrain", c:"+973"}, {n:"Bangladesh", c:"+880"}, {n:"Belgium", c:"+32"}, {n:"Brazil", c:"+55"}, {n:"Canada", c:"+1"}, {n:"China", c:"+86"}, {n:"France", c:"+33"}, {n:"Germany", c:"+49"}, {n:"India", c:"+91"}, {n:"Indonesia", c:"+62"}, {n:"Ireland", c:"+353"}, {n:"Italy", c:"+39"}, {n:"Japan", c:"+81"}, {n:"Kuwait", c:"+965"}, {n:"Malaysia", c:"+60"}, {n:"Netherlands", c:"+31"}, {n:"New Zealand", c:"+64"}, {n:"Oman", c:"+968"}, {n:"Pakistan", c:"+92"}, {n:"Philippines", c:"+63"}, {n:"Qatar", c:"+974"}, {n:"Russia", c:"+7"}, {n:"Saudi Arabia", c:"+966"}, {n:"Singapore", c:"+65"}, {n:"South Africa", c:"+27"}, {n:"South Korea", c:"+82"}, {n:"Spain", c:"+34"}, {n:"Sri Lanka", c:"+94"}, {n:"Switzerland", c:"+41"}, {n:"UAE", c:"+971"}, {n:"UK", c:"+44"}, {n:"USA", c:"+1"}
             ],
 
             openForm(role) {
@@ -181,21 +205,21 @@
                 
                 if (role === 'Student') {
                     dynamic.innerHTML = `
-                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1">Major Subject</p>
+                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1">Major Selection</p>
                         <select id="f-dept"><option value="Computer Science">Computer Science</option><option value="Artificial Intelligence">Artificial Intelligence</option></select>
-                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1 mt-4">Current Year</p>
+                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1 mt-4">Year of Study</p>
                         <select id="f-year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
                     `;
                 } else if (role === 'Minor') {
                     dynamic.innerHTML = `
-                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1">Minor Subject</p>
+                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1">Minor Selection</p>
                         <select id="f-dept"><option value="Mathematics">Mathematics</option><option value="Electronics">Electronics</option></select>
-                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1 mt-4">Current Year</p>
+                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1 mt-4">Year of Study</p>
                         <select id="f-year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
                     `;
                 } else if (role === 'Guest') {
                     dynamic.innerHTML = `
-                        <p class="text-[9px] text-slate-400 font-black uppercase ml-1">Department / Organization</p>
+                        <p class="text-[9px] text-slate-400 font-black uppercase ml-1">Department / Organization Name</p>
                         <input id="f-dept" placeholder="Enter manual org name">
                     `;
                 } else if (role === 'Alumni') {
@@ -215,12 +239,24 @@
                 lucide.createIcons();
             },
 
+            previewPhoto(input) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.profileData = e.target.result;
+                    document.getElementById('p-preview').src = this.profileData;
+                    document.getElementById('p-preview').classList.remove('hidden');
+                    document.getElementById('p-placeholder').classList.add('hidden');
+                    document.querySelector('.profile-upload-area').classList.add('active');
+                };
+                reader.readAsDataURL(input.files[0]);
+            },
+
             async startCamera() {
                 try {
                     document.getElementById('camera-gate').style.display = 'flex';
                     this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                     document.getElementById('v-stream').srcObject = this.stream;
-                } catch(e) { alert("Biometric Access Denied."); this.stopCamera(); }
+                } catch(e) { alert("Biometric Error: Camera Protocol Blocked."); this.stopCamera(); }
             },
 
             stopCamera() {
@@ -234,9 +270,9 @@
                 c.width = 400; c.height = 400;
                 c.getContext('2d').drawImage(v, 0, 0, 400, 400);
                 this.faceData = c.toDataURL('image/jpeg', 0.6);
-                document.getElementById('face-preview').src = this.faceData;
-                document.getElementById('face-preview').classList.remove('hidden');
-                document.getElementById('cam-icon').classList.add('hidden');
+                document.getElementById('face-captured-preview').src = this.faceData;
+                document.getElementById('face-captured-preview').classList.remove('hidden');
+                document.getElementById('face-icon').classList.add('hidden');
                 document.getElementById('face-stat').innerText = "SIGNATURE BOUND ✅";
                 document.getElementById('face-stat').classList.replace('text-red-500', 'text-cyan-400');
                 this.stopCamera();
@@ -248,15 +284,17 @@
                 let phone = document.getElementById('f-phone').value.trim();
                 const btn = document.getElementById('submit-btn');
 
-                if(!id || !name || !phone || !this.faceData) return alert("All identity markers are mandatory.");
+                if(!id || !name || !phone || !this.faceData || !this.profileData) {
+                    return alert("All markers mandatory: Photo, Face Data, ID, Name, and Mobile.");
+                }
 
-                // India Number Sanitization
+                // Phone Sanitization (+91 auto-prepend)
                 phone = phone.replace(/[^0-9]/g, '');
                 if (phone.length === 10) phone = '+91' + phone;
                 else if (phone.length === 12 && phone.startsWith('91')) phone = '+' + phone;
 
                 btn.disabled = true;
-                btn.innerText = "SPLICING HUB NODE...";
+                btn.innerText = "INITIALIZING HUB NODE...";
 
                 const payload = {
                     action: 'register',
@@ -270,21 +308,22 @@
                     higherStudies: document.getElementById('f-higher')?.value || '',
                     intlCode: document.getElementById('f-intl-code')?.value || '',
                     intlNumber: document.getElementById('f-intl-num')?.value || '',
-                    photo: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00f2ff&color=000`
+                    photo: this.profileData // Base64 Identity Photo
                 };
 
                 try {
-                    // Google Apps Script usually needs no-cors for simple POST to work reliably
                     await fetch(APPS_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
                     
-                    // Temporary local save so mobile.html can pick it up instantly
-                    localStorage.setItem('csync_user_v700', JSON.stringify(payload));
-                    
+                    // Local session save
+                    localStorage.setItem('csync_user_v805', JSON.stringify({
+                        id, name, role: this.role, dept: payload.dept, photo: this.profileData, phone: payload.phone
+                    }));
+
                     setTimeout(() => {
-                        alert("Registry Initialized. Hub Node will activate upon Departmental Verification.");
+                        alert("Node Initialization Success. Your station OS profile is ready. Pending HOD Authorization.");
                         location.href = 'mobile.html';
                     }, 2000);
-                } catch(e) { alert("Handshake Fail. Check Registry Connection."); btn.disabled = false; }
+                } catch(e) { alert("Registry Sync Failure."); btn.disabled = false; }
             }
         };
         window.onload = () => lucide.createIcons();
