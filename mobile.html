@@ -5,81 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>C-Sync | Sovereign Mobile Node</title>
     
+    <!-- PWA Meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
         :root { --accent: #00f2ff; --bg: #000000; --card: rgba(15, 23, 42, 0.7); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; height: 100dvh; overflow: hidden; user-select: none; }
         
-        /* Glass UI Components */
         .glass { background: var(--card); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.05); }
-        .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 14px; padding: 14px; transition: 0.3s; text-transform: uppercase; font-size: 10px; width: 100%; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(0,242,255,0.15); }
-        
-        /* View Management */
-        .view-container { display: none; height: 100%; overflow-y: auto; padding-bottom: 140px; }
+        .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 14px; padding: 14px; transition: 0.3s; text-transform: uppercase; font-size: 10px; width: 100%; border: none; cursor: pointer; }
+
+        .view-container { display: none; height: 100%; overflow-y: auto; padding-bottom: 140px; scroll-behavior: smooth; }
         .view-active { display: block !important; animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Neural Oracle Overlay (The Core Feature) */
+        /* Neural Oracle Full-Screen Overlay */
         #oracle-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; padding: 25px; padding-top: 60px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #oracle-overlay.active { display: flex; transform: translateY(0); }
         
-        /* Chat Styling (Top-to-Bottom) */
         .ai-msg { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--accent); border-radius: 0 15px 15px 15px; padding: 15px; font-size: 13px; color: #cbd5e1; margin-bottom: 15px; width: 90%; }
         .user-msg { background: rgba(255,255,255,0.05); border-radius: 15px 15px 0 15px; padding: 15px; font-size: 13px; align-self: flex-end; text-align: right; color: #fff; margin-bottom: 15px; width: 90%; margin-left: auto; }
 
-        /* Nav Bar */
         .bottom-nav { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
         .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; transition: 0.3s; }
         .nav-active { color: var(--accent); filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
 
-        input { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 16px !important; border-radius: 14px !important; width: 100%; font-size: 14px; }
+        input, textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 14px !important; border-radius: 12px !important; width: 100%; font-size: 14px; }
         .shimmer { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
         @keyframes shimmer { to { background-position: -200% 0; } }
     </style>
 </head>
 <body>
 
+    <!-- LOADING/SECURITY GATE -->
+    <div id="status-overlay" class="fixed inset-0 bg-black z-[9999] hidden flex flex-col items-center justify-center p-10 text-center">
+        <div class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-8"></div>
+        <h2 id="status-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-4">Verifying Node</h2>
+        <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest">Handshaking with Sovereign Registry...</p>
+    </div>
+
     <!-- NEURAL ORACLE FULL-SCREEN OVERLAY -->
     <div id="oracle-overlay">
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
                 <div class="w-3 h-3 bg-cyan-400 rounded-full animate-ping"></div>
-                <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic uppercase tracking-tighter">Neural Oracle</h2>
+                <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic uppercase">Neural Oracle</h2>
             </div>
             <button onclick="UI.toggleOracle(false)" class="p-2 glass rounded-full text-slate-500"><i data-lucide="x"></i></button>
         </header>
 
-        <!-- Multi-Modal Chat Area (Top-to-Bottom Flow) -->
-        <div id="oracle-chat-box" class="flex-1 overflow-y-auto pr-2 space-y-4">
-            <div class="ai-msg">Neural Protocol Active. I am monitoring Lab PCs CS-01 to CS-50. Submit text, voice, or image directives.</div>
+        <div id="oracle-chat-box" class="flex-1 overflow-y-auto pr-2 space-y-4 flex flex-col-reverse">
+            <!-- New messages appear at top because of flex-col-reverse -->
+            <div class="ai-msg">Neural Protocol Active. State your directive or provide visual data.</div>
         </div>
 
-        <!-- Attachment Bar -->
-        <div id="ora-att-bar" class="hidden flex items-center gap-3 p-3 bg-white/5 rounded-xl mb-4 border border-white/10">
+        <div id="ora-att-bar" class="hidden flex items-center gap-3 p-3 bg-white/5 rounded-xl mb-4">
             <i data-lucide="image" class="w-4 h-4 text-cyan-400"></i>
-            <span id="ora-att-name" class="text-[10px] truncate flex-1">file_name.jpg</span>
+            <span id="ora-att-name" class="text-[10px] truncate flex-1">file.jpg</span>
             <button onclick="UI.clearAttachment()"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
 
-        <!-- Control HUD -->
         <div class="mt-4 pb-10 space-y-4">
             <div class="flex items-center gap-2">
                 <button onclick="document.getElementById('ora-file').click()" class="glass p-5 rounded-2xl text-cyan-400"><i data-lucide="paperclip"></i></button>
                 <input type="file" id="ora-file" class="hidden" onchange="UI.handleOracleFile(this)">
-                
                 <div class="relative flex-1">
-                    <input id="ora-input" placeholder="Speak or type directive..." class="!py-5 pr-14 shadow-2xl">
+                    <input id="ora-input" placeholder="Speak or type..." class="!py-5 pr-14">
                     <button onclick="UI.startSTT()" id="ora-mic" class="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-400"><i data-lucide="mic"></i></button>
                 </div>
-
-                <button onclick="UI.askOracle()" class="bg-cyan-400 text-black p-5 rounded-2xl font-black shadow-[0_0_20px_rgba(0,242,255,0.3)]"><i data-lucide="send"></i></button>
-            </div>
-            <div class="flex justify-center">
-                <button onclick="UI.toggleTTS()" id="tts-btn" class="text-[8px] font-black uppercase text-cyan-400 tracking-[0.3em]">Audio Output: Enabled</button>
+                <button onclick="UI.askOracle()" class="bg-cyan-400 text-black p-5 rounded-2xl font-black"><i data-lucide="send"></i></button>
             </div>
         </div>
     </div>
@@ -92,34 +94,29 @@
                 <h1 class="font-['Orbitron'] text-2xl italic font-black tracking-tighter">C-SYNC</h1>
                 <div class="flex items-center gap-3 glass px-4 py-2 rounded-full border-cyan-400/20">
                     <div id="h-streak" class="text-orange-500 font-black text-xs">🔥 0</div>
-                    <div class="w-px h-3 bg-white/10"></div>
                     <div id="h-stars" class="text-yellow-500 font-black text-xs">⭐ 0</div>
                 </div>
             </header>
 
-            <!-- IDENTITY SECTION -->
+            <!-- IDENTITY BENTO -->
             <div class="glass p-6 rounded-[2.5rem] mb-8 flex items-center gap-5 border-l-4 border-cyan-400 shimmer">
-                <img id="h-avatar" class="w-16 h-16 rounded-full border-2 border-white/10 object-cover shadow-2xl">
+                <img id="h-avatar" class="w-16 h-16 rounded-full border-2 border-white/10 object-cover">
                 <div>
-                    <h3 id="h-name" class="font-black text-lg uppercase tracking-tight">Candidate</h3>
-                    <p id="h-meta" class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Node ID: Loading...</p>
+                    <h3 id="h-name" class="font-black text-lg uppercase tracking-tight">...</h3>
+                    <p id="h-meta" class="text-[8px] text-slate-500 font-black uppercase">Major: CS • Yr 3</p>
                 </div>
             </div>
 
-            <!-- NEURAL ORACLE WIDGET (Prominent Feature) -->
-            <div onclick="UI.toggleOracle(true)" class="glass p-8 rounded-[3rem] border-t-4 border-cyan-400 mb-8 bg-gradient-to-br from-cyan-950/20 to-transparent relative overflow-hidden group active:scale-95 transition-transform">
-                <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform">
-                    <i data-lucide="cpu" class="w-32 h-32 text-cyan-400"></i>
-                </div>
-                <h4 class="text-cyan-400 font-black uppercase text-xs tracking-[0.2em] mb-2">Neural Oracle</h4>
-                <p class="text-white text-xl font-bold leading-tight mb-4">Engage Multimodal Intelligence</p>
-                <div class="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500">
-                    <span>Analyze</span> • <span>Research</span> • <span>Command</span>
-                    <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            <!-- NEURAL ORACLE WIDGET (INVOKER) -->
+            <div onclick="UI.toggleOracle(true)" class="glass p-8 rounded-[3rem] border-t-4 border-cyan-400 mb-8 bg-gradient-to-br from-cyan-950/20 to-transparent active:scale-95 transition-transform">
+                <h4 class="text-cyan-400 font-black uppercase text-[10px] tracking-widest mb-2">Neural Oracle</h4>
+                <p class="text-white text-xl font-bold leading-tight mb-4">Engage Multimodal AI Intelligence</p>
+                <div class="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500">
+                    <span>Analyze</span> • <span>Voice Control</span> • <span>Vision</span>
+                    <i data-lucide="chevron-right" class="w-3 h-3 ml-auto"></i>
                 </div>
             </div>
 
-            <!-- MODULE STACK -->
             <div class="grid grid-cols-2 gap-4">
                 <button onclick="UI.switchTab('scribe')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-purple-500">
                     <i data-lucide="book-open" class="text-purple-500 w-5 h-5 mb-3"></i>
@@ -129,41 +126,44 @@
                 <button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500">
                     <i data-lucide="map-pin" class="text-emerald-500 w-5 h-5 mb-3"></i>
                     <h4 class="text-[10px] font-black uppercase text-white">Presence</h4>
-                    <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">GPS Handshake</p>
+                    <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">GPS Mark</p>
                 </button>
             </div>
         </div>
 
-        <!-- OTHER VIEWS (Rankings, Feed, Profile) -->
+        <!-- LEADERSHIP BOARD VIEW -->
         <div id="view-rankings" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase">Leadership Board</h2>
             <div id="leader-list" class="space-y-4"></div>
         </div>
 
+        <!-- FEED VIEW -->
         <div id="view-discuss" class="view-container">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic uppercase">Sovereign Feed</h2>
-                <button onclick="UI.newTopic()" class="hidden bg-white text-black text-[8px] font-black px-4 py-2 rounded-xl" id="btn-staff-plus">NEW TOPIC</button>
+                <button id="btn-staff-plus" onclick="UI.newTopic()" class="hidden bg-white text-black text-[8px] font-black px-4 py-2 rounded-xl">NEW TOPIC</button>
             </div>
             <div id="topic-list" class="space-y-4"></div>
         </div>
 
+        <!-- PROFILE VIEW -->
         <div id="view-profile" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase">Node Profile</h2>
             <div class="glass p-8 rounded-[3rem] space-y-6">
-                <input id="p-name" placeholder="Display Name">
-                <input id="p-phone" placeholder="Mobile Node No">
-                <button onclick="UI.updateProfile()" class="cyber-btn">Update Hub Identity</button>
-                <div class="pt-6 border-t border-white/5">
-                    <button onclick="UI.logout()" class="text-red-500 font-black text-[10px] uppercase w-full">Unbind Hardware Node</button>
+                <div class="flex flex-col items-center">
+                    <img id="p-avatar" class="w-20 h-20 rounded-full border-2 border-cyan-400 object-cover mb-4">
+                    <input id="p-name" placeholder="Display Name">
                 </div>
+                <input id="p-phone" placeholder="Mobile Number">
+                <button onclick="UI.saveProfile()" class="cyber-btn">Update Identity</button>
+                <button onclick="UI.logout()" class="text-red-500 font-black text-[10px] uppercase w-full mt-4">Unbind Hardware Node</button>
             </div>
         </div>
 
     </div>
 
-    <!-- BOTTOM NAV -->
-    <nav class="bottom-nav">
+    <!-- BOTTOM NAVIGATION -->
+    <nav id="bottom-nav" class="bottom-nav hidden">
         <button onclick="UI.switchTab('dashboard')" class="nav-item nav-active" id="nav-dashboard"><i data-lucide="shield"></i><span>HUB</span></button>
         <button onclick="UI.switchTab('rankings')" class="nav-item" id="nav-rankings"><i data-lucide="trophy"></i><span>BOARD</span></button>
         <button onclick="UI.switchTab('discuss')" class="nav-item" id="nav-discuss"><i data-lucide="messages-square"></i><span>FEED</span></button>
@@ -172,32 +172,59 @@
 
     <script>
         const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
+        const UUID = btoa(navigator.userAgent + screen.width);
         let USER = JSON.parse(localStorage.getItem('csync_user_v400'));
         let attachment = null;
         let ttsEnabled = true;
 
         const UI = {
-            init() {
+            async init() {
                 lucide.createIcons();
-                if(!USER) location.href = 'register.html'; // Assuming external registration or roles view
-                this.boot();
+                if (!USER) {
+                    location.href = 'register.html';
+                    return;
+                }
+                this.checkStatus();
+            },
+
+            async checkStatus() {
+                const overlay = document.getElementById('status-overlay');
+                overlay.classList.remove('hidden');
+                try {
+                    const res = await fetch(`${APPS_URL}?action=check_status&uid=${USER.id}&uuid=${UUID}`);
+                    const status = await res.text();
+                    if (status === "Approved") {
+                        overlay.classList.add('hidden');
+                        this.boot();
+                    } else if (status === "Pending") {
+                        document.getElementById('status-msg').innerText = "Awaiting Faculty Approval...";
+                    } else {
+                        document.getElementById('status-msg').innerText = "Hardware Mismatch Detected.";
+                    }
+                } catch(e) { this.boot(); overlay.classList.add('hidden'); }
             },
 
             boot() {
+                document.getElementById('bottom-nav').classList.remove('hidden');
                 document.getElementById('h-name').innerText = USER.name;
                 document.getElementById('h-avatar').src = USER.photo;
-                document.getElementById('h-meta').innerText = `${USER.role} • ${USER.dept}`;
-                if(USER.role === 'HOD' || USER.role === 'Lecturer') document.getElementById('btn-staff-plus').classList.remove('hidden');
+                document.getElementById('p-avatar').src = USER.photo;
+                document.getElementById('p-name').value = USER.name;
+                document.getElementById('p-phone').value = USER.phone;
+                document.getElementById('h-meta').innerText = `${USER.role === 'Student' ? 'Major' : 'Minor'}: ${USER.dept}`;
+                
+                if (['HOD', 'Lecturer'].includes(USER.role)) {
+                    document.getElementById('btn-staff-plus').classList.remove('hidden');
+                }
                 this.refreshLeadership();
                 this.refreshFeed();
             },
 
-            // NEURAL ORACLE LOGIC
             toggleOracle(show) {
                 const el = document.getElementById('oracle-overlay');
                 el.style.display = 'flex';
                 setTimeout(() => el.classList.toggle('active', show), 10);
-                if(!show) setTimeout(() => el.style.display = 'none', 500);
+                if (!show) setTimeout(() => el.style.display = 'none', 500);
             },
 
             handleOracleFile(input) {
@@ -218,15 +245,13 @@
 
             async askOracle() {
                 const q = document.getElementById('ora-input').value;
-                if(!q && !attachment) return;
-
+                if (!q && !attachment) return;
                 const box = document.getElementById('oracle-chat-box');
-                box.innerHTML += `<div class="user-msg">${q || "Multimodal Data Attached"}</div>`;
+                box.insertAdjacentHTML('afterbegin', `<div class="user-msg">${q || "Multimodal Analysis Requested"}</div>`);
                 document.getElementById('ora-input').value = "";
                 
                 const tempId = "ai-" + Date.now();
-                box.innerHTML += `<div class="ai-msg" id="${tempId}">Neural Splicing...</div>`;
-                box.scrollTop = box.scrollHeight;
+                box.insertAdjacentHTML('afterbegin', `<div class="ai-msg" id="${tempId}">Neural Splicing...</div>`);
 
                 try {
                     const res = await fetch(APPS_URL, {
@@ -235,10 +260,9 @@
                     });
                     const aiText = await res.text();
                     document.getElementById(tempId).innerText = aiText;
-                    if(ttsEnabled) this.speak(aiText);
+                    if (ttsEnabled) this.speak(aiText);
                     this.clearAttachment();
-                    box.scrollTop = box.scrollHeight;
-                } catch(e) { document.getElementById(tempId).innerText = "Hub Link Failure."; }
+                } catch(e) { document.getElementById(tempId).innerText = "Hub Link Offline."; }
             },
 
             startSTT() {
@@ -255,16 +279,10 @@
             speak(txt) {
                 window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(txt);
-                msg.pitch = 1.1; msg.rate = 1.1;
+                msg.rate = 1.1;
                 window.speechSynthesis.speak(msg);
             },
 
-            toggleTTS() {
-                ttsEnabled = !ttsEnabled;
-                document.getElementById('tts-btn').innerText = `Audio Output: ${ttsEnabled ? 'Enabled' : 'Disabled'}`;
-            },
-
-            // TABS
             switchTab(t) {
                 document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active'));
                 document.getElementById('view-'+t).classList.add('view-active');
@@ -292,24 +310,41 @@
                 const data = await res.json();
                 document.getElementById('topic-list').innerHTML = data.map(t => `
                     <div class="glass p-6 rounded-[2.5rem] border-l-4 border-cyan-400">
-                        <p class="text-[8px] text-slate-500 font-bold uppercase mb-2">Ref: ${t.id} • Staff: ${t.author}</p>
+                        <p class="text-[8px] text-slate-500 font-bold uppercase mb-2">Ref: ${t.id} • ${t.author}</p>
                         <h4 class="text-xs font-black uppercase text-white mb-2">${t.title}</h4>
                         <p class="text-[10px] text-slate-400 leading-relaxed mb-4">${t.content}</p>
-                        <button class="text-[8px] text-cyan-400 font-black uppercase tracking-[0.3em]">Engage Feed</button>
+                        <button class="text-[8px] text-cyan-400 font-black uppercase tracking-widest">Join Discussion</button>
                     </div>
                 `).join('');
             },
 
             async markPresence() {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
-                    if(pos.coords.accuracy > 100) return alert("GPS Accuracy too low. Move to an open area.");
+                    if (pos.coords.accuracy > 100) return alert("Low GPS accuracy. Move to a window.");
                     await fetch(APPS_URL, {
                         method: 'POST',
-                        body: JSON.stringify({ action: 'attendance', id: USER.id, name: USER.name, coords: `${pos.coords.latitude},${pos.coords.longitude}`, faceMatch: true })
+                        body: JSON.stringify({ 
+                            action: 'attendance', 
+                            id: USER.id, 
+                            name: USER.name, 
+                            coords: `${pos.coords.latitude},${pos.coords.longitude}`, 
+                            faceMatch: true 
+                        })
                     });
                     alert("Lab Attendance Verified.");
                 });
-            }
+            },
+
+            async saveProfile() {
+                const name = document.getElementById('p-name').value;
+                const phone = document.getElementById('p-phone').value;
+                await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', uid: USER.id, name, phone }) });
+                USER.name = name; USER.phone = phone;
+                localStorage.setItem('csync_user_v400', JSON.stringify(USER));
+                alert("Node Identity Re-synced.");
+            },
+
+            logout() { if(confirm("Unbind Node Hardware?")) { localStorage.clear(); location.reload(); } }
         };
 
         window.onload = () => UI.init();
