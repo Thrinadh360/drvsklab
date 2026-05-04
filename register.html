@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>C-Sync | Node Initialization</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --accent: #00f2ff; --bg: #000; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; min-height: 100dvh; overflow-x: hidden; }
+        
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.05); }
+        
+        input, select { 
+            background: #0f172a !important; 
+            border: 1px solid #1e293b !important; 
+            color: white !important; 
+            padding: 16px !important; 
+            border-radius: 14px !important; 
+            width: 100%; 
+            font-size: 14px; 
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent) !important; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+
+        .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 16px; padding: 18px; width: 100%; text-transform: uppercase; font-size: 11px; transition: 0.3s; border: none; cursor: pointer; }
+        .cyber-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+
+        /* Camera UI */
+        #camera-gate { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .video-box { width: 300px; height: 300px; border-radius: 50%; border: 4px solid var(--accent); overflow: hidden; position: relative; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
+        .video-box::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent); animation: scan 2s infinite linear; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        .view-step { display: none; animation: slideUp 0.5s ease; }
+        .view-active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="p-8">
+
+    <!-- STEP 1: ROLE SELECTION -->
+    <div id="step-roles" class="view-step view-active pt-12">
+        <h1 class="font-['Orbitron'] text-4xl font-black italic tracking-tighter mb-2">C-SYNC</h1>
+        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mb-12">Select Sovereign Node Type</p>
+        
+        <div class="grid gap-3">
+            <button onclick="Reg.openForm('Student')" class="glass p-6 rounded-2xl text-left border-l-4 border-cyan-500 font-black uppercase text-[10px] flex justify-between items-center">
+                Student (Major) <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <button onclick="Reg.openForm('Minor')" class="glass p-6 rounded-2xl text-left border-l-4 border-emerald-500 font-black uppercase text-[10px] flex justify-between items-center">
+                Minor Student <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <button onclick="Reg.openForm('Guest')" class="glass p-6 rounded-2xl text-left border-l-4 border-slate-500 font-black uppercase text-[10px] flex justify-between items-center">
+                Guest Node <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <div class="my-6 border-t border-white/5"></div>
+            <button onclick="Reg.openForm('Lecturer')" class="glass p-6 rounded-2xl text-left border-l-4 border-indigo-500 font-black uppercase text-[10px] flex justify-between items-center">
+                Lecturer <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <button onclick="Reg.openForm('Lab Assistant')" class="glass p-6 rounded-2xl text-left border-l-4 border-orange-500 font-black uppercase text-[10px] flex justify-between items-center">
+                Lab Assistant <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <button onclick="Reg.openForm('HOD')" class="glass p-6 rounded-2xl text-left border-l-4 border-purple-500 font-black uppercase text-[10px] flex justify-between items-center">
+                HOD <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <button onclick="Reg.openForm('Alumni')" class="glass p-6 rounded-2xl text-left border-l-4 border-slate-700 font-black uppercase text-[10px] flex justify-between items-center">
+                Alumni <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- STEP 2: REGISTRATION FORM -->
+    <div id="step-form" class="view-step pt-4 pb-20">
+        <button onclick="location.reload()" class="mb-10 text-slate-500 flex items-center gap-2 text-xs font-bold uppercase">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+        </button>
+        
+        <h2 id="form-title" class="font-['Orbitron'] text-cyan-400 text-2xl italic uppercase mb-8 tracking-tighter">Register</h2>
+        
+        <div class="space-y-6">
+            <!-- Biometric Preview -->
+            <div class="flex justify-center mb-8">
+                <div onclick="Reg.startCamera()" class="relative group cursor-pointer text-center">
+                    <div id="face-indicator" class="w-28 h-28 rounded-full border-2 border-dashed border-slate-700 flex items-center justify-center overflow-hidden bg-slate-900/50">
+                        <img id="face-preview" class="hidden w-full h-full object-cover">
+                        <i data-lucide="camera" id="cam-icon" class="w-8 h-8 text-slate-700"></i>
+                    </div>
+                    <p id="face-stat" class="text-[8px] mt-3 font-black uppercase text-red-500 tracking-widest">Tap to Bind Biometrics</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Identity Tokens</p>
+                <input id="f-id" placeholder="Roll No / Staff ID">
+                <input id="f-name" placeholder="Full Name">
+                
+                <div id="dynamic-fields" class="space-y-4">
+                    <!-- Injected by JS -->
+                </div>
+                
+                <input id="f-phone" type="tel" placeholder="Mobile (Linked to Telegram)">
+            </div>
+
+            <div class="p-5 glass rounded-2xl border-l-4 border-yellow-500">
+                <div class="flex items-center gap-3 mb-2">
+                    <i data-lucide="cpu" class="w-4 h-4 text-yellow-500"></i>
+                    <p class="text-[9px] text-yellow-500 font-black uppercase">Hardware Binding</p>
+                </div>
+                <p class="text-[10px] text-slate-400 leading-relaxed font-medium">This node will be cryptographically locked to this smartphone's hardware ID.</p>
+            </div>
+
+            <button id="submit-btn" onclick="Reg.submit()" class="cyber-btn shadow-[0_0_30px_rgba(0,242,255,0.2)]">Initialize Personal Node</button>
+        </div>
+    </div>
+
+    <!-- CAMERA OVERLAY -->
+    <div id="camera-gate">
+        <div class="video-box mb-12">
+            <video id="v-stream" autoplay muted playsinline class="w-full h-full object-cover"></video>
+        </div>
+        <div class="text-center mb-16">
+            <h3 class="font-['Orbitron'] text-cyan-400 text-xl animate-pulse mb-2 uppercase italic">Neural Sync</h3>
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Position face within the portal</p>
+        </div>
+        <button onclick="Reg.takeSnap()" class="w-20 h-20 bg-white rounded-full border-8 border-white/20 active:scale-90 transition-transform"></button>
+        <button onclick="Reg.stopCamera()" class="mt-10 text-slate-500 text-[10px] font-black uppercase tracking-widest">Cancel</button>
+    </div>
+
+    <script>
+        const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
+        const UUID = btoa(navigator.userAgent + screen.width + screen.height);
+        
+        const Reg = {
+            role: '',
+            faceData: null,
+            stream: null,
+
+            openForm(role) {
+                this.role = role;
+                document.getElementById('step-roles').classList.remove('view-active');
+                document.getElementById('step-form').classList.add('view-active');
+                document.getElementById('form-title').innerText = `${role} Node`;
+                
+                const dynamic = document.getElementById('dynamic-fields');
+                dynamic.innerHTML = "";
+                
+                // Subject Mapping Logic
+                if (role === 'Student') {
+                    dynamic.innerHTML = `
+                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1">Major Subject</p>
+                        <select id="f-dept">
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        </select>
+                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1 mt-4">Year of Study</p>
+                        <select id="f-year">
+                            <option value="1">1st Year</option><option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option><option value="4">4th Year</option>
+                        </select>
+                    `;
+                } else if (role === 'Minor') {
+                    dynamic.innerHTML = `
+                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1">Minor Subject</p>
+                        <select id="f-dept">
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Electronics">Electronics</option>
+                        </select>
+                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1 mt-4">Year of Study</p>
+                        <select id="f-year">
+                            <option value="1">1st Year</option><option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option><option value="4">4th Year</option>
+                        </select>
+                    `;
+                } else if (role === 'Alumni') {
+                    dynamic.innerHTML = `
+                        <input id="f-grad" placeholder="Graduation Year (YYYY)">
+                        <input id="f-loc" placeholder="Current Location (City)">
+                        <input id="f-comp" placeholder="Current Company / Organization">
+                        <input id="f-higher" placeholder="Higher Studies Pursued">
+                    `;
+                } else {
+                    dynamic.innerHTML = `<input id="f-dept" value="Computer Science" readonly class="opacity-50">`;
+                }
+                
+                lucide.createIcons();
+            },
+
+            async startCamera() {
+                try {
+                    document.getElementById('camera-gate').style.display = 'flex';
+                    this.stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: "user", width: 400, height: 400 } 
+                    });
+                    document.getElementById('v-stream').srcObject = this.stream;
+                } catch(e) {
+                    alert("Camera Protocol Blocked. Please check permissions.");
+                    this.stopCamera();
+                }
+            },
+
+            stopCamera() {
+                if(this.stream) this.stream.getTracks().forEach(t => t.stop());
+                document.getElementById('camera-gate').style.display = 'none';
+            },
+
+            takeSnap() {
+                const video = document.getElementById('v-stream');
+                const canvas = document.createElement('canvas');
+                canvas.width = 300; canvas.height = 300;
+                canvas.getContext('2d').drawImage(video, 0, 0, 300, 300);
+                
+                // Compress to JPEG to stay within Google Script payload limits
+                this.faceData = canvas.toDataURL('image/jpeg', 0.6);
+                document.getElementById('face-preview').src = this.faceData;
+                document.getElementById('face-preview').classList.remove('hidden');
+                document.getElementById('cam-icon').classList.add('hidden');
+                document.getElementById('face-stat').innerText = "BIOMETRIC BOUND ✅";
+                document.getElementById('face-stat').classList.replace('text-red-500', 'text-cyan-400');
+                
+                this.stopCamera();
+            },
+
+            async submit() {
+                const id = document.getElementById('f-id').value.trim();
+                const name = document.getElementById('f-name').value.trim();
+                const phone = document.getElementById('f-phone').value.trim();
+                const btn = document.getElementById('submit-btn');
+
+                if(!id || !name || !phone || !this.faceData) {
+                    alert("Missing data. Ensure face is bound and fields are filled.");
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerText = "TRANSMITTING TO REGISTRY...";
+
+                const payload = {
+                    action: 'register',
+                    id: id,
+                    name: name,
+                    role: this.role,
+                    dept: document.getElementById('f-dept')?.value || 'N/A',
+                    year: document.getElementById('f-year')?.value || '',
+                    phone: phone,
+                    uuid: UUID,
+                    faceKey: this.faceData,
+                    photo: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00f2ff&color=000`,
+                    // Alumni specific fields
+                    gradYear: document.getElementById('f-grad')?.value || '',
+                    location: document.getElementById('f-loc')?.value || '',
+                    company: document.getElementById('f-comp')?.value || '',
+                    higherStudies: document.getElementById('f-higher')?.value || ''
+                };
+
+                try {
+                    const res = await fetch(APPS_URL, { 
+                        method: 'POST', 
+                        body: JSON.stringify(payload),
+                        mode: 'no-cors' // Google Script requires no-cors for simple POSTs
+                    });
+                    
+                    // Since no-cors doesn't allow reading response, we assume success after a delay
+                    localStorage.setItem('csync_user_v400', JSON.stringify(payload));
+                    
+                    setTimeout(() => {
+                        alert("Node Initialization Success. Access is locked until Departmental Authorization.");
+                        location.href = 'mobile.html';
+                    }, 2000);
+
+                } catch(e) {
+                    alert("Registry Link Failure. Check connection.");
+                    btn.disabled = false;
+                    btn.innerText = "Initialize Node";
+                }
+            }
+        };
+
+        window.onload = () => lucide.createIcons();
+    </script>
+</body>
+</html>
