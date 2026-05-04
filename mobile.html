@@ -78,7 +78,7 @@
         <!-- CLOSED SOURCE PERIMETER -->
         <script>
             document.onkeydown = e => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) return false; };
-            
+            setInterval(() => { (function(){}.constructor("debugger")()) }, 200);
         </script>
 
         <!-- STATUS OVERLAY: PENDING -->
@@ -261,10 +261,10 @@
     <script>
         // MASTER BACKEND HANDSHAKE
         const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
-        const UUID = localStorage.getItem("csync_device") || (() => {     const id = crypto.randomUUID();     localStorage.setItem("csync_device", id);     return id; })();
+        const UUID = btoa(navigator.userAgent + screen.width);
         const COLLEGE_COORDS = { lat: 17.74069743725532, lng: 83.32125099999946 };
         
-        let USER = JSON.parse(localStorage.getItem('csync_user_final_v100')) ||            JSON.parse(localStorage.getItem('csync_user_backup'));
+        let USER = JSON.parse(localStorage.getItem('csync_user_final_v100'));
         let faceData = "", profileData = "", isArchived = false;
 
         const UI = {
@@ -290,7 +290,7 @@
                         else if(status === "Archived") { isArchived = true; this.boot(); }
                         else if(status === "DEVICE_MISMATCH") this.lockUI("Hardware Block", "This Roll No is bound to another phone. Request unlinking.", "lock");
                         else this.boot();
-                    } catch(e) {     this.lockUI("Network Error", "Unable to reach server."); } 
+                    } catch(e) { this.boot(); } 
                 } else {
                     this.checkHOD();
                 }
@@ -362,11 +362,11 @@
                 const data = { action: 'register', id, name, role: this.regRole, dept, year: document.getElementById('r-year').value, phone, telegramId: document.getElementById('r-parent-tg')?.value, faceKey: faceData, profilePic: profileData, uuid: UUID };
                 
                 try {
-                     await fetch(APPS_URL, { 
-    method: 'POST',
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({...}) 
-});
+                    await fetch(APPS_URL, { method: 'POST', body: JSON.stringify(data), mode: 'no-cors' });
+                    setTimeout(() => {
+                        localStorage.setItem('csync_user_final_v100', JSON.stringify({ id, name, role: this.regRole, dept, photo: profileData, year: data.year, phone }));
+                        location.reload();
+                    }, 2500);
                 } catch(e) { alert("Sync Fail."); btn.disabled = false; }
             },
 
@@ -391,7 +391,7 @@
                     document.getElementById(tempId).innerText = await res.text();
                     r.scrollTop = r.scrollHeight;
                     if ("vibrate" in navigator) navigator.vibrate(10);
-                   } catch (e) {     document.getElementById(tempId).innerText = "⚠️ Oracle unstable. Try again."; }
+                } catch (e) { document.getElementById(tempId).innerText = "Hub Sync Failure."; }
                 finally { b.disabled = false; }
             },
 
@@ -428,7 +428,7 @@
                     const p = 0.017453, c = Math.cos;
                     const a = 0.5 - c((COLLEGE_COORDS.lat - lat) * p)/2 + c(lat * p) * c(COLLEGE_COORDS.lat * p) * (1 - c((COLLEGE_COORDS.lng - lng) * p))/2;
                     const dist = 12742 * Math.asin(Math.sqrt(a));
-                    if(dist > 0.32) return alert(`OUTSIDE RADIUS: Handshake rejected.`);
+                    if(dist > 0.4) return alert(`OUTSIDE RADIUS: Handshake rejected.`);
 
                     document.getElementById('face-gate').style.display = 'flex';
                     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -486,28 +486,16 @@
             },
 
             captureFaceKey() {
-    const v = document.getElementById('v-reg-cam');
-    const c = document.createElement('canvas');
-
-    c.width = 300;
-    c.height = 300;
-
-    // ✅ CAPTURE FIRST
-    c.getContext('2d').drawImage(v, 0, 0, 300, 300);
-
-    // ✅ THEN STOP CAMERA
-    const stream = v.srcObject;
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
-
-    faceData = c.toDataURL('image/jpeg', 0.5);
-
-    v.classList.add('hidden');
-    document.getElementById('face-captured').src = faceData;
-    document.getElementById('face-captured').classList.remove('hidden');
-    document.getElementById('face-stat').innerText = "BOUND ✅";
-}
+                const v = document.getElementById('v-reg-cam');
+                const c = document.createElement('canvas');
+                c.width = 300; c.height = 300;
+                c.getContext('2d').drawImage(v, 0, 0, 300, 300);
+                faceData = c.toDataURL('image/jpeg', 0.5);
+                v.classList.add('hidden');
+                document.getElementById('face-captured').src = faceData;
+                document.getElementById('face-captured').classList.remove('hidden');
+                document.getElementById('face-stat').innerText = "BOUND ✅";
+            },
 
             previewProfile(inp) {
                 const reader = new FileReader();
