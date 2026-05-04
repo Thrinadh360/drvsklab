@@ -16,75 +16,52 @@
         * { box-sizing: border-box; user-select: none; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; cursor: none; }
         
-        /* Windows 11 Fluent Background */
-        .win-blur { 
-            position: fixed; inset: 0; 
-            background: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1974') center/cover; 
-            filter: brightness(0.3) blur(60px); 
-            transform: scale(1.1); z-index: 1; 
-        }
-
-        .full-screen { 
-            position: fixed; inset: 0; 
-            display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; 
-            z-index: 10; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
+        /* Windows 11 Fluent Effect */
+        .win-blur { position: fixed; inset: 0; background: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1974') center/cover; filter: brightness(0.3) blur(60px); transform: scale(1.1); z-index: 1; }
+        .full-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* Glass Components */
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; }
-        
+        /* Glass UI */
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2.5rem; }
         #qr-container { background: white; padding: 25px; border-radius: 2rem; box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); }
         
         /* Welcome Avatar */
-        .profile-ring { 
-            width: 160px; height: 160px; border-radius: 50%; 
-            border: 4px solid var(--accent); padding: 5px; 
-            box-shadow: 0 0 40px rgba(0, 242, 255, 0.4);
-            animation: ringPulse 2s infinite;
-        }
-        @keyframes ringPulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+        .profile-ring { width: 180px; height: 180px; border-radius: 50%; border: 4px solid var(--accent); padding: 5px; box-shadow: 0 0 40px rgba(0, 242, 255, 0.4); }
         .profile-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-        /* Status & Timers */
-        .timer-text { font-family: 'Orbitron'; font-weight: 900; letter-spacing: -2px; }
+        /* Setup Screen */
         .setup-card { background: #05060f; border: 2px solid #ef4444; padding: 50px; border-radius: 3rem; text-align: center; width: 450px; z-index: 1000; box-shadow: 0 0 100px rgba(239, 68, 68, 0.2); }
-        
-        input { 
-            background: #0f172a !important; border: 1px solid #1e293b !important; 
-            color: white !important; padding: 18px !important; border-radius: 1rem !important; 
-            width: 100%; text-align: center; font-family: 'Orbitron'; font-size: 24px; outline: none; 
-        }
+        input { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 18px !important; border-radius: 1rem !important; width: 100%; text-align: center; font-family: 'Orbitron'; font-size: 24px; outline: none; }
 
-        .shimmer { 
-            background: linear-gradient(90deg, transparent 25%, rgba(0, 242, 255, 0.1) 50%, transparent 75%); 
-            background-size: 200% 100%; animation: shimmer 3s infinite; 
-        }
+        .shimmer { background: linear-gradient(90deg, transparent 25%, rgba(0, 242, 255, 0.1) 50%, transparent 75%); background-size: 200% 100%; animation: shimmer 3s infinite; }
         @keyframes shimmer { to { background-position: -200% 0; } }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
+    <!-- CLOSED SOURCE SHIELD -->
+    <script>
+        document.onkeydown = e => { if (["F11", "F12", "Escape", "u", "U"].includes(e.key) && e.ctrlKey) e.preventDefault(); };
+        setInterval(() => { (function(){}.constructor("debugger")()) }, 200);
+    </script>
+
     <div class="win-blur"></div>
 
-    <!-- 1. HARDWARE BINDING SETUP (Visible only if unbound) -->
+    <!-- 1. HARDWARE BINDING (First Boot Only) -->
     <div id="view-setup" class="full-screen" style="display: none;">
         <div class="setup-card">
-            <div class="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i data-lucide="shield-alert" class="text-red-500"></i>
-            </div>
-            <h2 class="text-white font-black text-2xl mb-2 uppercase font-['Orbitron']">Station Unbound</h2>
-            <p class="text-xs text-slate-500 mb-10 uppercase font-bold tracking-widest">Neural Link Required for CS-XX Mapping</p>
-            <input type="text" id="setup-id" placeholder="CS-01">
-            <button onclick="Kiosk.bindHardware()" class="w-full bg-red-600 text-white mt-8 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-red-500 transition-all">Initialize Binding</button>
+            <i data-lucide="shield-alert" class="w-16 h-16 text-red-500 mx-auto mb-6"></i>
+            <h2 class="text-white font-black text-2xl mb-2 uppercase font-['Orbitron']">Hardware Unbound</h2>
+            <p class="text-xs text-slate-500 mb-10 uppercase font-bold tracking-widest">Assign identity to this physical workstation</p>
+            <input type="text" id="setup-id" placeholder="e.g. CS-01">
+            <button onclick="Kiosk.bind()" class="w-full bg-red-600 text-white mt-8 py-5 rounded-2xl font-black uppercase text-xs tracking-widest">Authorize Hardware Link</button>
         </div>
     </div>
 
     <!-- 2. SOVEREIGN LOCK SCREEN -->
     <div id="view-lock" class="full-screen">
         <div class="text-center mb-16">
-            <h1 id="display-sid" class="text-7xl font-['Orbitron'] text-cyan-400 font-black tracking-[0.5em] italic shimmer">CS-01</h1>
-            <p class="text-[10px] text-slate-500 font-black uppercase mt-6 tracking-[1em]">Sovereign Terminal Locked</p>
+            <h1 id="display-sid" class="text-7xl font-['Orbitron'] text-cyan-400 font-black tracking-[0.4em] italic shimmer">CS-XX</h1>
+            <p class="text-[10px] text-slate-500 font-black uppercase mt-6 tracking-[0.8em]">Workstation Secured</p>
         </div>
         
         <div id="qr-container">
@@ -94,56 +71,53 @@
         <div class="mt-20 text-center space-y-4">
             <div class="flex items-center justify-center gap-4">
                 <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                <p class="text-xs font-black uppercase tracking-[0.4em] text-white">Awaiting Handshake</p>
+                <p class="text-xs font-black uppercase tracking-[0.3em] text-white">Awaiting Handshake</p>
             </div>
-            <p class="text-[9px] text-slate-600 uppercase font-bold">Open C-Sync on mobile to authorize access</p>
+            <p class="text-[9px] text-slate-600 uppercase font-bold">Open C-Sync on your phone to unlock</p>
         </div>
     </div>
 
-    <!-- 3. WINDOWS WELCOME OVERLAY -->
+    <!-- 3. WINDOWS WELCOME SCREEN -->
     <div id="view-welcome" class="full-screen bg-black hidden opacity-0">
         <div class="profile-ring mb-10">
             <img id="w-pic" src="" class="profile-img">
         </div>
-        <h2 class="text-5xl font-light text-white mb-2">Welcome,</h2>
-        <h1 id="w-name" class="text-5xl font-black text-white uppercase tracking-tight">User</h1>
+        <h2 class="text-5xl font-light text-white mb-2 italic">Welcome,</h2>
+        <h1 id="w-name" class="text-5xl font-black text-white uppercase tracking-tight">...</h1>
         
         <div class="mt-12 flex flex-col items-center gap-4">
             <div class="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-[10px] text-cyan-500 font-black uppercase tracking-[0.5em]">Preparing Workspace...</p>
+            <p class="text-[10px] text-cyan-500 font-black uppercase tracking-widest">Preparing your node environment...</p>
         </div>
     </div>
 
-    <!-- 4. ACTIVE WORKSTATION DESKTOP -->
+    <!-- 4. ACTIVE DESKTOP VIEW -->
     <div id="view-desktop" class="full-screen hidden">
-        <!-- Floating HUD -->
-        <header class="fixed top-0 left-0 w-full p-10 flex justify-between items-start z-50">
+        <header class="fixed top-0 left-0 w-full p-12 flex justify-between items-start z-50">
             <div class="glass p-6 flex items-center gap-6 border-l-4 border-cyan-500 shadow-2xl">
-                <img id="d-pic" src="" class="w-16 h-16 rounded-full border-2 border-cyan-400 object-cover">
+                <img id="d-pic" src="" class="w-20 h-20 rounded-full border-2 border-cyan-400 object-cover">
                 <div>
-                    <h4 id="d-name" class="text-xl font-black uppercase text-white">...</h4>
+                    <h4 id="d-name" class="text-2xl font-black uppercase text-white tracking-tighter">...</h4>
                     <div class="flex items-center gap-2 mt-1">
                         <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <p class="text-[9px] text-cyan-600 font-black uppercase tracking-widest">Sovereign Session Active</p>
+                        <p class="text-[10px] text-cyan-500 font-black uppercase tracking-widest">Handshake Verified</p>
                     </div>
                 </div>
             </div>
 
             <div class="glass p-6 text-right border-r-4 border-red-500">
-                <p class="text-[10px] text-slate-500 font-black uppercase mb-1">Auto-Purge In</p>
-                <p id="timer" class="timer-text text-4xl text-white">05:00</p>
+                <p class="text-[10px] text-slate-500 font-black uppercase mb-1">Session Auto-Purge</p>
+                <p id="timer" class="text-4xl font-['Orbitron'] font-black text-white">05:00</p>
             </div>
         </header>
 
-        <!-- Desktop Content -->
-        <div class="text-center opacity-10">
-            <h1 class="text-[12vw] font-['Orbitron'] font-black uppercase tracking-widest">C-SYNC</h1>
-            <p class="text-2xl font-black uppercase tracking-[2em]">Dr. VSK GDC (A)</p>
+        <div class="text-center opacity-10 select-none">
+            <h1 class="text-[15vw] font-['Orbitron'] font-black uppercase tracking-widest">C-SYNC</h1>
+            <p class="text-2xl font-black uppercase tracking-[1.5em]">Sovereign Station</p>
         </div>
 
-        <!-- Logout Trigger -->
         <footer class="fixed bottom-12 text-center w-full">
-            <button onclick="Kiosk.manualLogout()" class="px-12 py-4 border-2 border-red-500/20 text-red-500 rounded-full text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-lg hover:shadow-red-500/20">
+            <button onclick="Kiosk.logout()" class="px-12 py-4 border-2 border-red-500/30 text-red-500 rounded-full text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-xl">
                 Terminate Session
             </button>
         </footer>
@@ -152,24 +126,29 @@
     <script>
         const API = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
         
-        // AUTO-FETCH HARDWARE FINGERPRINT
+        // UNIQUE HARDWARE FINGERPRINT (Browser-based MAC replacement)
         const HW_ID = btoa(navigator.platform + navigator.hardwareConcurrency + screen.colorDepth + navigator.deviceMemory);
         
         let idleSecs = 0;
-        let SYS_ID = localStorage.getItem('csync_station_v96');
+        let SYS_ID = "";
 
         const Kiosk = {
             async init() {
                 lucide.createIcons();
                 
-                if (!SYS_ID) {
+                // 1. Identify Station Node via Backend
+                const res = await fetch(`${API}?action=identify_pc&hwId=${HW_ID}`);
+                const identity = await res.text();
+
+                if (identity === "UNBOUND") {
                     this.showSetup();
                 } else {
+                    SYS_ID = identity;
                     document.getElementById('display-sid').innerText = SYS_ID;
                     new QRCode(document.getElementById("qr-code"), { text: SYS_ID, width: 250, height: 250 });
                     this.poll();
                 }
-                this.hardenOS();
+                this.forceFullscreen();
             },
 
             showSetup() {
@@ -178,17 +157,13 @@
                 document.body.style.cursor = 'default';
             },
 
-            async bindHardware() {
+            async bind() {
                 const sid = document.getElementById('setup-id').value.trim().toUpperCase();
-                if (!sid.startsWith('CS-')) return alert("Format Error: Use CS-01 to CS-50");
+                if (!sid.startsWith('CS-')) return alert("Use format CS-01 to CS-50");
 
-                const res = await fetch(API, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'bind_hardware', sysId: sid, hwId: HW_ID })
-                });
-
+                // Execute GET handshake for max reliability
+                const res = await fetch(`${API}?action=bind_hardware&sysId=${sid}&hwId=${HW_ID}`);
                 if (await res.text() === "HARDWARE_BOUND") {
-                    localStorage.setItem('csync_station_v96', sid);
                     location.reload();
                 }
             },
@@ -197,54 +172,47 @@
                 try {
                     const res = await fetch(`${API}?action=kiosk_poll&sysId=${SYS_ID}&hwId=${HW_ID}`);
                     const data = await res.json();
-                    if (data.status === "AUTHORIZED") {
-                        this.welcome(data);
-                    } else {
-                        setTimeout(() => this.poll(), 3000);
-                    }
+                    if (data.status === "AUTHORIZED") this.welcome(data);
+                    else setTimeout(() => this.poll(), 3000);
                 } catch(e) { setTimeout(() => this.poll(), 5000); }
             },
 
             welcome(user) {
-                const welcomeView = document.getElementById('view-welcome');
-                document.getElementById('view-lock').style.transform = "translateY(-100%) scale(0.8)";
-                document.getElementById('view-lock').style.opacity = "0";
+                const lock = document.getElementById('view-lock');
+                const welcome = document.getElementById('view-welcome');
+                
+                lock.style.transform = "translateY(-100%) scale(0.9)";
+                lock.style.opacity = "0";
                 
                 setTimeout(() => {
-                    document.getElementById('view-lock').style.display = "none";
-                    welcomeView.classList.remove('hidden');
-                    setTimeout(() => welcomeView.style.opacity = "1", 50);
-
+                    lock.style.display = "none";
+                    welcome.classList.remove('hidden');
+                    setTimeout(() => welcome.style.opacity = "1", 50);
                     document.getElementById('w-pic').src = user.profilePic;
                     document.getElementById('w-name').innerText = user.name;
-
-                    // Transition to Desktop after 4 seconds
-                    setTimeout(() => this.launchDesktop(user), 4500);
+                    setTimeout(() => this.launchDesktop(user), 4000);
                 }, 800);
             },
 
             launchDesktop(user) {
-                const welcomeView = document.getElementById('view-welcome');
-                welcomeView.style.opacity = "0";
-                welcomeView.style.transform = "scale(1.2)";
+                const welcome = document.getElementById('view-welcome');
+                welcome.style.opacity = "0";
+                welcome.style.transform = "scale(1.1)";
 
                 setTimeout(() => {
-                    welcomeView.style.display = "none";
+                    welcome.style.display = "none";
                     const dv = document.getElementById('view-desktop');
                     dv.classList.remove('hidden');
                     document.getElementById('d-pic').src = user.profilePic;
                     document.getElementById('d-name').innerText = user.name;
                     document.body.style.cursor = 'default';
-                    this.startAutonomousEngine();
+                    this.startIdleTimer();
                 }, 800);
             },
 
-            startAutonomousEngine() {
-                // Reset Idle on any hardware activity
-                document.onmousemove = document.onkeydown = document.onclick = () => {
-                    idleSecs = 0;
-                    document.getElementById('timer').classList.remove('text-red-500', 'animate-pulse');
-                };
+            startIdleTimer() {
+                // Heartbeat/Idle Logic
+                document.onmousemove = document.onkeydown = document.onclick = () => idleSecs = 0;
 
                 setInterval(async () => {
                     idleSecs++;
@@ -252,14 +220,8 @@
                     document.getElementById('timer').innerText = this.fmt(remaining);
                     
                     if (remaining <= 60) document.getElementById('timer').classList.add('text-red-500', 'animate-pulse');
-                    
-                    // 5 Minute Purge
                     if (idleSecs >= 300) this.logout();
                 }, 1000);
-            },
-
-            async manualLogout() {
-                if(confirm("Terminate your active session and release this workstation?")) this.logout();
             },
 
             async logout() {
@@ -276,12 +238,7 @@
                 return `${m.toString().padStart(2,'0')}:${rs.toString().padStart(2,'0')}`;
             },
 
-            hardenOS() {
-                // Disable Function Keys and Esc
-                window.onkeydown = e => {
-                    if (["F11", "F12", "Escape", "Tab"].includes(e.key)) e.preventDefault();
-                };
-                // Enforce Fullscreen on interaction
+            forceFullscreen() {
                 document.body.onclick = () => {
                     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
                 };
