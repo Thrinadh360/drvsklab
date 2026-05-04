@@ -3,311 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C-Sync | Sovereign Station OS</title>
+    <title>C-Sync | Station Terminal</title>
     
     <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --accent: #00f2ff; --bg: #000000; }
-        * { box-sizing: border-box; user-select: none; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; }
+        :root { --accent: #00f2ff; --bg: #000; }
+        body { background: var(--bg); color: white; margin: 0; overflow: hidden; font-family: sans-serif; cursor: none; }
         
-        .win-blur { position: fixed; inset: 0; background: url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070') center/cover; filter: brightness(0.2) blur(60px); transform: scale(1.1); z-index: 1; }
-        .full-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2.5rem; }
-        
-        /* QR Container */
-        #qr-container { background: white; padding: 25px; border-radius: 2rem; box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); border: 8px solid rgba(0,242,255,0.1); }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; }
         
         /* Neural Whisper HUD */
-        #whisper-hud { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: 80%; max-width: 800px; z-index: 10000; display: none; animation: slideDown 0.5s ease forwards; }
-        @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 10%; opacity: 1; } }
+        #whisper-hud { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: 60%; z-index: 10000; display: none; animation: slideDown 0.5s ease; }
+        @keyframes slideDown { from { transform: translate(-50%, -100%); } to { transform: translate(-50%, 0); } }
 
-        /* Setup/Security UI */
-        input { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 20px !important; border-radius: 1rem !important; width: 100%; text-align: center; font-family: 'Orbitron'; font-size: 28px; outline: none; }
-        .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 1rem; padding: 18px; width: 100%; text-transform: uppercase; font-size: 11px; }
+        /* Scanning Animation */
+        .qr-box { position: relative; padding: 20px; background: white; border-radius: 20px; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--accent); animation: scan 2s infinite linear; z-index: 10; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
 
-        .shimmer { background: linear-gradient(90deg, transparent 25%, rgba(0, 242, 255, 0.1) 50%, transparent 75%); background-size: 200% 100%; animation: shimmer 3s infinite; }
-        @keyframes shimmer { to { background-position: -200% 0; } }
+        .pc-id { font-family: 'Orbitron', sans-serif; letter-spacing: -5px; }
+        .sentient-pulse { animation: pulse 4s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-    <div class="win-blur"></div>
-
-    <!-- 1. HARDWARE BINDING GATE -->
-    <div id="view-setup" class="full-screen hidden">
-        <div class="glass p-12 text-center w-[500px] border-red-500/50 border-2">
-            <i data-lucide="shield-alert" class="w-16 h-16 text-red-500 mx-auto mb-6"></i>
-            <h2 class="font-['Orbitron'] text-2xl font-black mb-2 uppercase italic">Hardware Unbound</h2>
-            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-10">Map station to Sovereign Registry</p>
-            <input type="text" id="setup-id" placeholder="e.g. CS-01">
-            <button onclick="Kiosk.bindHardware()" class="cyber-btn mt-10 !bg-red-600 !text-white">Initialize Link</button>
+    <!-- NEURAL WHISPER HUD (INTERCOM) -->
+    <div id="whisper-hud" class="glass p-10 border-l-[10px] border-cyan-400">
+        <div class="flex items-center gap-6">
+            <i data-lucide="info" class="w-12 h-12 text-cyan-400 animate-pulse"></i>
+            <div>
+                <p class="text-cyan-400 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Neural Whisper // Admin Command</p>
+                <h1 id="whisper-txt" class="text-4xl font-['Orbitron'] font-black italic uppercase"></h1>
+            </div>
         </div>
     </div>
 
-    <!-- 2. LOCK SCREEN (QR IDLE) -->
-    <div id="view-lock" class="full-screen">
-        <div class="text-center mb-12">
-            <h1 id="display-sid" class="text-8xl font-['Orbitron'] text-cyan-400 font-black tracking-[0.3em] italic shimmer">CS-XX</h1>
-            <p class="text-[10px] text-slate-500 font-black uppercase mt-6 tracking-[0.8em]">Station Hard-Locked</p>
-        </div>
+    <!-- LOCKED STATE VIEW -->
+    <div id="view-lock" class="h-screen flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,_#071a2e_0%,_#000_100%)]">
+        <h1 id="station-id-display" class="pc-id text-[12rem] font-black text-white/5 absolute top-10 select-none">CS-01</h1>
         
-        <div id="qr-container" class="mb-12">
-            <div id="qr-code"></div>
-        </div>
-
-        <div class="text-center space-y-6">
-            <div class="flex items-center justify-center gap-3">
-                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                <p class="text-xs font-black uppercase tracking-widest">Scanning for Mobile Node...</p>
+        <div class="z-10 text-center">
+            <div class="qr-box inline-block mb-10">
+                <div class="scan-line"></div>
+                <div id="qr-container"></div>
             </div>
-            <button onclick="Kiosk.openManual()" class="text-[9px] text-slate-600 font-black uppercase tracking-widest hover:text-cyan-400 transition underline">Manual Handshake / Forgot Phone</button>
-        </div>
-    </div>
-
-    <!-- 3. MANUAL ACCESS MODAL -->
-    <div id="modal-manual" class="fixed inset-0 z-[5000] bg-black/95 hidden flex items-center justify-center p-10">
-        <div class="glass p-12 w-[450px] text-center border-white/10">
-            <h2 id="m-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-8 uppercase">Manual Entry</h2>
             
-            <div id="m-step-1" class="space-y-4">
-                <button onclick="Kiosk.prepManual('Student')" class="cyber-btn">Student (Forgot Phone)</button>
-                <button onclick="Kiosk.prepManual('Guest')" class="cyber-btn !bg-white !text-black">Guest Access</button>
-                <button onclick="Kiosk.closeManual()" class="text-[10px] font-bold uppercase text-slate-600 mt-4 block mx-auto">Cancel</button>
-            </div>
-
-            <div id="m-step-form" class="hidden space-y-4">
-                <input id="m-id" placeholder="Roll No / Phone" class="!text-xl !py-4">
-                <input id="m-name" placeholder="Full Name" class="hidden !text-xl !py-4">
-                <button onclick="Kiosk.requestManual()" class="cyber-btn">Submit Request</button>
-            </div>
-
-            <div id="m-step-otp" class="hidden space-y-6">
-                <p class="text-[10px] text-slate-400 uppercase">OTP sent to your Registered Telegram</p>
-                <input id="m-otp" placeholder="6-Digit Code">
-                <button onclick="Kiosk.verifyOTP()" class="cyber-btn">Verify OTP</button>
-            </div>
-
-            <div id="m-step-wait" class="hidden py-10">
-                <div class="w-10 h-10 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                <p class="text-xs font-black uppercase animate-pulse">Awaiting Lecturer Approval...</p>
+            <h2 class="text-2xl font-['Orbitron'] font-black text-cyan-400 mb-2 uppercase italic sentient-pulse">Station Locked</h2>
+            <p class="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px]">Scan Rotating Security Token to Synchronize</p>
+            
+            <div class="mt-12 flex items-center justify-center gap-6 opacity-30">
+                <div class="flex items-center gap-2"><div class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div><span class="text-[8px] font-bold uppercase">CCTV Pulse</span></div>
+                <div class="flex items-center gap-2"><div class="w-2 h-2 bg-cyan-400 rounded-full"></div><span class="text-[8px] font-bold uppercase">Neural Hub Online</span></div>
             </div>
         </div>
+
+        <button onclick="Kiosk.manualRequest()" class="absolute bottom-10 text-slate-800 text-[8px] font-black uppercase tracking-widest hover:text-slate-500 transition">Request Manual Handshake</button>
     </div>
 
-    <!-- 4. ACTIVE DESKTOP HUD -->
-    <div id="view-desktop" class="full-screen hidden">
-        <div id="whisper-hud" class="glass p-8 border-l-8 border-cyan-400 bg-black/90">
-            <p class="text-[9px] text-cyan-400 font-black uppercase tracking-widest mb-2">Neural Whisper // Command Hub</p>
-            <h2 id="whisper-txt" class="text-3xl font-black italic uppercase"></h2>
-        </div>
-
-        <header class="fixed top-0 left-0 w-full p-12 flex justify-between items-start z-50">
-            <div class="glass p-6 flex items-center gap-6 border-l-4 border-cyan-500">
-                <img id="d-pic" src="" class="w-20 h-20 rounded-full border-2 border-cyan-400 object-cover shadow-2xl">
-                <div>
-                    <h4 id="d-name" class="text-2xl font-black uppercase text-white tracking-tighter">Candidate</h4>
-                    <p class="text-[9px] text-cyan-600 font-black uppercase tracking-widest">Handshake Verified</p>
+    <!-- UNLOCKED / ACTIVE STATE VIEW -->
+    <div id="view-active" class="hidden h-screen flex flex-col items-center justify-center bg-[#000]">
+        <div class="glass p-16 flex items-center gap-12 border-l-[12px] border-emerald-500 max-w-4xl">
+            <img id="u-photo" src="" class="w-48 h-48 rounded-full border-4 border-emerald-500/50 object-cover shadow-2xl shadow-emerald-500/20">
+            <div>
+                <p class="text-emerald-500 font-['Orbitron'] font-black text-[12px] mb-4 tracking-[0.4em]">NODE SESSION ACTIVE</p>
+                <h1 id="u-name" class="text-7xl font-['Orbitron'] font-black uppercase italic mb-4">...</h1>
+                <div class="flex items-center gap-4 text-slate-500 font-black text-xs uppercase tracking-widest">
+                    <span id="session-time">00:00:00</span>
+                    <span>•</span>
+                    <span id="pc-id-active">CS-01</span>
                 </div>
             </div>
-            <div class="glass p-6 text-right border-r-4 border-red-500">
-                <p class="text-[8px] text-slate-500 font-black uppercase mb-1">Session Timer</p>
-                <p id="timer" class="text-4xl font-['Orbitron'] font-black">00:00</p>
-            </div>
-        </header>
-
-        <!-- WATERMARK -->
-        <div class="text-center opacity-5 pointer-events-none">
-            <h1 class="text-[15vw] font-['Orbitron'] font-black uppercase tracking-widest">C-SYNC</h1>
         </div>
-
-        <footer class="fixed bottom-12 w-full flex justify-center gap-6 px-12">
-            <button onclick="document.getElementById('file-up').click()" class="px-10 py-4 glass border-purple-500/30 text-purple-400 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                <i data-lucide="upload-cloud"></i> Project Handover
-                <input type="file" id="file-up" class="hidden" onchange="Kiosk.handover(this)">
-            </button>
-            <button onclick="Kiosk.logout()" class="px-10 py-4 glass border-red-500/30 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest">Terminate Session</button>
-        </footer>
+        <p class="mt-10 text-slate-800 font-bold text-[8px] uppercase tracking-[0.5em]">Hardware Synced // Institutional Intelligence Active</p>
     </div>
 
     <script>
+        // MASTER CONFIG
         const API = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
-        const HW_ID = btoa(navigator.userAgent + screen.colorDepth + navigator.hardwareConcurrency);
-        
-        let SYS_ID = "";
-        let sessionTime = 0;
-        let isOccupied = false;
-        let currentUser = null;
+        const PC_ID = "CS-01"; // <--- CHANGE FOR EACH PC
+        let IS_OCCUPIED = false;
 
         const Kiosk = {
-            async init() {
+            init() {
                 lucide.createIcons();
-                // 1. Check Binding
-                try {
-                    const res = await fetch(`${API}?action=identify_pc&hwId=${HW_ID}`);
-                    const identity = await res.text();
-                    if (identity === "UNBOUND") {
-                        document.getElementById('view-lock').classList.add('hidden');
-                        document.getElementById('view-setup').classList.remove('hidden');
-                    } else {
-                        SYS_ID = identity;
-                        document.getElementById('display-sid').innerText = SYS_ID;
-                        this.startProtocols();
-                    }
-                } catch(e) { console.error("Identity Pulse Lost"); }
-            },
-
-            async bindHardware() {
-                const sid = document.getElementById('setup-id').value.trim().toUpperCase();
-                if (!sid.startsWith('CS-')) return alert("Format: CS-XX");
-                const res = await fetch(`${API}?action=bind_hardware&sysId=${sid}&hwId=${HW_ID}`);
-                if (await res.text() === "HARDWARE_BOUND") location.reload();
-            },
-
-            startProtocols() {
-                setInterval(() => this.rotateQR(), 10000);
+                document.getElementById('station-id-display').innerText = PC_ID;
+                document.getElementById('pc-id-active').innerText = PC_ID;
                 this.rotateQR();
                 this.poll();
-                // Enforce Fullscreen on interaction
-                document.body.onclick = () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); };
+                setInterval(() => this.rotateQR(), 10000); // QR Rotates every 10s
+                setInterval(() => this.cctvPulse(), 7000); // CCTV Snapshot every 7s
             },
 
+            // 1. ROTATING SECURITY QR
             async rotateQR() {
-                if (isOccupied) return;
-                const res = await fetch(`${API}?action=get_kiosk_token&sysId=${SYS_ID}`);
-                const token = await res.text();
-                document.getElementById('qr-code').innerHTML = "";
-                new QRCode(document.getElementById("qr-code"), {
-                    text: JSON.stringify({ id: SYS_ID, auth: token }),
-                    width: 250, height: 250, colorDark: "#000000", colorLight: "#ffffff"
-                });
+                if (IS_OCCUPIED) return;
+                try {
+                    const res = await fetch(`${API}?action=get_kiosk_token&sysId=${PC_ID}`);
+                    const token = await res.text();
+                    document.getElementById('qr-container').innerHTML = "";
+                    new QRCode(document.getElementById('qr-container'), {
+                        text: JSON.stringify({ id: PC_ID, auth: token }),
+                        width: 280,
+                        height: 280,
+                        colorDark: "#000",
+                        colorLight: "#fff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } catch (e) { console.error("Neural Link Offline."); }
             },
 
+            // 2. SERVER POLLING (UNLOCK & WHISPERS)
             async poll() {
                 try {
-                    const res = await fetch(`${API}?action=kiosk_poll&sysId=${SYS_ID}`);
+                    const res = await fetch(`${API}?action=kiosk_poll&sysId=${PC_ID}`);
                     const data = await res.json();
 
                     // Handle Neural Whisper
                     if (data.whisper) {
-                        const hud = document.getElementById('whisper-hud');
-                        document.getElementById('whisper-txt').innerText = data.whisper;
-                        hud.style.display = 'block';
-                        setTimeout(() => hud.style.display = 'none', 8000);
+                        this.showWhisper(data.whisper);
                     }
 
-                    // Handle Session Unlock
-                    if (data.status === "AUTHORIZED" && !isOccupied) {
+                    // Handle Session State
+                    if (data.status === "AUTHORIZED" && !IS_OCCUPIED) {
                         this.unlock(data);
-                    } else if (data.status === "IDLE" && isOccupied) {
-                        this.logout();
-                    } else if (data.status === "LOCKED") {
-                        alert("COMMAND HUB: Station Locked due to policy violation.");
-                        location.reload();
+                    } else if (data.status === "IDLE" && IS_OCCUPIED) {
+                        location.reload(); // Lock back down
                     }
-                } catch(e) {}
-                setTimeout(() => this.poll(), isOccupied ? 10000 : 3000);
+                } catch (e) {}
+                setTimeout(() => this.poll(), 4000);
             },
 
-            unlock(data) {
-                isOccupied = true;
-                currentUser = data;
-                document.getElementById('view-lock').classList.add('hidden');
-                document.getElementById('view-desktop').classList.remove('hidden');
-                document.getElementById('d-pic').src = data.profilePic;
-                document.getElementById('d-name').innerText = data.name;
-                this.startTimers();
-                this.startCCTVPulse();
-            },
-
-            startTimers() {
-                setInterval(() => {
-                    if(!isOccupied) return;
-                    sessionTime++;
-                    const m = Math.floor(sessionTime / 60).toString().padStart(2, '0');
-                    const s = (sessionTime % 60).toString().padStart(2, '0');
-                    document.getElementById('timer').innerText = `${m}:${s}`;
-                }, 1000);
-            },
-
-            startCCTVPulse() {
-                setInterval(async () => {
-                    if(!isOccupied) return;
-                    const canvas = await html2canvas(document.body, { scale: 0.25, logging: false });
+            // 3. CCTV PULSE (LIVE STREAMING TO ADMIN)
+            async cctvPulse() {
+                try {
+                    // Takes a "screenshot" of the browser view
+                    const canvas = await html2canvas(document.body, { 
+                        scale: 0.15, // Low scale for high-speed transmission
+                        logging: false
+                    });
                     const frame = canvas.toDataURL('image/jpeg', 0.1);
+                    
                     fetch(API, {
                         method: 'POST',
                         mode: 'no-cors',
-                        body: JSON.stringify({ action: 'push_frame', pcId: SYS_ID, frame })
+                        body: JSON.stringify({ action: 'push_frame', pcId: PC_ID, frame: frame })
                     });
-                }, 7000);
+                } catch (e) {}
             },
 
-            async handover(input) {
-                const file = input.files[0];
-                const btn = event.target.parentElement;
-                btn.innerText = "TRANSMITTING...";
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    await fetch(API, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'handover_project',
-                            uid: currentUser.id,
-                            pcId: SYS_ID,
-                            fileName: file.name,
-                            fileData: e.target.result
-                        })
-                    });
-                    btn.innerHTML = `<i data-lucide="check"></i> SUCCESS`;
-                    setTimeout(() => location.reload(), 2000);
-                };
-                reader.readAsDataURL(file);
+            unlock(u) {
+                IS_OCCUPIED = true;
+                document.getElementById('view-lock').style.display = 'none';
+                document.getElementById('view-active').style.display = 'flex';
+                document.getElementById('u-photo').src = u.profilePic;
+                document.getElementById('u-name').innerText = u.name;
+                this.speak(`Welcome ${u.name}. Station ${PC_ID} successfully synchronized.`);
+                this.startTimer();
             },
 
-            // MANUAL ACCESS LOGIC
-            openManual() { document.getElementById('modal-manual').classList.remove('hidden'); },
-            closeManual() { document.getElementById('modal-manual').classList.add('hidden'); },
-            prepManual(type) {
-                this.manualRole = type;
-                document.getElementById('m-step-1').classList.add('hidden');
-                document.getElementById('m-step-form').classList.remove('hidden');
-                if(type === 'Guest') document.getElementById('m-name').classList.remove('hidden');
+            showWhisper(msg) {
+                const hud = document.getElementById('whisper-hud');
+                document.getElementById('whisper-txt').innerText = msg;
+                hud.style.display = 'block';
+                this.speak(`Neural Whisper Received: ${msg}`);
+                setTimeout(() => hud.style.display = 'none', 10000);
             },
-            async requestManual() {
-                const id = document.getElementById('m-id').value;
-                const name = document.getElementById('m-name').value;
-                const res = await fetch(API, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'manual_request', type: this.manualRole, uid: id, name, pcId: SYS_ID })
-                });
-                const status = await res.text();
-                if(status === "GUEST_REPEAT_BLOCKED") {
-                    alert("STRICT PROTOCOL: Manual access is only allowed once for Guests. Please use the mobile app.");
-                    this.closeManual();
-                } else {
-                    document.getElementById('m-step-form').classList.add('hidden');
-                    document.getElementById('m-step-otp').classList.remove('hidden');
+
+            speak(txt) {
+                window.speechSynthesis.cancel();
+                let audio = txt.replace(/\bDr\./g, 'Doctor');
+                const msg = new SpeechSynthesisUtterance(audio);
+                msg.rate = 0.9; // Deep, technical voice
+                msg.pitch = 0.8;
+                window.speechSynthesis.speak(msg);
+            },
+
+            startTimer() {
+                let seconds = 0;
+                setInterval(() => {
+                    seconds++;
+                    let hrs = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                    let mins = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                    let secs = (seconds % 60).toString().padStart(2, '0');
+                    document.getElementById('session-time').innerText = `${hrs}:${mins}:${secs}`;
+                }, 1000);
+            },
+
+            manualRequest() {
+                const uid = prompt("ENTER YOUR NODE ID / ROLL NO:");
+                if(uid) {
+                    this.speak("Manual handshake requested. Awaiting administrator verification.");
+                    alert("Manual authorization request transmitted to Command Hub.");
                 }
-            },
-            async verifyOTP() {
-                const otp = document.getElementById('m-otp').value;
-                // Simplified for demo - usually a secondary GET call
-                document.getElementById('m-step-otp').classList.add('hidden');
-                document.getElementById('m-step-wait').classList.remove('hidden');
-                this.poll(); // Start polling for lecturer approval
-            },
-
-            async logout() {
-                if(isOccupied && !confirm("Terminate session?")) return;
-                await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'end_session', sysId: SYS_ID }), mode: 'no-cors' });
-                location.reload();
             }
         };
 
