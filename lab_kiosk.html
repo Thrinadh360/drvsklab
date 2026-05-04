@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C-Sync | Station Node</title>
+    <title>C-Sync | Station OS</title>
     
     <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,31 +13,53 @@
 
     <style>
         :root { --accent: #00f2ff; --bg: #000000; }
-        * { box-sizing: border-box; cursor: none !important; user-select: none; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; }
+        * { box-sizing: border-box; user-select: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; cursor: none; }
         
-        /* Windows Style Background */
-        .win-blur { position: fixed; inset: 0; background: url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070') center/cover; filter: brightness(0.3) blur(60px); transform: scale(1.1); z-index: 1; }
+        /* Windows 11 Fluent Background */
+        .win-blur { 
+            position: fixed; inset: 0; 
+            background: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1974') center/cover; 
+            filter: brightness(0.3) blur(60px); 
+            transform: scale(1.1); z-index: 1; 
+        }
 
-        .full-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .full-screen { 
+            position: fixed; inset: 0; 
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; 
+            z-index: 10; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
         
-        /* Lock Screen QR */
-        #qr-container { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); border: 10px solid rgba(0, 242, 255, 0.1); }
+        /* Glass Components */
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; }
         
-        /* Welcome Screen */
-        #welcome-view { background: #000; z-index: 100; display: none; opacity: 0; }
-        .profile-ring { width: 180px; height: 180px; border-radius: 50%; border: 4px solid var(--accent); padding: 5px; box-shadow: 0 0 30px rgba(0, 242, 255, 0.3); }
+        #qr-container { background: white; padding: 25px; border-radius: 2rem; box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); }
+        
+        /* Welcome Avatar */
+        .profile-ring { 
+            width: 160px; height: 160px; border-radius: 50%; 
+            border: 4px solid var(--accent); padding: 5px; 
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.4);
+            animation: ringPulse 2s infinite;
+        }
+        @keyframes ringPulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
         .profile-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-        /* Active Desktop */
-        #desktop-view { display: none; background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(20px); }
-        .desktop-watermark { position: absolute; font-family: 'Orbitron'; font-size: 12vw; font-weight: 900; color: rgba(255,255,255,0.03); text-transform: uppercase; pointer-events: none; }
+        /* Status & Timers */
+        .timer-text { font-family: 'Orbitron'; font-weight: 900; letter-spacing: -2px; }
+        .setup-card { background: #05060f; border: 2px solid #ef4444; padding: 50px; border-radius: 3rem; text-align: center; width: 450px; z-index: 1000; box-shadow: 0 0 100px rgba(239, 68, 68, 0.2); }
+        
+        input { 
+            background: #0f172a !important; border: 1px solid #1e293b !important; 
+            color: white !important; padding: 18px !important; border-radius: 1rem !important; 
+            width: 100%; text-align: center; font-family: 'Orbitron'; font-size: 24px; outline: none; 
+        }
 
-        /* Setup UI */
-        .setup-card { background: #05060f; border: 2px solid #ef4444; padding: 40px; border-radius: 30px; text-align: center; width: 400px; z-index: 1000; }
-        input { background: #1e1b4b !important; border: 1px solid #334155 !important; color: white !important; padding: 15px; border-radius: 12px; width: 100%; text-align: center; font-family: 'Orbitron'; font-size: 20px; outline: none; }
-
-        .shimmer { background: linear-gradient(90deg, #475569 25%, #00f2ff 50%, #475569 75%); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2s infinite; }
+        .shimmer { 
+            background: linear-gradient(90deg, transparent 25%, rgba(0, 242, 255, 0.1) 50%, transparent 75%); 
+            background-size: 200% 100%; animation: shimmer 3s infinite; 
+        }
         @keyframes shimmer { to { background-position: -200% 0; } }
     </style>
 </head>
@@ -45,94 +67,109 @@
 
     <div class="win-blur"></div>
 
-    <!-- 1. INITIAL SETUP GATE (UNBOUND HARDWARE) -->
+    <!-- 1. HARDWARE BINDING SETUP (Visible only if unbound) -->
     <div id="view-setup" class="full-screen" style="display: none;">
         <div class="setup-card">
-            <i data-lucide="shield-alert" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
-            <h2 class="text-white font-bold mb-2 uppercase">Unbound Hardware</h2>
-            <p class="text-[10px] text-slate-500 mb-8 uppercase tracking-widest">Assign Station ID to this physical node</p>
-            <input type="text" id="setup-id" placeholder="e.g. CS-01">
-            <button onclick="Kiosk.bind()" class="w-full bg-red-600 text-white mt-6 py-4 rounded-2xl font-black uppercase text-xs tracking-widest">Bind to Registry</button>
+            <div class="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="shield-alert" class="text-red-500"></i>
+            </div>
+            <h2 class="text-white font-black text-2xl mb-2 uppercase font-['Orbitron']">Station Unbound</h2>
+            <p class="text-xs text-slate-500 mb-10 uppercase font-bold tracking-widest">Neural Link Required for CS-XX Mapping</p>
+            <input type="text" id="setup-id" placeholder="CS-01">
+            <button onclick="Kiosk.bindHardware()" class="w-full bg-red-600 text-white mt-8 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-red-500 transition-all">Initialize Binding</button>
         </div>
     </div>
 
-    <!-- 2. LOCK SCREEN (QR) -->
+    <!-- 2. SOVEREIGN LOCK SCREEN -->
     <div id="view-lock" class="full-screen">
-        <div class="text-center mb-12">
-            <h1 id="display-sid" class="text-6xl font-['Orbitron'] text-cyan-400 font-black tracking-[0.4em] italic">CS-XX</h1>
-            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-[0.5em]">Workstation Secured</p>
+        <div class="text-center mb-16">
+            <h1 id="display-sid" class="text-7xl font-['Orbitron'] text-cyan-400 font-black tracking-[0.5em] italic shimmer">CS-01</h1>
+            <p class="text-[10px] text-slate-500 font-black uppercase mt-6 tracking-[1em]">Sovereign Terminal Locked</p>
         </div>
         
         <div id="qr-container">
             <div id="qr-code"></div>
         </div>
 
-        <div class="mt-16 text-center">
-            <div class="flex items-center justify-center gap-3 mb-2">
+        <div class="mt-20 text-center space-y-4">
+            <div class="flex items-center justify-center gap-4">
                 <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                <p class="text-xs font-bold uppercase tracking-widest">Awaiting Neural Handshake</p>
+                <p class="text-xs font-black uppercase tracking-[0.4em] text-white">Awaiting Handshake</p>
             </div>
-            <p class="text-[9px] text-slate-600 uppercase font-black">Scan with C-Sync Mobile PWA to Unlock</p>
+            <p class="text-[9px] text-slate-600 uppercase font-bold">Open C-Sync on mobile to authorize access</p>
         </div>
     </div>
 
-    <!-- 3. WINDOWS STYLE WELCOME SCREEN -->
-    <div id="view-welcome" class="full-screen">
-        <div class="profile-ring mb-8">
+    <!-- 3. WINDOWS WELCOME OVERLAY -->
+    <div id="view-welcome" class="full-screen bg-black hidden opacity-0">
+        <div class="profile-ring mb-10">
             <img id="w-pic" src="" class="profile-img">
         </div>
-        <h2 class="text-4xl font-light text-white">Welcome, <span id="w-name" class="font-bold">...</span></h2>
-        <div class="mt-8 flex items-center gap-3">
-            <div class="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-[10px] text-cyan-500 font-black uppercase tracking-widest">Preparing your environment</p>
+        <h2 class="text-5xl font-light text-white mb-2">Welcome,</h2>
+        <h1 id="w-name" class="text-5xl font-black text-white uppercase tracking-tight">User</h1>
+        
+        <div class="mt-12 flex flex-col items-center gap-4">
+            <div class="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-[10px] text-cyan-500 font-black uppercase tracking-[0.5em]">Preparing Workspace...</p>
         </div>
     </div>
 
-    <!-- 4. ACTIVE DESKTOP -->
-    <div id="view-desktop" class="full-screen">
-        <div class="desktop-watermark">C-SYNC</div>
-        
-        <header class="fixed top-0 left-0 w-full p-8 flex justify-between items-center border-b border-white/5">
-            <div class="flex items-center gap-4">
-                <img id="d-pic" src="" class="w-12 h-12 rounded-full border border-cyan-400 object-cover">
+    <!-- 4. ACTIVE WORKSTATION DESKTOP -->
+    <div id="view-desktop" class="full-screen hidden">
+        <!-- Floating HUD -->
+        <header class="fixed top-0 left-0 w-full p-10 flex justify-between items-start z-50">
+            <div class="glass p-6 flex items-center gap-6 border-l-4 border-cyan-500 shadow-2xl">
+                <img id="d-pic" src="" class="w-16 h-16 rounded-full border-2 border-cyan-400 object-cover">
                 <div>
-                    <h4 id="d-name" class="text-sm font-bold uppercase tracking-tight">...</h4>
-                    <p class="text-[8px] text-cyan-600 font-black uppercase tracking-widest">Authenticated Session</p>
+                    <h4 id="d-name" class="text-xl font-black uppercase text-white">...</h4>
+                    <div class="flex items-center gap-2 mt-1">
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <p class="text-[9px] text-cyan-600 font-black uppercase tracking-widest">Sovereign Session Active</p>
+                    </div>
                 </div>
             </div>
-            <div class="text-right">
-                <p class="text-[9px] text-red-500 font-black uppercase mb-1">Session Auto-Release</p>
-                <p id="timer" class="text-3xl font-black tracking-tighter">05:00</p>
+
+            <div class="glass p-6 text-right border-r-4 border-red-500">
+                <p class="text-[10px] text-slate-500 font-black uppercase mb-1">Auto-Purge In</p>
+                <p id="timer" class="timer-text text-4xl text-white">05:00</p>
             </div>
         </header>
 
-        <main class="text-center">
-            <i data-lucide="monitor" class="w-20 h-20 text-slate-800 mx-auto mb-6"></i>
-            <h1 class="text-xs font-black text-slate-500 uppercase tracking-[1em] mb-12">Station Active</h1>
-            <button onclick="Kiosk.logout()" class="px-10 py-3 border border-red-500/30 text-red-500 rounded-full text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition-all">Terminate Session</button>
-        </main>
+        <!-- Desktop Content -->
+        <div class="text-center opacity-10">
+            <h1 class="text-[12vw] font-['Orbitron'] font-black uppercase tracking-widest">C-SYNC</h1>
+            <p class="text-2xl font-black uppercase tracking-[2em]">Dr. VSK GDC (A)</p>
+        </div>
+
+        <!-- Logout Trigger -->
+        <footer class="fixed bottom-12 text-center w-full">
+            <button onclick="Kiosk.manualLogout()" class="px-12 py-4 border-2 border-red-500/20 text-red-500 rounded-full text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-lg hover:shadow-red-500/20">
+                Terminate Session
+            </button>
+        </footer>
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbxjob4JL7zw4hLK0cUQUi8jLpVzGjq7gAKpQM51zdyAbuCEqwX_SiShrql0XRSsU-xr/exec";
+        const API = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
         
-        // UNIQUE HARDWARE FINGERPRINT
-        const HW_ID = btoa(navigator.userAgent + navigator.hardwareConcurrency + screen.colorDepth);
+        // AUTO-FETCH HARDWARE FINGERPRINT
+        const HW_ID = btoa(navigator.platform + navigator.hardwareConcurrency + screen.colorDepth + navigator.deviceMemory);
         
         let idleSecs = 0;
-        let SYS_ID = localStorage.getItem('csync_station_id');
+        let SYS_ID = localStorage.getItem('csync_station_v96');
 
         const Kiosk = {
             async init() {
                 lucide.createIcons();
+                
                 if (!SYS_ID) {
                     this.showSetup();
                 } else {
                     document.getElementById('display-sid').innerText = SYS_ID;
-                    new QRCode(document.getElementById("qr-code"), { text: SYS_ID, width: 220, height: 220 });
+                    new QRCode(document.getElementById("qr-code"), { text: SYS_ID, width: 250, height: 250 });
                     this.poll();
                 }
-                this.shield();
+                this.hardenOS();
             },
 
             showSetup() {
@@ -141,17 +178,17 @@
                 document.body.style.cursor = 'default';
             },
 
-            async bind() {
+            async bindHardware() {
                 const sid = document.getElementById('setup-id').value.trim().toUpperCase();
-                if (!sid) return alert("Enter Station ID");
-                
+                if (!sid.startsWith('CS-')) return alert("Format Error: Use CS-01 to CS-50");
+
                 const res = await fetch(API, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'bind_hardware', sysId: sid, hwId: HW_ID })
                 });
-                
+
                 if (await res.text() === "HARDWARE_BOUND") {
-                    localStorage.setItem('csync_station_id', sid);
+                    localStorage.setItem('csync_station_v96', sid);
                     location.reload();
                 }
             },
@@ -169,34 +206,45 @@
             },
 
             welcome(user) {
-                const lock = document.getElementById('view-lock');
-                const welcome = document.getElementById('view-welcome');
+                const welcomeView = document.getElementById('view-welcome');
+                document.getElementById('view-lock').style.transform = "translateY(-100%) scale(0.8)";
+                document.getElementById('view-lock').style.opacity = "0";
                 
-                lock.style.transform = "translateY(-100%)";
-                welcome.style.display = "flex";
-                setTimeout(() => welcome.style.opacity = "1", 100);
-
-                document.getElementById('w-pic').src = user.profilePic;
-                document.getElementById('w-name').innerText = user.name;
-
-                // Hold welcome screen for 4 seconds (Windows 11 feel)
-                setTimeout(() => this.launchDesktop(user), 4000);
-            },
-
-            launchDesktop(user) {
-                document.getElementById('view-welcome').style.opacity = "0";
                 setTimeout(() => {
-                    document.getElementById('view-welcome').style.display = "none";
-                    document.getElementById('view-desktop').style.display = "flex";
-                    document.getElementById('d-pic').src = user.profilePic;
-                    document.getElementById('d-name').innerText = user.name;
-                    this.startEngine();
+                    document.getElementById('view-lock').style.display = "none";
+                    welcomeView.classList.remove('hidden');
+                    setTimeout(() => welcomeView.style.opacity = "1", 50);
+
+                    document.getElementById('w-pic').src = user.profilePic;
+                    document.getElementById('w-name').innerText = user.name;
+
+                    // Transition to Desktop after 4 seconds
+                    setTimeout(() => this.launchDesktop(user), 4500);
                 }, 800);
             },
 
-            startEngine() {
-                // Global movement listener for idle timer
-                document.onmousemove = document.onkeydown = () => idleSecs = 0;
+            launchDesktop(user) {
+                const welcomeView = document.getElementById('view-welcome');
+                welcomeView.style.opacity = "0";
+                welcomeView.style.transform = "scale(1.2)";
+
+                setTimeout(() => {
+                    welcomeView.style.display = "none";
+                    const dv = document.getElementById('view-desktop');
+                    dv.classList.remove('hidden');
+                    document.getElementById('d-pic').src = user.profilePic;
+                    document.getElementById('d-name').innerText = user.name;
+                    document.body.style.cursor = 'default';
+                    this.startAutonomousEngine();
+                }, 800);
+            },
+
+            startAutonomousEngine() {
+                // Reset Idle on any hardware activity
+                document.onmousemove = document.onkeydown = document.onclick = () => {
+                    idleSecs = 0;
+                    document.getElementById('timer').classList.remove('text-red-500', 'animate-pulse');
+                };
 
                 setInterval(async () => {
                     idleSecs++;
@@ -204,8 +252,14 @@
                     document.getElementById('timer').innerText = this.fmt(remaining);
                     
                     if (remaining <= 60) document.getElementById('timer').classList.add('text-red-500', 'animate-pulse');
-                    if (idleSecs >= 300) this.logout(); // Auto-logout at 5 mins
+                    
+                    // 5 Minute Purge
+                    if (idleSecs >= 300) this.logout();
                 }, 1000);
+            },
+
+            async manualLogout() {
+                if(confirm("Terminate your active session and release this workstation?")) this.logout();
             },
 
             async logout() {
@@ -222,12 +276,12 @@
                 return `${m.toString().padStart(2,'0')}:${rs.toString().padStart(2,'0')}`;
             },
 
-            shield() {
-                // Disable common browser/windows escape keys
+            hardenOS() {
+                // Disable Function Keys and Esc
                 window.onkeydown = e => {
-                    if (["F11", "F12", "Escape"].includes(e.key)) e.preventDefault();
+                    if (["F11", "F12", "Escape", "Tab"].includes(e.key)) e.preventDefault();
                 };
-                // Enforce fullscreen on first click
+                // Enforce Fullscreen on interaction
                 document.body.onclick = () => {
                     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
                 };
