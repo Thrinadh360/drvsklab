@@ -3,312 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C-Sync | Station OS</title>
+    <title>C-Sync | Sovereign Station OS</title>
     
-    <!-- Core Infrastructure -->
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
         :root { --accent: #00f2ff; --bg: #000000; }
         * { box-sizing: border-box; user-select: none; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; cursor: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; }
         
-        /* Windows 11 Fluent Backdrop */
-        .win-blur { 
-            position: fixed; inset: 0; 
-            background: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1974') center/cover; 
-            filter: brightness(0.2) blur(60px); 
-            transform: scale(1.1); z-index: 1; 
-        }
-
-        .full-screen { 
-            position: fixed; inset: 0; 
-            display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; 
-            z-index: 10; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        
-        /* Glass Components */
+        .win-blur { position: fixed; inset: 0; background: url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070') center/cover; filter: brightness(0.2) blur(60px); transform: scale(1.1); z-index: 1; }
+        .full-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
         .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2.5rem; }
-        #qr-container { background: white; padding: 25px; border-radius: 2rem; box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); border: 10px solid rgba(0,242,255,0.1); }
         
-        /* Welcome Profile Section */
-        .profile-ring { 
-            width: 180px; height: 180px; border-radius: 50%; 
-            border: 4px solid var(--accent); padding: 6px; 
-            box-shadow: 0 0 40px rgba(0, 242, 255, 0.4);
-            animation: ringPulse 2s infinite;
-        }
-        @keyframes ringPulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        .profile-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #000; }
+        /* QR Container */
+        #qr-container { background: white; padding: 25px; border-radius: 2rem; box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); border: 8px solid rgba(0,242,255,0.1); }
+        
+        /* Neural Whisper HUD */
+        #whisper-hud { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: 80%; max-width: 800px; z-index: 10000; display: none; animation: slideDown 0.5s ease forwards; }
+        @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 10%; opacity: 1; } }
 
         /* Setup/Security UI */
-        .setup-card { background: #05060f; border: 2px solid #ef4444; padding: 60px; border-radius: 3rem; text-align: center; width: 500px; z-index: 1000; box-shadow: 0 0 100px rgba(239, 68, 68, 0.3); }
-        input { 
-            background: #0f172a !important; border: 1px solid #1e293b !important; 
-            color: white !important; padding: 20px !important; border-radius: 1rem !important; 
-            width: 100%; text-align: center; font-family: 'Orbitron'; font-size: 28px; outline: none; 
-        }
+        input { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 20px !important; border-radius: 1rem !important; width: 100%; text-align: center; font-family: 'Orbitron'; font-size: 28px; outline: none; }
+        .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 1rem; padding: 18px; width: 100%; text-transform: uppercase; font-size: 11px; }
 
-        .shimmer { 
-            background: linear-gradient(90deg, transparent 25%, rgba(0, 242, 255, 0.1) 50%, transparent 75%); 
-            background-size: 200% 100%; animation: shimmer 3s infinite; 
-        }
+        .shimmer { background: linear-gradient(90deg, transparent 25%, rgba(0, 242, 255, 0.1) 50%, transparent 75%); background-size: 200% 100%; animation: shimmer 3s infinite; }
         @keyframes shimmer { to { background-position: -200% 0; } }
-        .timer-text { font-family: 'Orbitron'; text-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- CLOSED SOURCE PROTECTION PERIMETER -->
-    <script>
-        document.onkeydown = e => { 
-            if (["F11", "F12", "Escape", "Tab"].includes(e.key)) e.preventDefault();
-            if (e.ctrlKey && (e.key === "u" || e.key === "U" || e.key === "i" || e.key === "I")) e.preventDefault();
-        };
-        setInterval(() => { (function(){}.constructor("debugger")()) }, 200);
-    </script>
-
     <div class="win-blur"></div>
 
-    <!-- 1. HARDWARE BINDING GATE (Visible only if identify_pc returns UNBOUND) -->
-    <div id="view-setup" class="full-screen" style="display: none;">
-        <div class="setup-card">
-            <div class="w-20 h-20 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-8">
-                <i data-lucide="shield-alert" class="w-10 h-10 text-red-500"></i>
-            </div>
-            <h2 class="text-white font-black text-3xl mb-3 uppercase font-['Orbitron'] tracking-tighter">Hardware Unbound</h2>
-            <p class="text-[10px] text-slate-500 mb-10 uppercase font-bold tracking-[0.3em]">Map physical machine to Sovereign Registry</p>
+    <!-- 1. HARDWARE BINDING GATE -->
+    <div id="view-setup" class="full-screen hidden">
+        <div class="glass p-12 text-center w-[500px] border-red-500/50 border-2">
+            <i data-lucide="shield-alert" class="w-16 h-16 text-red-500 mx-auto mb-6"></i>
+            <h2 class="font-['Orbitron'] text-2xl font-black mb-2 uppercase italic">Hardware Unbound</h2>
+            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-10">Map station to Sovereign Registry</p>
             <input type="text" id="setup-id" placeholder="e.g. CS-01">
-            <button onclick="Kiosk.bindHardware()" id="btn-bind" class="w-full bg-red-600 text-white mt-10 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.4em] hover:bg-red-500 transition-all shadow-xl">Initialize Link</button>
+            <button onclick="Kiosk.bindHardware()" class="cyber-btn mt-10 !bg-red-600 !text-white">Initialize Link</button>
         </div>
     </div>
 
     <!-- 2. LOCK SCREEN (QR IDLE) -->
     <div id="view-lock" class="full-screen">
-        <div class="text-center mb-16">
-            <h1 id="display-sid" class="text-8xl font-['Orbitron'] text-cyan-400 font-black tracking-[0.4em] italic shimmer">CS-XX</h1>
-            <p class="text-[10px] text-slate-500 font-black uppercase mt-8 tracking-[1em]">Workstation Hard-Locked</p>
+        <div class="text-center mb-12">
+            <h1 id="display-sid" class="text-8xl font-['Orbitron'] text-cyan-400 font-black tracking-[0.3em] italic shimmer">CS-XX</h1>
+            <p class="text-[10px] text-slate-500 font-black uppercase mt-6 tracking-[0.8em]">Station Hard-Locked</p>
         </div>
         
-        <div id="qr-container" class="shimmer">
+        <div id="qr-container" class="mb-12">
             <div id="qr-code"></div>
         </div>
 
-        <div class="mt-20 text-center space-y-6">
-            <div class="flex items-center justify-center gap-4">
-                <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-ping"></div>
-                <p class="text-sm font-black uppercase tracking-[0.4em] text-white">Neural Handshake Ready</p>
+        <div class="text-center space-y-6">
+            <div class="flex items-center justify-center gap-3">
+                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+                <p class="text-xs font-black uppercase tracking-widest">Scanning for Mobile Node...</p>
             </div>
-            <p class="text-[10px] text-slate-600 uppercase font-bold tracking-widest">Scan with C-Sync Mobile PWA to Unlock</p>
+            <button onclick="Kiosk.openManual()" class="text-[9px] text-slate-600 font-black uppercase tracking-widest hover:text-cyan-400 transition underline">Manual Handshake / Forgot Phone</button>
         </div>
     </div>
 
-    <!-- 3. WINDOWS WELCOME TRANSITION -->
-    <div id="view-welcome" class="full-screen bg-black hidden opacity-0">
-        <div class="profile-ring mb-12">
-            <img id="w-pic" src="" class="profile-img">
-        </div>
-        <h2 class="text-5xl font-light text-white mb-3 italic">Welcome,</h2>
-        <h1 id="w-name" class="text-6xl font-black text-white uppercase tracking-tight">...</h1>
-        
-        <div class="mt-16 flex flex-col items-center gap-6">
-            <div class="w-8 h-8 border-3 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs text-cyan-500 font-black uppercase tracking-[0.6em]">Preparing your environment...</p>
+    <!-- 3. MANUAL ACCESS MODAL -->
+    <div id="modal-manual" class="fixed inset-0 z-[5000] bg-black/95 hidden flex items-center justify-center p-10">
+        <div class="glass p-12 w-[450px] text-center border-white/10">
+            <h2 id="m-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-8 uppercase">Manual Entry</h2>
+            
+            <div id="m-step-1" class="space-y-4">
+                <button onclick="Kiosk.prepManual('Student')" class="cyber-btn">Student (Forgot Phone)</button>
+                <button onclick="Kiosk.prepManual('Guest')" class="cyber-btn !bg-white !text-black">Guest Access</button>
+                <button onclick="Kiosk.closeManual()" class="text-[10px] font-bold uppercase text-slate-600 mt-4 block mx-auto">Cancel</button>
+            </div>
+
+            <div id="m-step-form" class="hidden space-y-4">
+                <input id="m-id" placeholder="Roll No / Phone" class="!text-xl !py-4">
+                <input id="m-name" placeholder="Full Name" class="hidden !text-xl !py-4">
+                <button onclick="Kiosk.requestManual()" class="cyber-btn">Submit Request</button>
+            </div>
+
+            <div id="m-step-otp" class="hidden space-y-6">
+                <p class="text-[10px] text-slate-400 uppercase">OTP sent to your Registered Telegram</p>
+                <input id="m-otp" placeholder="6-Digit Code">
+                <button onclick="Kiosk.verifyOTP()" class="cyber-btn">Verify OTP</button>
+            </div>
+
+            <div id="m-step-wait" class="hidden py-10">
+                <div class="w-10 h-10 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                <p class="text-xs font-black uppercase animate-pulse">Awaiting Lecturer Approval...</p>
+            </div>
         </div>
     </div>
 
-    <!-- 4. ACTIVE DESKTOP VIEW -->
+    <!-- 4. ACTIVE DESKTOP HUD -->
     <div id="view-desktop" class="full-screen hidden">
+        <div id="whisper-hud" class="glass p-8 border-l-8 border-cyan-400 bg-black/90">
+            <p class="text-[9px] text-cyan-400 font-black uppercase tracking-widest mb-2">Neural Whisper // Command Hub</p>
+            <h2 id="whisper-txt" class="text-3xl font-black italic uppercase"></h2>
+        </div>
+
         <header class="fixed top-0 left-0 w-full p-12 flex justify-between items-start z-50">
-            <div class="glass p-8 flex items-center gap-8 border-l-4 border-cyan-500 shadow-2xl">
-                <img id="d-pic" src="" class="w-24 h-24 rounded-full border-2 border-cyan-400 object-cover shadow-lg">
+            <div class="glass p-6 flex items-center gap-6 border-l-4 border-cyan-500">
+                <img id="d-pic" src="" class="w-20 h-20 rounded-full border-2 border-cyan-400 object-cover shadow-2xl">
                 <div>
-                    <h4 id="d-name" class="text-3xl font-black uppercase text-white tracking-tighter">...</h4>
-                    <div class="flex items-center gap-3 mt-2">
-                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <p class="text-xs text-cyan-600 font-black uppercase tracking-widest">Handshake Verified</p>
-                    </div>
+                    <h4 id="d-name" class="text-2xl font-black uppercase text-white tracking-tighter">Candidate</h4>
+                    <p class="text-[9px] text-cyan-600 font-black uppercase tracking-widest">Handshake Verified</p>
                 </div>
             </div>
-
-            <div class="glass p-8 text-right border-r-4 border-red-500">
-                <p class="text-[10px] text-slate-500 font-black uppercase mb-2 tracking-widest">Auto-Logout In</p>
-                <p id="timer" class="timer-text text-5xl font-black text-white">05:00</p>
+            <div class="glass p-6 text-right border-r-4 border-red-500">
+                <p class="text-[8px] text-slate-500 font-black uppercase mb-1">Session Timer</p>
+                <p id="timer" class="text-4xl font-['Orbitron'] font-black">00:00</p>
             </div>
         </header>
 
-        <div class="text-center opacity-5 select-none">
-            <h1 class="text-[18vw] font-['Orbitron'] font-black uppercase tracking-widest">C-SYNC</h1>
-            <p class="text-3xl font-black uppercase tracking-[2.5em]">Dr. VSK GDC (A)</p>
+        <!-- WATERMARK -->
+        <div class="text-center opacity-5 pointer-events-none">
+            <h1 class="text-[15vw] font-['Orbitron'] font-black uppercase tracking-widest">C-SYNC</h1>
         </div>
 
-        <footer class="fixed bottom-16 text-center w-full">
-            <button onclick="Kiosk.manualLogout()" class="px-16 py-5 border-2 border-red-500/20 text-red-500 rounded-full text-xs font-black uppercase tracking-[0.3em] hover:bg-red-600 hover:text-white transition-all shadow-2xl">
-                Terminate Session
+        <footer class="fixed bottom-12 w-full flex justify-center gap-6 px-12">
+            <button onclick="document.getElementById('file-up').click()" class="px-10 py-4 glass border-purple-500/30 text-purple-400 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                <i data-lucide="upload-cloud"></i> Project Handover
+                <input type="file" id="file-up" class="hidden" onchange="Kiosk.handover(this)">
             </button>
+            <button onclick="Kiosk.logout()" class="px-10 py-4 glass border-red-500/30 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest">Terminate Session</button>
         </footer>
     </div>
 
     <script>
-        // MASTER BACKEND MAPPING
         const API = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
+        const HW_ID = btoa(navigator.userAgent + screen.colorDepth + navigator.hardwareConcurrency);
         
-        // UNIQUE HARDWARE FINGERPRINT (Hardware-Level Identification)
-        const HW_ID = btoa(navigator.platform + navigator.hardwareConcurrency + screen.colorDepth + (navigator.deviceMemory || "8"));
-        
-        let idleSecs = 0;
         let SYS_ID = "";
+        let sessionTime = 0;
+        let isOccupied = false;
+        let currentUser = null;
 
         const Kiosk = {
             async init() {
                 lucide.createIcons();
-                
-                // 1. Identify Station Node via Backend GET Path (Stable)
+                // 1. Check Binding
                 try {
                     const res = await fetch(`${API}?action=identify_pc&hwId=${HW_ID}`);
                     const identity = await res.text();
-
                     if (identity === "UNBOUND") {
-                        this.showSetup();
+                        document.getElementById('view-lock').classList.add('hidden');
+                        document.getElementById('view-setup').classList.remove('hidden');
                     } else {
                         SYS_ID = identity;
                         document.getElementById('display-sid').innerText = SYS_ID;
-                        new QRCode(document.getElementById("qr-code"), { text: SYS_ID, width: 250, height: 250 });
-                        this.poll();
+                        this.startProtocols();
                     }
-                } catch(e) { 
-                    document.getElementById('display-sid').innerText = "LINK_ERR";
-                }
-                
-                // Enforce Fullscreen
-                document.body.onclick = () => {
-                    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => {});
-                };
-            },
-
-            showSetup() {
-                document.getElementById('view-lock').style.display = 'none';
-                document.getElementById('view-setup').style.display = 'flex';
-                document.body.style.cursor = 'default';
+                } catch(e) { console.error("Identity Pulse Lost"); }
             },
 
             async bindHardware() {
                 const sid = document.getElementById('setup-id').value.trim().toUpperCase();
-                const btn = document.getElementById('btn-bind');
-                if (!sid.startsWith('CS-')) return alert("Syntax Error: Use CS-01 to CS-50 format");
+                if (!sid.startsWith('CS-')) return alert("Format: CS-XX");
+                const res = await fetch(`${API}?action=bind_hardware&sysId=${sid}&hwId=${HW_ID}`);
+                if (await res.text() === "HARDWARE_BOUND") location.reload();
+            },
 
-                btn.disabled = true;
-                btn.innerText = "BINDING...";
+            startProtocols() {
+                setInterval(() => this.rotateQR(), 10000);
+                this.rotateQR();
+                this.poll();
+                // Enforce Fullscreen on interaction
+                document.body.onclick = () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); };
+            },
 
-                // HARD-LINK GET REQUEST (Bypass CORS)
-                try {
-                    const res = await fetch(`${API}?action=bind_hardware&sysId=${encodeURIComponent(sid)}&hwId=${encodeURIComponent(HW_ID)}`, { method: 'GET' });
-                    const status = await res.text();
-                    if (status === "HARDWARE_BOUND") {
-                        alert(`Station Registered: ${sid}`);
-                        location.reload();
-                    } else {
-                        alert("Access Denied: " + status);
-                        btn.disabled = false;
-                        btn.innerText = "Initialize Link";
-                    }
-                } catch(e) {
-                    alert("Handshake Failure. Verify Internet Connectivity.");
-                    btn.disabled = false;
-                    btn.innerText = "Initialize Link";
-                }
+            async rotateQR() {
+                if (isOccupied) return;
+                const res = await fetch(`${API}?action=get_kiosk_token&sysId=${SYS_ID}`);
+                const token = await res.text();
+                document.getElementById('qr-code').innerHTML = "";
+                new QRCode(document.getElementById("qr-code"), {
+                    text: JSON.stringify({ id: SYS_ID, auth: token }),
+                    width: 250, height: 250, colorDark: "#000000", colorLight: "#ffffff"
+                });
             },
 
             async poll() {
                 try {
-                    const res = await fetch(`${API}?action=kiosk_poll&sysId=${SYS_ID}&hwId=${HW_ID}`);
+                    const res = await fetch(`${API}?action=kiosk_poll&sysId=${SYS_ID}`);
                     const data = await res.json();
-                    if (data.status === "AUTHORIZED") {
-                        this.welcome(data);
-                    } else {
-                        setTimeout(() => this.poll(), 3000);
+
+                    // Handle Neural Whisper
+                    if (data.whisper) {
+                        const hud = document.getElementById('whisper-hud');
+                        document.getElementById('whisper-txt').innerText = data.whisper;
+                        hud.style.display = 'block';
+                        setTimeout(() => hud.style.display = 'none', 8000);
                     }
-                } catch(e) { setTimeout(() => this.poll(), 5000); }
+
+                    // Handle Session Unlock
+                    if (data.status === "AUTHORIZED" && !isOccupied) {
+                        this.unlock(data);
+                    } else if (data.status === "IDLE" && isOccupied) {
+                        this.logout();
+                    } else if (data.status === "LOCKED") {
+                        alert("COMMAND HUB: Station Locked due to policy violation.");
+                        location.reload();
+                    }
+                } catch(e) {}
+                setTimeout(() => this.poll(), isOccupied ? 10000 : 3000);
             },
 
-            welcome(user) {
-                const lock = document.getElementById('view-lock');
-                const welcome = document.getElementById('view-welcome');
-                
-                lock.style.transform = "translateY(-100%) scale(0.9)";
-                lock.style.opacity = "0";
-                
-                setTimeout(() => {
-                    lock.style.display = "none";
-                    welcome.classList.remove('hidden');
-                    setTimeout(() => welcome.style.opacity = "1", 50);
-
-                    document.getElementById('w-pic').src = user.profilePic;
-                    document.getElementById('w-name').innerText = user.name;
-
-                    // Windows Login Sequence Duration
-                    setTimeout(() => this.launchDesktop(user), 4500);
-                }, 800);
+            unlock(data) {
+                isOccupied = true;
+                currentUser = data;
+                document.getElementById('view-lock').classList.add('hidden');
+                document.getElementById('view-desktop').classList.remove('hidden');
+                document.getElementById('d-pic').src = data.profilePic;
+                document.getElementById('d-name').innerText = data.name;
+                this.startTimers();
+                this.startCCTVPulse();
             },
 
-            launchDesktop(user) {
-                const welcome = document.getElementById('view-welcome');
-                welcome.style.opacity = "0";
-                welcome.style.transform = "scale(1.1)";
-
-                setTimeout(() => {
-                    welcome.style.display = "none";
-                    const dv = document.getElementById('view-desktop');
-                    dv.classList.remove('hidden');
-                    document.getElementById('d-pic').src = user.profilePic;
-                    document.getElementById('d-name').innerText = user.name;
-                    document.body.style.cursor = 'default';
-                    this.startAutonomousEngine();
-                }, 800);
-            },
-
-            startAutonomousEngine() {
-                // Heartbeat / Reset timer on any movement
-                document.onmousemove = document.onkeydown = document.onclick = () => idleSecs = 0;
-
-                setInterval(async () => {
-                    idleSecs++;
-                    const remaining = 300 - idleSecs;
-                    document.getElementById('timer').innerText = this.fmt(remaining);
-                    
-                    if (remaining <= 60) document.getElementById('timer').classList.add('text-red-500', 'animate-pulse');
-                    
-                    // 5 Minute Security Release
-                    if (idleSecs >= 300) this.logout();
-                    
-                    // Force Lockdown Check (5 PM IST)
-                    const hr = new Date().getHours();
-                    if(hr >= 17 || hr < 8) this.logout();
+            startTimers() {
+                setInterval(() => {
+                    if(!isOccupied) return;
+                    sessionTime++;
+                    const m = Math.floor(sessionTime / 60).toString().padStart(2, '0');
+                    const s = (sessionTime % 60).toString().padStart(2, '0');
+                    document.getElementById('timer').innerText = `${m}:${s}`;
                 }, 1000);
             },
 
-            async manualLogout() {
-                if(confirm("Terminate Session and Release Station?")) this.logout();
+            startCCTVPulse() {
+                setInterval(async () => {
+                    if(!isOccupied) return;
+                    const canvas = await html2canvas(document.body, { scale: 0.25, logging: false });
+                    const frame = canvas.toDataURL('image/jpeg', 0.1);
+                    fetch(API, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify({ action: 'push_frame', pcId: SYS_ID, frame })
+                    });
+                }, 7000);
+            },
+
+            async handover(input) {
+                const file = input.files[0];
+                const btn = event.target.parentElement;
+                btn.innerText = "TRANSMITTING...";
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    await fetch(API, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'handover_project',
+                            uid: currentUser.id,
+                            pcId: SYS_ID,
+                            fileName: file.name,
+                            fileData: e.target.result
+                        })
+                    });
+                    btn.innerHTML = `<i data-lucide="check"></i> SUCCESS`;
+                    setTimeout(() => location.reload(), 2000);
+                };
+                reader.readAsDataURL(file);
+            },
+
+            // MANUAL ACCESS LOGIC
+            openManual() { document.getElementById('modal-manual').classList.remove('hidden'); },
+            closeManual() { document.getElementById('modal-manual').classList.add('hidden'); },
+            prepManual(type) {
+                this.manualRole = type;
+                document.getElementById('m-step-1').classList.add('hidden');
+                document.getElementById('m-step-form').classList.remove('hidden');
+                if(type === 'Guest') document.getElementById('m-name').classList.remove('hidden');
+            },
+            async requestManual() {
+                const id = document.getElementById('m-id').value;
+                const name = document.getElementById('m-name').value;
+                const res = await fetch(API, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'manual_request', type: this.manualRole, uid: id, name, pcId: SYS_ID })
+                });
+                const status = await res.text();
+                if(status === "GUEST_REPEAT_BLOCKED") {
+                    alert("STRICT PROTOCOL: Manual access is only allowed once for Guests. Please use the mobile app.");
+                    this.closeManual();
+                } else {
+                    document.getElementById('m-step-form').classList.add('hidden');
+                    document.getElementById('m-step-otp').classList.remove('hidden');
+                }
+            },
+            async verifyOTP() {
+                const otp = document.getElementById('m-otp').value;
+                // Simplified for demo - usually a secondary GET call
+                document.getElementById('m-step-otp').classList.add('hidden');
+                document.getElementById('m-step-wait').classList.remove('hidden');
+                this.poll(); // Start polling for lecturer approval
             },
 
             async logout() {
-                // Update backend to "Available"
-                await fetch(API, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'end_session', sysId: SYS_ID }),
-                    mode: 'no-cors' 
-                });
+                if(isOccupied && !confirm("Terminate session?")) return;
+                await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'end_session', sysId: SYS_ID }), mode: 'no-cors' });
                 location.reload();
-            },
-
-            fmt(s) {
-                const m = Math.floor(s / 60);
-                const rs = s % 60;
-                return `${m.toString().padStart(2,'0')}:${rs.toString().padStart(2,'0')}`;
             }
         };
 
