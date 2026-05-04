@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C-Sync | Station OS</title>
     
-    <!-- Dependencies -->
+    <!-- Core Infrastructure -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -16,7 +16,7 @@
         * { box-sizing: border-box; user-select: none; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; cursor: none; }
         
-        /* Windows 11 Fluent Effect Backdrop */
+        /* Windows 11 Fluent Backdrop */
         .win-blur { 
             position: fixed; inset: 0; 
             background: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1974') center/cover; 
@@ -31,7 +31,7 @@
             z-index: 10; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); 
         }
         
-        /* Glass UI */
+        /* Glass Components */
         .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2.5rem; }
         #qr-container { background: white; padding: 25px; border-radius: 2rem; box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); border: 10px solid rgba(0,242,255,0.1); }
         
@@ -63,9 +63,18 @@
 </head>
 <body oncontextmenu="return false;">
 
+    <!-- CLOSED SOURCE PROTECTION PERIMETER -->
+    <script>
+        document.onkeydown = e => { 
+            if (["F11", "F12", "Escape", "Tab"].includes(e.key)) e.preventDefault();
+            if (e.ctrlKey && (e.key === "u" || e.key === "U" || e.key === "i" || e.key === "I")) e.preventDefault();
+        };
+        setInterval(() => { (function(){}.constructor("debugger")()) }, 200);
+    </script>
+
     <div class="win-blur"></div>
 
-    <!-- 1. HARDWARE BINDING SETUP (Triggered if identify_pc returns UNBOUND) -->
+    <!-- 1. HARDWARE BINDING GATE (Visible only if identify_pc returns UNBOUND) -->
     <div id="view-setup" class="full-screen" style="display: none;">
         <div class="setup-card">
             <div class="w-20 h-20 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-8">
@@ -85,14 +94,14 @@
             <p class="text-[10px] text-slate-500 font-black uppercase mt-8 tracking-[1em]">Workstation Hard-Locked</p>
         </div>
         
-        <div id="qr-container">
+        <div id="qr-container" class="shimmer">
             <div id="qr-code"></div>
         </div>
 
         <div class="mt-20 text-center space-y-6">
             <div class="flex items-center justify-center gap-4">
                 <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-ping"></div>
-                <p class="text-sm font-black uppercase tracking-[0.4em] text-white">Neural Handshake Active</p>
+                <p class="text-sm font-black uppercase tracking-[0.4em] text-white">Neural Handshake Ready</p>
             </div>
             <p class="text-[10px] text-slate-600 uppercase font-bold tracking-widest">Scan with C-Sync Mobile PWA to Unlock</p>
         </div>
@@ -108,7 +117,7 @@
         
         <div class="mt-16 flex flex-col items-center gap-6">
             <div class="w-8 h-8 border-3 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs text-cyan-500 font-black uppercase tracking-[0.6em]">Preparing your node...</p>
+            <p class="text-xs text-cyan-500 font-black uppercase tracking-[0.6em]">Preparing your environment...</p>
         </div>
     </div>
 
@@ -145,10 +154,10 @@
     </div>
 
     <script>
-        // MASTER BACKEND CONFIG
-        const API = "https://script.google.com/macros/s/AKfycbwjob4JL7zw4hLK0cUQUi8jLpVzGjq7gAKpQM51zdyAbuCEqwX_SiShrql0XRSsU-xr/exec";
+        // MASTER BACKEND MAPPING
+        const API = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
         
-        // UNIQUE HARDWARE FINGERPRINT
+        // UNIQUE HARDWARE FINGERPRINT (Hardware-Level Identification)
         const HW_ID = btoa(navigator.platform + navigator.hardwareConcurrency + screen.colorDepth + (navigator.deviceMemory || "8"));
         
         let idleSecs = 0;
@@ -157,9 +166,8 @@
         const Kiosk = {
             async init() {
                 lucide.createIcons();
-                this.stealthShield();
-
-                // 1. Ask Backend for Identity based on HW_ID
+                
+                // 1. Identify Station Node via Backend GET Path (Stable)
                 try {
                     const res = await fetch(`${API}?action=identify_pc&hwId=${HW_ID}`);
                     const identity = await res.text();
@@ -175,6 +183,11 @@
                 } catch(e) { 
                     document.getElementById('display-sid').innerText = "LINK_ERR";
                 }
+                
+                // Enforce Fullscreen
+                document.body.onclick = () => {
+                    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => {});
+                };
             },
 
             showSetup() {
@@ -186,25 +199,27 @@
             async bindHardware() {
                 const sid = document.getElementById('setup-id').value.trim().toUpperCase();
                 const btn = document.getElementById('btn-bind');
-                if (!sid.startsWith('CS-')) return alert("Format Error: Use CS-01 to CS-50");
+                if (!sid.startsWith('CS-')) return alert("Syntax Error: Use CS-01 to CS-50 format");
 
                 btn.disabled = true;
                 btn.innerText = "BINDING...";
 
-                // ✅ THE FIX: Use GET protocol for initial binding to bypass CORS blocks
+                // HARD-LINK GET REQUEST (Bypass CORS)
                 try {
-                    const res = await fetch(`${API}?action=bind_hardware&sysId=${encodeURIComponent(sid)}&hwId=${encodeURIComponent(HW_ID)}`);
+                    const res = await fetch(`${API}?action=bind_hardware&sysId=${encodeURIComponent(sid)}&hwId=${encodeURIComponent(HW_ID)}`, { method: 'GET' });
                     const status = await res.text();
                     if (status === "HARDWARE_BOUND") {
-                        alert("Station Bound Successfully.");
+                        alert(`Station Registered: ${sid}`);
                         location.reload();
                     } else {
-                        alert("Registry Error: " + status);
+                        alert("Access Denied: " + status);
                         btn.disabled = false;
+                        btn.innerText = "Initialize Link";
                     }
                 } catch(e) {
-                    alert("Handshake Failure. Check backend logs.");
+                    alert("Handshake Failure. Verify Internet Connectivity.");
                     btn.disabled = false;
+                    btn.innerText = "Initialize Link";
                 }
             },
 
@@ -213,14 +228,14 @@
                     const res = await fetch(`${API}?action=kiosk_poll&sysId=${SYS_ID}&hwId=${HW_ID}`);
                     const data = await res.json();
                     if (data.status === "AUTHORIZED") {
-                        this.welcomeSequence(data);
+                        this.welcome(data);
                     } else {
                         setTimeout(() => this.poll(), 3000);
                     }
                 } catch(e) { setTimeout(() => this.poll(), 5000); }
             },
 
-            welcomeSequence(user) {
+            welcome(user) {
                 const lock = document.getElementById('view-lock');
                 const welcome = document.getElementById('view-welcome');
                 
@@ -231,11 +246,12 @@
                     lock.style.display = "none";
                     welcome.classList.remove('hidden');
                     setTimeout(() => welcome.style.opacity = "1", 50);
+
                     document.getElementById('w-pic').src = user.profilePic;
                     document.getElementById('w-name').innerText = user.name;
-                    
-                    // Windows Welcome Duration (4 seconds)
-                    setTimeout(() => this.launchDesktop(user), 4000);
+
+                    // Windows Login Sequence Duration
+                    setTimeout(() => this.launchDesktop(user), 4500);
                 }, 800);
             },
 
@@ -256,7 +272,7 @@
             },
 
             startAutonomousEngine() {
-                // Heartbeat/Reset on any activity
+                // Heartbeat / Reset timer on any movement
                 document.onmousemove = document.onkeydown = document.onclick = () => idleSecs = 0;
 
                 setInterval(async () => {
@@ -266,7 +282,7 @@
                     
                     if (remaining <= 60) document.getElementById('timer').classList.add('text-red-500', 'animate-pulse');
                     
-                    // 5 Minute Security Purge & Release
+                    // 5 Minute Security Release
                     if (idleSecs >= 300) this.logout();
                     
                     // Force Lockdown Check (5 PM IST)
@@ -280,10 +296,11 @@
             },
 
             async logout() {
+                // Update backend to "Available"
                 await fetch(API, { 
                     method: 'POST', 
                     body: JSON.stringify({ action: 'end_session', sysId: SYS_ID }),
-                    mode: 'no-cors'
+                    mode: 'no-cors' 
                 });
                 location.reload();
             },
@@ -292,20 +309,6 @@
                 const m = Math.floor(s / 60);
                 const rs = s % 60;
                 return `${m.toString().padStart(2,'0')}:${rs.toString().padStart(2,'0')}`;
-            },
-
-            stealthShield() {
-                // Disable Function Keys and Esc
-                window.onkeydown = e => {
-                    if (["F11", "F12", "Escape", "Tab"].includes(e.key)) e.preventDefault();
-                    if (e.ctrlKey && (e.key === "u" || e.key === "U")) e.preventDefault();
-                };
-                // Enforce Fullscreen on interaction
-                document.body.onclick = () => {
-                    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => {});
-                };
-                // Debugger Trap
-                setInterval(() => { (function(){}.constructor("debugger")()) }, 500);
             }
         };
 
