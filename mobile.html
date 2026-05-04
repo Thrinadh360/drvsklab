@@ -14,32 +14,34 @@
     <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --accent: #00f2ff; --accent-minor: #10b981; --bg: #000000; --card: rgba(15, 23, 42, 0.7); }
+        :root { --accent: #00f2ff; --bg: #000000; --card: rgba(15, 23, 42, 0.7); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; height: 100dvh; overflow: hidden; user-select: none; }
         
+        /* Glass UI Components */
         .glass { background: var(--card); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.05); }
         .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 14px; padding: 14px; transition: 0.3s; text-transform: uppercase; font-size: 10px; width: 100%; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(0,242,255,0.15); }
         .cyber-btn:active { transform: scale(0.96); opacity: 0.8; }
 
+        /* View Management */
         .view-container { display: none; height: 100%; overflow-y: auto; padding-bottom: 140px; scroll-behavior: smooth; }
         .view-active { display: block !important; animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Neural Oracle HUD Overlay */
+        /* Overlays */
         #oracle-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; padding: 25px; padding-top: 60px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #oracle-overlay.active { display: flex; transform: translateY(0); }
-        
-        /* Bridge Challenge Overlay */
         #bridge-overlay { position: fixed; inset: 0; background: #000; z-index: 9000; display: none; align-items: center; justify-content: center; padding: 30px; }
 
-        /* AI Message Bubble Flow */
+        /* Chat Flow (Multimodal) */
         .ai-msg { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--accent); border-radius: 0 15px 15px 15px; padding: 15px; font-size: 13px; color: #cbd5e1; margin-bottom: 15px; width: 90%; }
         .user-msg { background: rgba(255,255,255,0.05); border-radius: 15px 15px 0 15px; padding: 15px; font-size: 13px; align-self: flex-end; text-align: right; color: #fff; margin-bottom: 15px; width: 90%; margin-left: auto; }
 
+        /* Navigation */
         .bottom-nav { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
         .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; transition: 0.3s; }
         .nav-active { color: var(--accent); filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
@@ -51,27 +53,27 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- LOADING / VERIFICATION OVERLAY -->
+    <!-- LOADING & SECURITY OVERLAY -->
     <div id="status-overlay" class="fixed inset-0 bg-black z-[9999] hidden flex flex-col items-center justify-center p-10 text-center">
         <div class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-8"></div>
-        <h2 id="status-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter">Handshaking...</h2>
-        <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Authenticating Node Hardware</p>
+        <h2 id="status-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter">Syncing Node...</h2>
+        <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Authenticating Hardware Identity</p>
         <button onclick="UI.forceRepair()" class="mt-12 text-slate-600 text-[8px] font-black uppercase tracking-widest underline">Neural Redundancy / Repair</button>
     </div>
 
-    <!-- IDENTITY BRIDGE CHALLENGE -->
+    <!-- CROSS-BROWSER IDENTITY BRIDGE -->
     <div id="bridge-overlay">
         <div class="glass p-8 rounded-[3rem] text-center w-full max-w-sm border-t-4 border-cyan-400">
             <i data-lucide="zap" class="w-12 h-12 text-cyan-400 mx-auto mb-6"></i>
-            <h2 class="font-['Orbitron'] text-white text-lg mb-2 uppercase italic tracking-tighter">Sync Device</h2>
+            <h2 class="font-['Orbitron'] text-white text-lg mb-2 uppercase italic tracking-tighter">Bridge Identity</h2>
             <p id="bridge-msg" class="text-[10px] text-slate-500 uppercase font-black mb-8 leading-relaxed"></p>
             <input id="bridge-roll" placeholder="ENTER YOUR ROLL NO" class="text-center mb-6 !text-lg !font-['Orbitron'] tracking-widest">
             <button onclick="UI.completeBridge()" class="cyber-btn shadow-lg shadow-cyan-400/20">Authorize Node</button>
-            <button onclick="location.href='register.html'" class="text-[8px] text-slate-700 uppercase font-black mt-6 block mx-auto underline">New Device Registry</button>
+            <button onclick="location.href='register.html'" class="text-[8px] text-slate-700 uppercase font-black mt-6 block mx-auto underline">Register New Device</button>
         </div>
     </div>
 
-    <!-- NEURAL ORACLE FULL-SCREEN HUD -->
+    <!-- NEURAL ORACLE MULTIMODAL HUD -->
     <div id="oracle-overlay">
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
@@ -81,9 +83,9 @@
             <button onclick="UI.toggleOracle(false)" class="p-2 glass rounded-full text-slate-500"><i data-lucide="x"></i></button>
         </header>
 
+        <!-- Message flow is flex-col-reverse: new messages appear at TOP visually -->
         <div id="oracle-chat-box" class="flex-1 overflow-y-auto pr-2 space-y-4 flex flex-col-reverse">
-            <!-- Messages appear here (top-to-bottom via flex-col-reverse logic) -->
-            <div class="ai-msg">Neural Hub Ready. I am monitoring Lab PCs CS-01 to CS-50. Submit text, voice, or image data for analysis.</div>
+            <div class="ai-msg">Neural Hub Active. Pronunciation Mode: Doctor. I am monitoring Lab PCs. Submit text, voice, or visuals.</div>
         </div>
 
         <div id="ora-att-bar" class="hidden flex items-center gap-3 p-3 bg-white/5 rounded-xl mb-4 border border-white/10">
@@ -97,17 +99,18 @@
                 <button onclick="document.getElementById('ora-file').click()" class="glass p-5 rounded-2xl text-cyan-400"><i data-lucide="paperclip"></i></button>
                 <input type="file" id="ora-file" class="hidden" onchange="UI.handleOracleFile(this)">
                 <div class="relative flex-1">
-                    <input id="ora-input" placeholder="Speak or type directive..." class="!py-5 pr-14 shadow-2xl">
+                    <input id="ora-input" placeholder="Type or speak..." class="!py-5 pr-14 shadow-2xl">
                     <button onclick="UI.startSTT()" id="ora-mic" class="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-400"><i data-lucide="mic"></i></button>
                 </div>
                 <button onclick="UI.askOracle()" class="bg-cyan-400 text-black p-5 rounded-2xl font-black shadow-[0_0_20px_rgba(0,242,255,0.3)]"><i data-lucide="send"></i></button>
             </div>
             <div class="flex justify-center">
-                <button onclick="UI.toggleTTS()" id="tts-btn" class="text-[8px] font-black uppercase text-cyan-400 tracking-[0.3em]">Audio Synthesis: Enabled</button>
+                <button onclick="UI.toggleTTS()" id="tts-btn" class="text-[8px] font-black uppercase text-cyan-400 tracking-[0.3em]">Audio Output: Active</button>
             </div>
         </div>
     </div>
 
+    <!-- MAIN APP WRAPPER -->
     <div id="app-wrapper" class="flex flex-col h-full p-6">
         
         <!-- DASHBOARD VIEW -->
@@ -129,28 +132,19 @@
                 </div>
             </div>
 
-            <!-- NEURAL ORACLE WIDGET -->
+            <!-- ORACLE TRIGGER CARD -->
             <div onclick="UI.toggleOracle(true)" class="glass p-8 rounded-[3rem] border-t-4 border-cyan-400 mb-8 bg-gradient-to-br from-cyan-950/20 to-transparent active:scale-95 transition-transform">
                 <h4 class="text-cyan-400 font-black uppercase text-[10px] tracking-widest mb-2">Neural Oracle</h4>
                 <p class="text-white text-xl font-bold leading-tight mb-4">Engage Multimodal AI Intelligence</p>
                 <div class="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500">
-                    <span>Analyze</span> • <span>Voice</span> • <span>Vision</span>
+                    <span>Analyze</span> • <span>Research</span> • <span>Vision</span>
                     <i data-lucide="chevron-right" class="w-3 h-3 ml-auto"></i>
                 </div>
             </div>
 
-            <!-- MODULE GRID -->
+            <!-- DYNAMIC MODULE GRID -->
             <div id="hub-modules" class="grid grid-cols-2 gap-4">
-                <button onclick="UI.switchTab('rankings')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500">
-                    <i data-lucide="trophy" class="text-yellow-500 w-5 h-5 mb-3"></i>
-                    <h4 class="text-[10px] font-black uppercase text-white">Board</h4>
-                    <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Leadership</p>
-                </button>
-                <button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500">
-                    <i data-lucide="map-pin" class="text-emerald-500 w-5 h-5 mb-3"></i>
-                    <h4 class="text-[10px] font-black uppercase text-white">Presence</h4>
-                    <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">GPS Handshake</p>
-                </button>
+                <!-- Injected via UI.renderHubModules() -->
             </div>
         </div>
 
@@ -160,7 +154,7 @@
             <div id="leader-list" class="space-y-4"></div>
         </div>
 
-        <!-- SOVEREIGN FEED VIEW -->
+        <!-- DISCUSSION FEED VIEW -->
         <div id="view-discuss" class="view-container">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic uppercase tracking-tighter">Sovereign Feed</h2>
@@ -169,20 +163,35 @@
             <div id="topic-list" class="space-y-4"></div>
         </div>
 
-        <!-- PROFILE VIEW -->
+        <!-- PROFILE SETTINGS VIEW -->
         <div id="view-profile" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Node Profile</h2>
-            <div class="glass p-8 rounded-[3rem] space-y-6">
-                <div class="flex flex-col items-center">
-                    <img id="p-avatar" class="w-24 h-24 rounded-full border-2 border-cyan-400 object-cover mb-4">
-                    <input id="p-name" placeholder="Name" class="text-center">
-                </div>
-                <input id="p-phone" placeholder="Mobile Node No" class="text-center">
-                <button onclick="UI.saveProfile()" class="cyber-btn">Sync Node Identity</button>
-                <button onclick="UI.logout()" class="text-red-500 font-black text-[10px] uppercase w-full mt-4 underline">Unbind Node Hardware</button>
+            <div class="glass p-8 rounded-[3rem] space-y-6 text-center">
+                <img id="p-avatar" class="w-24 h-24 rounded-full border-2 border-cyan-400 mx-auto object-cover mb-4">
+                <input id="p-name" placeholder="Display Name" class="text-center">
+                <input id="p-phone" placeholder="Node Mobile No" class="text-center">
+                <button onclick="UI.saveProfile()" class="cyber-btn shadow-lg">Sync Identity</button>
+                <button onclick="UI.logout()" class="text-red-500 font-black text-[10px] uppercase w-full mt-4 underline">Unbind Hardware Node</button>
             </div>
         </div>
 
+        <!-- NEURAL SCRIBE VIEW -->
+        <div id="view-scribe" class="view-container">
+            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Neural Scribe</h2>
+            <div class="glass p-8 rounded-[3rem] space-y-6">
+                <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest">Lab Learning Record</p>
+                <textarea id="scribe-notes" placeholder="What did you build or learn today?" class="h-40 !bg-transparent border-none p-0 focus:ring-0"></textarea>
+                <button onclick="UI.syncDiary()" class="cyber-btn">Generate AI Entry</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- QR SCANNER MODAL -->
+    <div id="qr-modal" class="fixed inset-0 bg-black/95 z-[9999] hidden flex flex-col items-center justify-center p-10">
+        <button onclick="UI.closeQR()" class="absolute top-10 right-10 text-white"><i data-lucide="x" class="w-10 h-10"></i></button>
+        <div id="qr-reader" class="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-cyan-400 shadow-2xl"></div>
+        <p class="text-cyan-400 font-['Orbitron'] mt-8 animate-pulse text-xs uppercase tracking-widest text-center">Scanning Registry Pulse</p>
     </div>
 
     <!-- PERSISTENT NAVIGATION -->
@@ -196,7 +205,7 @@
     <script>
         const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
         
-        // --- FUZZY HARDWARE FINGERPRINTING (SELF-HEALING) ---
+        // --- FUZZY HARDWARE FINGERPRINTING ---
         const generateFuzzyUUID = () => {
             const dna = [
                 navigator.platform,
@@ -214,31 +223,24 @@
         };
 
         const UUID = generateFuzzyUUID();
-        let USER = JSON.parse(localStorage.getItem('csync_user_v700'));
+        let USER = JSON.parse(localStorage.getItem('csync_user_v805'));
         let attachment = null;
         let ttsEnabled = true;
 
         const UI = {
             async init() {
                 lucide.createIcons();
-                
-                // 1. Check browser local storage
-                if (USER) {
-                    this.checkStatus();
-                    return;
-                }
+                if (USER) { this.checkStatus(); return; }
 
-                // 2. Self-Healing Bridge: Check if this device is registered in another browser
+                // CROSS-BROWSER AUTO-DETECTION
                 try {
                     const res = await fetch(`${APPS_URL}?action=identify_device&uuid=${UUID}`);
                     const data = await res.json();
                     if (data.status === "SOFT_MATCH") {
                         document.getElementById('bridge-overlay').style.display = 'flex';
-                        document.getElementById('bridge-msg').innerText = `Device ID Recognised. Are you ${data.hints[0].name}?`;
+                        document.getElementById('bridge-msg').innerText = `Device DNA Recognised. Are you ${data.hints[0].name}?`;
                         lucide.createIcons();
-                    } else {
-                        location.href = 'register.html';
-                    }
+                    } else { location.href = 'register.html'; }
                 } catch(e) { location.href = 'register.html'; }
             },
 
@@ -252,7 +254,7 @@
                         overlay.classList.add('hidden');
                         this.boot();
                     } else if (status === "Pending") {
-                        document.getElementById('status-msg').innerText = "Awaiting HOD Authorization...";
+                        document.getElementById('status-msg').innerText = "Awaiting Institutional Authorization...";
                     } else {
                         document.getElementById('status-msg').innerText = "Hardware Mismatch. Unbind current node.";
                     }
@@ -269,13 +271,14 @@
                 document.getElementById('p-name').value = USER.name;
                 document.getElementById('p-phone').value = USER.phone;
                 
-                const meta = `${USER.role === 'Student' ? 'Major' : USER.role === 'Minor' ? 'Minor' : USER.role}: ${USER.dept}`;
+                const meta = `${USER.role}: ${USER.dept}`;
                 document.getElementById('h-meta').innerText = meta;
                 
                 if (['HOD', 'Lecturer'].includes(USER.role)) {
                     document.getElementById('btn-staff-plus').classList.remove('hidden');
                 }
                 
+                this.renderHubModules();
                 this.refreshLeadership();
                 this.refreshFeed();
             },
@@ -288,13 +291,59 @@
                     const data = await res.json();
                     if (data.status === "VERIFIED") {
                         USER = data;
-                        localStorage.setItem('csync_user_v700', JSON.stringify(data));
+                        localStorage.setItem('csync_user_v805', JSON.stringify(data));
                         location.reload();
-                    } else { alert("Sync Failed. Invalid Roll Number."); }
+                    } else { alert("Sync Failed. Invalid Identity Challenge."); }
                 } catch(e) { alert("Identity Handshake Error."); }
             },
 
-            // --- NEURAL ORACLE MULTIMODAL LOGIC ---
+            renderHubModules() {
+                const container = document.getElementById('hub-modules');
+                let modules = "";
+
+                // 1. STATION HANDSHAKE
+                if (USER.role !== 'Alumni') {
+                    modules += `
+                    <button onclick="UI.openQR('lab')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500">
+                        <i data-lucide="scan-line" class="text-emerald-500 w-5 h-5 mb-3"></i>
+                        <h4 class="text-[10px] font-black uppercase text-white">Lab PC</h4>
+                        <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Unlock Station</p>
+                    </button>`;
+                }
+
+                // 2. GPS PRESENCE
+                modules += `
+                <button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-cyan-500">
+                    <i data-lucide="map-pin" class="text-cyan-500 w-5 h-5 mb-3"></i>
+                    <h4 class="text-[10px] font-black uppercase text-white">Presence</h4>
+                    <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Designated Coordinate</p>
+                </button>`;
+
+                // 3. ADMIN QR (Staff Only)
+                if (['HOD', 'Lecturer'].includes(USER.role)) {
+                    modules += `
+                    <button onclick="UI.openQR('admin')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500 col-span-2">
+                        <i data-lucide="monitor-check" class="text-yellow-500 w-5 h-5 mb-3"></i>
+                        <h4 class="text-[10px] font-black uppercase text-white">Authorize Command Hub</h4>
+                        <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Scan Admin.html QR</p>
+                    </button>`;
+                }
+
+                // 4. SCRIBE (Student Only)
+                if (['Student', 'Minor'].includes(USER.role)) {
+                    modules += `
+                    <button onclick="UI.switchTab('scribe')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-purple-500 col-span-2">
+                        <i data-lucide="book-open" class="text-purple-500 w-5 h-5 mb-3"></i>
+                        <h4 class="text-[10px] font-black uppercase text-white">Neural Scribe</h4>
+                        <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Log Lab Experience</p>
+                    </button>`;
+                }
+
+                container.innerHTML = modules;
+                lucide.createIcons();
+            },
+
+            // --- NEURAL ORACLE HUD ---
             toggleOracle(show) {
                 const el = document.getElementById('oracle-overlay');
                 el.style.display = 'flex';
@@ -323,7 +372,7 @@
                 if (!q && !attachment) return;
                 
                 const box = document.getElementById('oracle-chat-box');
-                box.insertAdjacentHTML('afterbegin', `<div class="user-msg">${q || "Visual Data Splicing..."}</div>`);
+                box.insertAdjacentHTML('afterbegin', `<div class="user-msg">${q || "Visual Context Splicing"}</div>`);
                 document.getElementById('ora-input').value = "";
                 
                 const tempId = "ai-" + Date.now();
@@ -338,7 +387,7 @@
                     document.getElementById(tempId).innerText = aiText;
                     if (ttsEnabled) this.speak(aiText);
                     this.clearAttachment();
-                } catch(e) { document.getElementById(tempId).innerText = "Hub Busy. Retrying protocol..."; }
+                } catch(e) { document.getElementById(tempId).innerText = "Hub Timeout. Retry protocol."; }
             },
 
             startSTT() {
@@ -354,16 +403,37 @@
 
             speak(txt) {
                 window.speechSynthesis.cancel();
-                const msg = new SpeechSynthesisUtterance(txt);
+                // PRONUNCIATION FIX: "Dr." -> "Doctor"
+                let audioText = txt.replace(/\bDr\./g, 'Doctor').replace(/\bDr\b/g, 'Doctor');
+                const msg = new SpeechSynthesisUtterance(audioText);
                 msg.rate = 1.1; window.speechSynthesis.speak(msg);
             },
 
             toggleTTS() {
                 ttsEnabled = !ttsEnabled;
-                document.getElementById('tts-btn').innerText = `Audio Synthesis: ${ttsEnabled ? 'Enabled' : 'Disabled'}`;
+                document.getElementById('tts-btn').innerText = `Voice Feedback: ${ttsEnabled ? 'ON' : 'OFF'}`;
             },
 
-            // --- TAB NAVIGATION ---
+            // --- QR LOGIC ---
+            openQR(type) {
+                document.getElementById('qr-modal').classList.remove('hidden');
+                this.scanner = new Html5Qrcode("qr-reader");
+                this.scanner.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, async (code) => {
+                    if (type === 'lab') {
+                        const pc = JSON.parse(code);
+                        await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'lab_session', id: USER.id, pcId: pc.id, photo: USER.photo, coords: this.lastCoords }) });
+                        alert("Station Unlocked.");
+                    } else {
+                        await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'authorize_desktop', sessionID: code, userName: USER.name, uid: USER.id }) });
+                        alert("Admin Hub Authenticated.");
+                    }
+                    this.closeQR();
+                });
+            },
+
+            closeQR() { if(this.scanner) this.scanner.stop(); document.getElementById('qr-modal').classList.add('hidden'); },
+
+            // --- SYSTEM ACTIONS ---
             switchTab(t) {
                 document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active'));
                 document.getElementById('view-'+t).classList.add('view-active');
@@ -372,7 +442,6 @@
                 lucide.createIcons();
             },
 
-            // --- DATA LOADERS ---
             async refreshLeadership() {
                 const res = await fetch(`${APPS_URL}?action=get_leadership`);
                 const data = await res.json();
@@ -392,29 +461,42 @@
                 const data = await res.json();
                 document.getElementById('topic-list').innerHTML = data.map(t => `
                     <div class="glass p-6 rounded-[2.5rem] border-l-4 border-cyan-400">
-                        <p class="text-[8px] text-slate-500 font-bold uppercase mb-2">Staff: ${t.author}</p>
-                        <h4 class="text-xs font-black uppercase text-white mb-2">${t.title}</h4>
-                        <p class="text-[10px] text-slate-400 leading-relaxed mb-4">${t.content}</p>
-                        <button class="text-[8px] text-cyan-400 font-black uppercase tracking-[0.3em]">Join Conversation</button>
+                        <p class="text-[8px] text-slate-500 font-bold uppercase mb-2">Staff: ${t[2]}</p>
+                        <h4 class="text-xs font-black uppercase text-white mb-2">${t[5]}</h4>
+                        <p class="text-[10px] text-slate-400 leading-relaxed mb-4">${t[6]}</p>
+                        <button onclick="UI.viewTopic('${t[0]}', '${t[5]}')" class="text-[8px] text-cyan-400 font-black uppercase tracking-widest">Open Node Feed</button>
                     </div>
                 `).join('');
             },
 
+            async viewTopic(tid, title) {
+                const msg = prompt(`FEED: ${title}\n\nEnter response:`);
+                if(msg) {
+                    await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'post_reply', topicId: tid, uid: USER.id, name: USER.name, msg }) });
+                    alert("Response Synced.");
+                }
+            },
+
             async markPresence() {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
-                    if (pos.coords.accuracy > 100) return alert("GPS Accuracy too low. Move to an open area.");
-                    await fetch(APPS_URL, {
+                    this.lastCoords = `${pos.coords.latitude},${pos.coords.longitude}`;
+                    const res = await fetch(APPS_URL, {
                         method: 'POST',
-                        body: JSON.stringify({ 
-                            action: 'attendance', 
-                            id: USER.id, 
-                            name: USER.name, 
-                            coords: `${pos.coords.latitude},${pos.coords.longitude}`, 
-                            faceMatch: true 
-                        })
+                        body: JSON.stringify({ action: 'attendance', id: USER.id, name: USER.name, coords: this.lastCoords, faceMatch: true })
                     });
-                    alert("Handshake Recorded.");
+                    const status = await res.text();
+                    if(status === "OUT_OF_BOUNDS") alert("Access Denied: Node outside institutional geofence.");
+                    else alert("Sovereign Handshake Confirmed.");
                 }, () => alert("GPS Signal Lost. Check permissions."));
+            },
+
+            async syncDiary() {
+                const notes = document.getElementById('scribe-notes').value;
+                if(!notes) return;
+                await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'sync_diary', uid: USER.id, name: USER.name, notes, tags: USER.dept }) });
+                alert("Neural Diary Synced to Registry.");
+                document.getElementById('scribe-notes').value = "";
+                this.switchTab('dashboard');
             },
 
             async saveProfile() {
@@ -422,12 +504,12 @@
                 const phone = document.getElementById('p-phone').value;
                 await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', uid: USER.id, name, phone }) });
                 USER.name = name; USER.phone = phone;
-                localStorage.setItem('csync_user_v700', JSON.stringify(USER));
-                alert("Node Re-synced.");
+                localStorage.setItem('csync_user_v805', JSON.stringify(USER));
+                alert("Identity Synced.");
             },
 
             forceRepair() {
-                if(confirm("This will clear local storage and re-sync your node from the Sovereign Registry. Proceed?")) {
+                if(confirm("Initiate Neural Redundancy? This clears local cache and re-fetches your node from registry.")) {
                     localStorage.clear(); location.reload();
                 }
             },
