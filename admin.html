@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C-Sync Admin | Sovereign Command Hub</title>
     
-    <!-- Core Dependencies -->
+    <!-- Professional Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -16,21 +16,21 @@
         * { box-sizing: border-box; outline: none; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; user-select: none; }
         
-        /* High-Tech UIHUD */
+        /* Command HUD Styling */
         .glass { background: var(--card); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.05); }
         .cyber-card { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 24px; transition: 0.3s; }
         .cyber-card:hover { border-color: var(--accent); box-shadow: 0 0 25px rgba(0, 242, 255, 0.15); }
         
         .sidebar { width: 280px; height: 100vh; background: #05060f; border-right: 1px solid #1e293b; z-index: 100; flex-shrink: 0; }
         .nav-btn { display: flex; align-items: center; gap: 1rem; width: 100%; padding: 1.2rem; border-radius: 12px; font-weight: 700; font-size: 11px; transition: 0.2s; text-transform: uppercase; border: none; background: none; color: #475569; cursor: pointer; }
-        .nav-btn:hover { background: rgba(255,255,255,0.05); color: var(--accent); }
+        .nav-btn:hover { background: rgba(0, 242, 255, 0.05); color: var(--accent); }
         .nav-active { background: rgba(0, 242, 255, 0.05) !important; color: var(--accent) !important; border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0; }
 
         .view-container { display: none; height: 100vh; overflow-y: auto; padding: 50px; padding-bottom: 150px; animation: fadeIn 0.4s ease-out; }
         .view-active { display: block !important; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* CCTV Grid */
+        /* CCTV Pulse Grid */
         .cctv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .monitor-card { background: #000; border: 1px solid #1e293b; border-radius: 16px; overflow: hidden; position: relative; }
         .monitor-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; opacity: 0.6; transition: 0.3s; }
@@ -43,38 +43,37 @@
 
         .shimmer { background: linear-gradient(90deg, #475569 25%, #00f2ff 50%, #475569 75%); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2s infinite; }
         @keyframes shimmer { to { background-position: -200% 0; } }
-
+        
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-    <!-- AUTH GATE -->
+    <!-- AUTHENTICATION GATE -->
     <div id="auth-gate" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center">
         <div class="glass p-16 text-center rounded-[3rem] border border-white/10 w-[500px]">
             <h1 class="font-['Orbitron'] text-cyan-400 text-3xl mb-2 italic tracking-tighter">C-SYNC COMMAND</h1>
-            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mb-12">Registry Handshake</p>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mb-12">Institutional Handshake</p>
             <div id="qr-canvas" class="inline-block p-6 bg-white rounded-3xl mb-12 shadow-[0_0_50px_rgba(0,242,255,0.2)]"></div>
             <div class="flex items-center justify-center gap-3 animate-pulse mb-8">
                 <div class="w-2 h-2 bg-cyan-400 rounded-full"></div>
-                <p class="text-xs text-white font-bold uppercase">Scanning for Mobile Node</p>
+                <p class="text-xs text-white font-bold uppercase">Scanning Mobile Registry</p>
             </div>
             <div class="pt-8 border-t border-white/5 flex flex-col gap-4">
                 <button onclick="Admin.developerLogin()" class="text-[9px] text-yellow-500/40 uppercase font-black hover:text-yellow-500 tracking-[0.3em] transition">Initialize Developer Deck</button>
-                <button onclick="Admin.emergencyLogin()" class="text-[8px] text-slate-700 uppercase font-black hover:text-cyan-400 tracking-[0.2em] transition">Staff Override</button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN INTERFACE -->
+    <!-- COMMAND INTERFACE -->
     <div id="main-layout" class="hidden flex h-screen">
         
         <!-- SIDEBAR -->
         <aside class="sidebar p-8 flex flex-col">
             <div class="mb-12 px-4">
                 <h1 class="font-['Orbitron'] text-2xl text-cyan-400 italic font-black">C-SYNC</h1>
-                <p id="admin-tag" class="text-[8px] text-slate-500 font-black uppercase mt-1">Sovereign Admin Alpha</p>
+                <p id="admin-tag" class="text-[8px] text-slate-500 font-black uppercase mt-1">Sovereign Command v810</p>
             </div>
 
             <nav class="space-y-1 flex-1">
@@ -84,7 +83,7 @@
                 <button onclick="Admin.tab('cctv')" id="nav-cctv" class="nav-btn"><i data-lucide="monitor"></i> Live Lab Pulse</button>
                 <button onclick="Admin.tab('naac')" id="nav-naac" class="nav-btn"><i data-lucide="award"></i> NAAC Architect</button>
                 <button onclick="Admin.tab('feed')" id="nav-feed" class="nav-btn"><i data-lucide="message-square"></i> Discussion Feed</button>
-                <button onclick="Admin.tab('projects')" id="nav-projects" class="nav-btn"><i data-lucide="file-code"></i> Project Handover</button>
+                <button onclick="Admin.tab('projects')" id="nav-projects" class="nav-btn"><i data-lucide="file-code"></i> Handover Hub</button>
                 <div class="my-6 border-t border-white/5"></div>
                 <button onclick="Admin.tab('dev')" id="nav-dev" class="nav-btn hidden text-yellow-500 font-black"><i data-lucide="cpu"></i> Developer Deck</button>
             </nav>
@@ -94,20 +93,29 @@
             </button>
         </aside>
 
-        <!-- VIEWPORT -->
+        <!-- COMMAND VIEWPORT -->
         <main class="flex-1 overflow-hidden relative bg-[radial-gradient(circle_at_top_right,_#070b1d_0%,_#020617_100%)]">
             
             <!-- VIEW: DASHBOARD (PULSE) -->
             <div id="view-dash" class="view-container view-active space-y-12">
                 <header>
                     <h2 class="font-['Orbitron'] text-5xl font-black tracking-tighter shimmer">CENTRAL PULSE</h2>
-                    <p class="text-slate-500 mt-2 uppercase text-[10px] font-bold tracking-[0.4em]">Institutional Intelligence Hub</p>
+                    <p class="text-slate-500 mt-2 uppercase text-[10px] font-bold tracking-[0.4em]">Real-time Institutional Data</p>
                 </header>
 
                 <div class="grid grid-cols-3 gap-8">
-                    <div class="cyber-card p-10"><p class="text-xs text-slate-500 font-bold uppercase mb-2">Registry Nodes</p><h3 id="stat-reg" class="text-6xl font-black text-white">...</h3></div>
-                    <div class="cyber-card p-10"><p class="text-xs text-slate-500 font-bold uppercase mb-2">Awaiting Verify</p><h3 id="stat-pend" class="text-6xl font-black text-yellow-500">...</h3></div>
-                    <div class="cyber-card p-10"><p class="text-xs text-slate-500 font-bold uppercase mb-2">Live Stations</p><h3 id="stat-lab" class="text-6xl font-black text-emerald-500">Active</h3></div>
+                    <div class="cyber-card p-10 border-l-4 border-cyan-400">
+                        <p class="text-xs text-slate-500 font-bold uppercase mb-2">Registered Nodes</p>
+                        <h3 id="stat-reg" class="text-6xl font-black text-white">...</h3>
+                    </div>
+                    <div class="cyber-card p-10 border-l-4 border-yellow-500">
+                        <p class="text-xs text-slate-500 font-bold uppercase mb-2">Awaiting Verify</p>
+                        <h3 id="stat-pend" class="text-6xl font-black text-yellow-500">...</h3>
+                    </div>
+                    <div class="cyber-card p-10 border-l-4 border-emerald-500">
+                        <p class="text-xs text-slate-500 font-bold uppercase mb-2">Active Stations</p>
+                        <h3 id="stat-lab" class="text-6xl font-black text-emerald-500">READY</h3>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-8">
@@ -124,7 +132,7 @@
                     </div>
                     <div class="cyber-card p-10 border-t-4 border-orange-500">
                         <h4 class="text-xs font-black uppercase mb-8">Global Signal Broadcast</h4>
-                        <textarea id="signal-msg" placeholder="Emergency broadcast or faculty advisory..." class="h-28 mb-6"></textarea>
+                        <textarea id="signal-msg" placeholder="Emergency broadcast or institutional advisory..." class="h-28 mb-6"></textarea>
                         <button onclick="Admin.broadcastSignal()" class="cyber-btn !bg-orange-600 !text-white">Transmit Global Signal</button>
                     </div>
                 </div>
@@ -137,23 +145,19 @@
             </div>
 
             <!-- VIEW: GOVERNANCE -->
-            <div id="view-gov" class="view-container space-y-12">
-                <h2 class="font-['Orbitron'] text-3xl font-black text-indigo-400 uppercase italic">Institutional Governance</h2>
-                
-                <div class="grid grid-cols-2 gap-10">
+            <div id="view-gov" class="view-container space-y-10">
+                <h2 class="font-['Orbitron'] text-3xl font-black text-indigo-400 uppercase italic">Governance Logic</h2>
+                <div class="grid grid-cols-2 gap-8">
                     <div class="cyber-card p-10 border-t-4 border-purple-500 bg-purple-500/5">
                         <h4 class="text-xs font-black uppercase mb-6 text-purple-400">HOD Succession Protocol</h4>
                         <div class="space-y-4">
                             <input id="suc-new" placeholder="New HOD Staff ID">
-                            <select id="suc-action">
-                                <option value="lecturer">Downgrade Current HOD to Lecturer</option>
-                                <option value="archive">Archive Current HOD Node</option>
-                            </select>
+                            <select id="suc-action"><option value="lecturer">Downgrade Current HOD to Lecturer</option><option value="archive">Archive Current HOD Node</option></select>
                             <button onclick="Admin.executeSuccession()" class="cyber-btn !bg-purple-600 !text-white">Execute Power Transfer</button>
                         </div>
                     </div>
-                    <div class="cyber-card p-10 border-t-4 border-indigo-500 bg-indigo-500/5">
-                        <h4 class="text-xs font-black uppercase mb-6 text-indigo-400">Lifecycle Queue (Promotion / Reversion)</h4>
+                    <div class="cyber-card p-10 border-t-4 border-indigo-400">
+                        <h4 class="text-xs font-black uppercase mb-6">Promotions / Reversions</h4>
                         <div id="gov-queue" class="space-y-4"></div>
                     </div>
                 </div>
@@ -163,14 +167,14 @@
             <div id="view-cctv" class="view-container space-y-10">
                 <div class="flex justify-between items-center">
                     <h2 class="font-['Orbitron'] text-3xl font-black text-emerald-400 uppercase italic">Live Lab Pulse</h2>
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Update Frequency: 7s</p>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Refresh: 7s</p>
                 </div>
                 <div id="monitor-grid" class="cctv-grid"></div>
             </div>
 
             <!-- VIEW: NAAC ARCHITECT -->
             <div id="view-naac" class="view-container space-y-10">
-                <h2 class="font-['Orbitron'] text-3xl font-black text-indigo-400 uppercase italic">NAAC AI Architect</h2>
+                <h2 class="font-['Orbitron'] text-3xl font-black text-indigo-400 uppercase italic">NAAC Architect (AI)</h2>
                 <div class="grid grid-cols-7 gap-4">
                     <button onclick="Admin.runNAAC(1)" class="glass p-8 text-[10px] font-black hover:border-cyan-400">CRIT 1</button>
                     <button onclick="Admin.runNAAC(2)" class="glass p-8 text-[10px] font-black hover:border-cyan-400">CRIT 2</button>
@@ -180,23 +184,23 @@
                     <button onclick="Admin.runNAAC(6)" class="glass p-8 text-[10px] font-black hover:border-cyan-400">CRIT 6</button>
                     <button onclick="Admin.runNAAC(7)" class="glass p-8 text-[10px] font-black hover:border-cyan-400">CRIT 7</button>
                 </div>
-                <div id="naac-output" class="hidden glass p-10 font-mono text-sm leading-relaxed text-emerald-400 border border-emerald-500/20 rounded-3xl whitespace-pre-wrap"></div>
+                <div id="naac-output" class="hidden glass p-10 font-mono text-sm leading-relaxed text-emerald-400 border border-emerald-500/20 rounded-3xl whitespace-pre-wrap max-h-[500px] overflow-y-auto"></div>
             </div>
 
             <!-- VIEW: PROJECTS -->
             <div id="view-projects" class="view-container space-y-10">
-                <h2 class="font-['Orbitron'] text-3xl font-black text-purple-400 uppercase italic">Project Handover Hub</h2>
+                <h2 class="font-['Orbitron'] text-3xl font-black text-purple-400 uppercase italic">Handover Hub</h2>
                 <div id="project-list" class="grid grid-cols-3 gap-6"></div>
             </div>
 
-            <!-- VIEW: DISCUSSION FEED -->
+            <!-- VIEW: FEED HUB -->
             <div id="view-feed" class="view-container space-y-10">
                 <h2 class="font-['Orbitron'] text-3xl font-black text-pink-500 uppercase italic">Feed Hub Management</h2>
                 <div class="cyber-card p-10 bg-pink-500/5 border-pink-500/20 border">
                     <h4 class="text-xs font-black uppercase mb-6">Initiate Discussion Node</h4>
-                    <input id="topic-title" placeholder="Topic Title (e.g. Lab Exercise 04 Instructions)" class="mb-4">
-                    <textarea id="topic-content" placeholder="Context or directives for the student nodes..." class="h-32 mb-6"></textarea>
-                    <button onclick="Admin.startDiscussion()" class="cyber-btn !bg-pink-600 !text-white">Activate Feed Topic</button>
+                    <input id="topic-title" placeholder="Topic Title" class="mb-4">
+                    <textarea id="topic-content" placeholder="Context for the student nodes..." class="h-32 mb-6"></textarea>
+                    <button onclick="Admin.startDiscussion()" class="cyber-btn !bg-pink-600 !text-white">Publish Topic</button>
                 </div>
             </div>
 
@@ -204,24 +208,19 @@
             <div id="view-dev" class="view-container space-y-10">
                 <h2 class="font-['Orbitron'] text-3xl font-black text-yellow-500 uppercase italic">Developer Deck (Root)</h2>
                 <div class="grid grid-cols-3 gap-8">
-                    <div class="cyber-card p-8 border-l-4 border-yellow-500">
-                        <h4 class="text-[10px] font-black uppercase mb-4 text-yellow-500">Node Expansion</h4>
-                        <select class="mb-2"><option>Physics Department</option><option>Commerce Department</option><option>Exams Cell</option></select>
-                        <button class="cyber-btn w-full !bg-yellow-500">Deploy Institutional Unit</button>
-                    </div>
                     <div class="cyber-card p-8 border-l-4 border-red-500">
-                        <h4 class="text-[10px] font-black uppercase mb-4 text-red-500">Hardware Reset Engine</h4>
+                        <h4 class="text-[10px] font-black uppercase mb-4 text-red-500">Hardware Reset</h4>
                         <input id="reset-uid" placeholder="Node ID" class="mb-2">
                         <button onclick="Admin.resetHardware()" class="cyber-btn w-full !bg-red-600 !text-white">Purge HW Link</button>
                     </div>
-                    <div class="cyber-card p-8 border-l-4 border-cyan-400 overflow-y-auto max-h-[300px]">
+                    <div class="cyber-card p-8 border-l-4 border-cyan-400">
                         <h4 class="text-[10px] font-black uppercase mb-4 text-cyan-400">HOD Auth Queue</h4>
                         <div id="hod-queue" class="space-y-2"></div>
                     </div>
-                </div>
-                <div class="glass p-10 rounded-3xl">
-                    <h4 class="text-xs font-black uppercase mb-4 opacity-50">Sovereign Audit Logs</h4>
-                    <div id="system-logs" class="font-mono text-[10px] text-slate-500 h-60 overflow-y-auto space-y-1"></div>
+                    <div class="cyber-card p-8 border-l-4 border-yellow-500">
+                        <h4 class="text-[10px] font-black uppercase mb-4 text-yellow-500">Node Expansion</h4>
+                        <button class="cyber-btn w-full !bg-yellow-500">Deploy New Institutional Unit</button>
+                    </div>
                 </div>
             </div>
 
@@ -253,20 +252,19 @@
             },
 
             developerLogin() {
-                const pass = prompt("ENTER ROOT ACCESS KEY:");
-                if (pass === "Pass3nadh") {
+                if (prompt("ENTER ROOT ACCESS KEY:") === "Pass3nadh") {
                     this.unlock({ name: "M. Thrinadh", uid: "DEV-ROOT", role: "DEVELOPER" });
                     document.getElementById('nav-dev').classList.remove('hidden');
                     document.getElementById('admin-tag').classList.add('text-yellow-500', 'shimmer');
                     this.tab('dev');
-                } else { alert("ACCESS DENIED: CHALLENGE FAILED"); }
+                } else { alert("ACCESS DENIED"); }
             },
 
             emergencyLogin() {
                 const token = prompt("ENTER STAFF OVERRIDE:");
                 if (btoa(token) === "dnNrYWRtaW4=") {
                     this.unlock({ name: "Staff Admin", uid: "STAFF-99", role: "ADMIN" });
-                } else { alert("INVALID STAFF TOKEN"); }
+                } else { alert("INVALID TOKEN"); }
             },
 
             unlock(user) {
@@ -275,11 +273,17 @@
                 document.getElementById('main-layout').classList.remove('hidden');
                 document.getElementById('admin-tag').innerText = `${user.name} (${user.role})`;
                 this.tab('dash');
+                this.confirm("Command handshake complete. Protocol active.");
                 this.startLoops();
-                lucide.createIcons();
             },
 
-            // 2. NAVIGATION
+            confirm(msg) {
+                if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+                const utt = new SpeechSynthesisUtterance(msg.replace(/\bDr\./g, 'Doctor'));
+                utt.rate = 1.05; window.speechSynthesis.speak(utt);
+            },
+
+            // 2. NAVIGATION & LOOPS
             tab(t) {
                 document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active'));
                 document.getElementById('view-' + t).classList.add('view-active');
@@ -289,27 +293,26 @@
                 lucide.createIcons();
             },
 
-            // 3. CORE ANALYTICS
+            startLoops() {
+                setInterval(() => this.refreshData(), 10000);
+                setInterval(() => this.refreshCCTV(), 7000);
+            },
+
+            // 3. MODULE LOADERS
             async refreshData() {
                 try {
                     const stats = await (await fetch(`${API}?action=get_stats`)).json();
                     document.getElementById('stat-reg').innerText = stats.reg;
                     document.getElementById('stat-pend').innerText = stats.pending;
 
-                    const curTab = document.querySelector('.view-active').id;
-                    if(curTab === 'view-queue') this.loadQueue();
-                    if(curTab === 'view-gov') this.loadGovQueue();
-                    if(curTab === 'view-projects') this.loadProjects();
-                    if(curTab === 'view-dev') this.loadDevDeck();
-                    if(curTab === 'view-cctv') this.refreshCCTV();
+                    const cur = document.querySelector('.view-active').id;
+                    if(cur === 'view-queue') this.loadQueue();
+                    if(cur === 'view-gov') this.loadGovQueue();
+                    if(cur === 'view-projects') this.loadProjects();
+                    if(cur === 'view-dev') this.loadDevDeck();
                 } catch(e) {}
             },
 
-            startLoops() {
-                setInterval(() => this.refreshData(), 8000);
-            },
-
-            // 4. MODULE LOADER LOGIC
             async loadQueue() {
                 const data = await (await fetch(`${API}?action=get_pending&isDev=false`)).json();
                 document.getElementById('queue-list').innerHTML = data.map(r => `
@@ -318,9 +321,8 @@
                             <img src="${r.photo}" class="w-14 h-14 rounded-full border border-white/10 shadow-xl object-cover">
                             <div><p class="text-xs font-black uppercase text-white">${r.name}</p><p class="text-[8px] text-slate-500 uppercase">${r.uid} • ${r.role}</p></div>
                         </div>
-                        <button onclick="Admin.approveNode('${r.uid}')" class="bg-cyan-500 text-black px-6 py-2 rounded-xl text-[10px] font-black uppercase">Approve</button>
-                    </div>
-                `).join('') || "<p class='text-slate-500 uppercase text-xs p-10'>Registry Secure.</p>";
+                        <button onclick="Admin.approveNode('${r.uid}')" class="cyber-btn !w-auto px-8">Approve</button>
+                    </div>`).join('') || "<p class='text-slate-500 uppercase text-xs p-10'>Registry Secure.</p>";
             },
 
             async loadGovQueue() {
@@ -329,97 +331,101 @@
                     <div class="glass p-5 flex justify-between items-center border-l-4 border-indigo-500">
                         <div><p class="text-xs font-black uppercase">${r.name}</p><p class="text-[8px] text-indigo-400 font-black">${r.type} REQUEST</p></div>
                         <button onclick="Admin.approveGov('${r.uid}')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Verify</button>
-                    </div>
-                `).join('') || "<p class='text-slate-500 text-xs uppercase p-4'>No lifecycle tasks.</p>";
-            },
-
-            async loadDevDeck() {
-                const hods = await (await fetch(`${API}?action=get_pending&isDev=true`)).json();
-                document.getElementById('hod-queue').innerHTML = hods.map(h => `
-                    <div class="flex justify-between items-center p-3 glass rounded-xl border-l-4 border-yellow-500 w-full">
-                        <span class="text-[10px] uppercase font-bold text-white">${h.name}</span>
-                        <button onclick="Admin.approveNode('${h.uid}')" class="text-yellow-500 text-[8px] font-black border border-yellow-500/20 px-3 py-1 rounded">AUTHORIZE HOD</button>
-                    </div>
-                `).join('') || "<p class='text-slate-600 text-[9px] uppercase'>No HOD nodes pending.</p>";
+                    </div>`).join('') || "<p class='text-slate-500 text-xs p-4'>No pending governance tasks.</p>";
             },
 
             async loadProjects() {
                 const data = await (await fetch(`${API}?action=get_submissions`)).json();
                 document.getElementById('project-list').innerHTML = data.map(s => `
                     <div class="glass p-6 border-l-4 border-purple-500">
-                        <p class="text-[9px] text-slate-500 uppercase mb-2">UID: ${s.uid} | Station: ${s.pcId}</p>
+                        <p class="text-[9px] text-slate-500 uppercase mb-2">UID: ${s.uid} | PC: ${s.pcId}</p>
                         <h4 class="text-xs font-black text-white mb-4 truncate">${s.fileName}</h4>
-                        <a href="${s.fileLink}" target="_blank" class="cyber-btn inline-block !w-auto px-6">Download Node File</a>
-                    </div>
-                `).join('') || "<p class='text-slate-500 uppercase text-xs p-10'>No handover logs.</p>";
+                        <a href="${s.fileLink}" target="_blank" class="text-cyan-400 text-[10px] font-black uppercase hover:underline">Download Archive</a>
+                    </div>`).join('') || "<p class='text-slate-500 text-xs p-10'>No handovers detected.</p>";
             },
 
-            // 5. LIVE COMMANDS
+            async loadDevDeck() {
+                const hods = await (await fetch(`${API}?action=get_pending&isDev=true`)).json();
+                document.getElementById('hod-queue').innerHTML = hods.map(h => `
+                    <div class="flex justify-between items-center p-3 glass rounded-xl border-l-4 border-yellow-500 w-full mb-2">
+                        <span class="text-[10px] uppercase font-bold text-white">${h.name}</span>
+                        <button onclick="Admin.approveNode('${h.uid}')" class="text-yellow-500 text-[8px] font-black">GRANT HOD</button>
+                    </div>`).join('') || "<p class='text-slate-600 text-[9px] uppercase'>No HOD requests.</p>";
+            },
+
+            // 4. CCTV & LIVE COMMANDS
             async refreshCCTV() {
+                if(!document.getElementById('view-cctv').classList.contains('view-active')) return;
                 const frames = await (await fetch(`${API}?action=get_live_frames`)).json();
                 document.getElementById('monitor-grid').innerHTML = frames.map(f => `
                     <div class="monitor-card">
-                        <div class="monitor-label">${f.pc} - LIVE PULSE</div>
+                        <div class="monitor-label">${f.pc}</div>
                         <img src="${f.frame}" class="monitor-img">
                         <div class="p-4 flex gap-2">
-                            <button onclick="Admin.whisper('${f.pc}')" class="flex-1 bg-cyan-500/10 text-cyan-400 text-[9px] font-black uppercase py-2 rounded-xl border border-cyan-400/20">Whisper</button>
-                            <button onclick="Admin.kill('${f.pc}')" class="bg-red-500/10 text-red-500 text-[9px] font-black uppercase px-4 rounded-xl border border-red-500/20">Kill</button>
+                            <button onclick="Admin.whisper('${f.pc}')" class="flex-1 bg-cyan-500/10 text-cyan-400 text-[9px] font-black uppercase py-2 rounded-xl">Whisper</button>
+                            <button onclick="Admin.kill('${f.pc}')" class="bg-red-500/10 text-red-500 text-[9px] font-black uppercase px-4 rounded-xl">Kill</button>
                         </div>
-                    </div>
-                `).join('');
+                    </div>`).join('');
             },
 
             async whisper(pc) {
-                const msg = prompt(`TRANSMIT NEURAL WHISPER TO ${pc}:`);
-                if(msg) await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'send_whisper', pcId: pc, message: msg }) });
+                const msg = prompt(`Neural Whisper for ${pc}:`);
+                if(msg) {
+                    await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'send_whisper', pcId: pc, message: msg }) });
+                    this.confirm(`Whisper transmitted to station ${pc}.`);
+                }
             },
 
             async kill(pc) {
-                if(confirm(`EMERGENCY LOCKDOWN ${pc}?`)) await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'remote_kill', pcId: pc }) });
+                if(confirm(`TERMINATE STATION ${pc}?`)) {
+                    await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'remote_kill', pcId: pc }) });
+                    this.confirm(`Station ${pc} hard locked.`);
+                }
             },
 
-            // 6. ACTION HANDLERS
+            // 5. ACTIONS
             async approveNode(uid) {
                 await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'approve_node', uid }) });
+                this.confirm("Node registry verified.");
                 this.refreshData();
-            },
-
-            async approveGov(uid) {
-                await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'approve_gov_action', uid }) });
-                this.refreshData();
-            },
-
-            async runNAAC(id) {
-                const out = document.getElementById('naac-output');
-                out.classList.remove('hidden');
-                out.innerText = `[NEURAL HUB] Splicing institutional data for NAAC Criterion ${id}...`;
-                const res = await (await fetch(`${API}?action=groq&query=Generate NAAC report for Criterion ${id}&user=Admin&role=HOD`)).text();
-                out.innerText = res;
             },
 
             async assignStars() {
-                const sid = document.getElementById('star-id').value;
-                const stars = document.getElementById('star-val').value;
-                const task = document.getElementById('star-task').value;
-                if(!sid) return alert("UID REQUIRED");
+                const sid = document.getElementById('star-id').value, stars = document.getElementById('star-val').value, task = document.getElementById('star-task').value;
+                if(!sid) return alert("UID required.");
                 await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'assign_stars', sid, stars, task, admin: ADMIN_NODE.name }) });
-                alert("STARS CREDITED");
+                this.confirm(`${stars} Sovereign stars credited to node ${sid}.`);
+                document.getElementById('star-id').value = "";
             },
 
-            async startDiscussion() {
-                const title = document.getElementById('topic-title').value;
-                const content = document.getElementById('topic-content').value;
-                if(!title) return;
-                await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'start_discussion', author: ADMIN_NODE.name, uid: ADMIN_NODE.uid, role: ADMIN_NODE.role, title, content }) });
-                alert("TOPIC LIVE"); this.tab('dash');
+            async broadcastSignal() {
+                const msg = document.getElementById('signal-msg').value;
+                await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'broadcast_signal', message: msg, level: 'High' }) });
+                this.confirm("Global signal broadcasted.");
+                document.getElementById('signal-msg').value = "";
+            },
+
+            async runNAAC(id) {
+                const out = document.getElementById('naac-output'); out.classList.remove('hidden');
+                out.innerText = `[NEURAL HUB] Architecting NAAC Data for Criterion ${id}...`;
+                const res = await (await fetch(`${API}?action=groq&query=Generate a NAAC Criterion ${id} report for our Computer Science Department based on the stats available.&user=Admin&role=HOD`)).text();
+                out.innerText = res;
             },
 
             async resetHardware() {
                 const uid = document.getElementById('reset-uid').value;
-                if(confirm(`WIPE HW LINK FOR NODE ${uid}?`)) {
+                if(confirm(`PURGE HW BINDING FOR NODE ${uid}?`)) {
                     await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'reset_device_binding', targetUid: uid }) });
-                    alert("BINDING PURGED");
+                    this.confirm("Hardware DNA unlinked.");
                 }
+            },
+
+            async startDiscussion() {
+                const title = document.getElementById('topic-title').value, content = document.getElementById('topic-content').value;
+                if(!title) return;
+                await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'start_discussion', author: ADMIN_NODE.name, uid: ADMIN_NODE.uid, title, content }) });
+                this.confirm("Discussion topic live on Sovereign Feed.");
+                this.tab('dash');
             }
         };
 
