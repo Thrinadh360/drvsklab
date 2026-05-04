@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C-Sync Admin | Sovereign Command Hub</title>
     
-    <!-- Core Infrastructure -->
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -16,45 +16,41 @@
         * { box-sizing: border-box; outline: none; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; user-select: none; }
         
-        /* Glass UI HUD */
         .glass { background: var(--card); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.05); }
-        .cyber-card { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 24px; transition: 0.3s; position: relative; overflow: hidden; }
-        .cyber-card:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); }
+        .cyber-card { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 24px; transition: 0.3s; }
+        .cyber-card:hover { border-color: var(--accent); box-shadow: 0 0 25px rgba(0, 242, 255, 0.15); }
         
-        /* Sidebar Layout */
+        /* Layout */
         .sidebar { width: 300px; height: 100vh; background: #05060f; border-right: 1px solid #1e293b; z-index: 100; flex-shrink: 0; }
         .nav-btn { display: flex; align-items: center; gap: 1rem; width: 100%; padding: 1.2rem; border-radius: 12px; font-weight: 700; font-size: 11px; transition: 0.2s; text-transform: uppercase; border: none; background: none; color: #475569; cursor: pointer; }
         .nav-btn:hover { background: rgba(255,255,255,0.05); color: var(--accent); }
         .nav-active { background: rgba(0, 242, 255, 0.05) !important; color: var(--accent) !important; border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0; }
 
-        /* View Animation */
-        .view-container { display: none; height: 100%; overflow-y: auto; padding-bottom: 120px; animation: fadeIn 0.4s ease-out; }
+        .view-container { display: none; height: 100%; overflow-y: auto; padding-bottom: 120px; animation: fadeIn 0.5s ease-out; }
         .view-active { display: block !important; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
         /* CCTV CCTV Grid */
         .cctv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .monitor-card { background: #000; border: 1px solid #1e293b; border-radius: 16px; overflow: hidden; position: relative; }
         .monitor-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; opacity: 0.7; transition: 0.3s; }
-        .monitor-label { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.8); color: var(--accent); padding: 4px 10px; font-size: 9px; font-weight: 900; border-radius: 6px; z-index: 10; border: 1px solid var(--accent); }
+        .monitor-card:hover .monitor-img { opacity: 1; }
+        .monitor-label { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.85); color: var(--accent); padding: 5px 12px; font-size: 9px; font-weight: 900; border-radius: 6px; border: 1px solid rgba(0,242,255,0.2); }
 
-        /* Form Elements */
-        input, select, textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 14px !important; border-radius: 12px !important; width: 100%; font-size: 13px; outline: none; }
+        input, select, textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 14px !important; border-radius: 12px !important; width: 100%; font-size: 13px; }
         .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 12px; padding: 14px; width: 100%; text-transform: uppercase; font-size: 10px; cursor: pointer; border: none; transition: 0.3s; }
-        .cyber-btn:active { transform: scale(0.97); opacity: 0.8; }
-        
+        .cyber-btn:active { transform: scale(0.97); }
+
         .shimmer { background: linear-gradient(90deg, #475569 25%, #00f2ff 50%, #475569 75%); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2s infinite; }
         @keyframes shimmer { to { background-position: -200% 0; } }
-
-        /* Scrollbar */
+        
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- AUTH GATE: SOVEREIGN HANDSHAKE -->
+    <!-- SOVEREIGN AUTH GATE -->
     <div id="auth-gate" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center">
         <div class="glass p-16 text-center rounded-[3rem] border border-white/10 w-[550px]">
             <h1 class="font-['Orbitron'] text-cyan-400 text-3xl mb-2 italic tracking-tighter">C-SYNC COMMAND</h1>
@@ -74,7 +70,7 @@
         </div>
     </div>
 
-    <!-- MAIN INTERFACE LAYOUT -->
+    <!-- MAIN INTERFACE -->
     <div id="main-layout" class="hidden flex h-screen">
         
         <!-- SIDEBAR -->
@@ -91,7 +87,7 @@
                 <button onclick="Admin.tab('cctv')" id="nav-cctv" class="nav-btn"><i data-lucide="monitor"></i> Live Lab Pulse</button>
                 <button onclick="Admin.tab('naac')" id="nav-naac" class="nav-btn"><i data-lucide="award"></i> NAAC Architect</button>
                 <button onclick="Admin.tab('feed')" id="nav-feed" class="nav-btn"><i data-lucide="message-square"></i> Discussion Hub</button>
-                <button onclick="Admin.tab('projects')" id="nav-projects" class="nav-btn"><i data-lucide="file-code"></i> Handover Hub</button>
+                <button onclick="Admin.tab('projects')" id="nav-projects" class="nav-btn"><i data-lucide="file-code"></i> Project Handover</button>
                 
                 <div class="my-6 border-t border-white/5"></div>
                 
@@ -129,7 +125,7 @@
                                     <option value="1">⭐ 1 Star</option><option value="2">⭐ 2 Stars</option>
                                     <option value="3">⭐ 3 Stars</option><option value="5">⭐ 5 Stars</option>
                                 </select>
-                                <input id="star-task" placeholder="Achievement/Task Detail" class="flex-1">
+                                <input id="star-task" placeholder="Task Achievement Detail" class="flex-1">
                             </div>
                             <button onclick="Admin.assignStars()" class="cyber-btn shadow-lg shadow-yellow-500/10">Credit Stars</button>
                         </div>
@@ -137,7 +133,7 @@
                     <div class="cyber-card p-10 border-t-4 border-orange-500">
                         <h4 class="text-xs font-black uppercase mb-8">Global Signal Broadcast</h4>
                         <textarea id="signal-msg" placeholder="Emergency broadcast or faculty advisory..." class="h-28 mb-6"></textarea>
-                        <button onclick="Admin.broadcastSignal()" class="cyber-btn !bg-orange-600 !text-white">Transmit Signal</button>
+                        <button onclick="Admin.broadcastSignal()" class="cyber-btn !bg-orange-600 !text-white">Transmit Global Signal</button>
                     </div>
                 </div>
             </div>
@@ -148,7 +144,7 @@
                 <div id="queue-list" class="grid grid-cols-2 gap-6"></div>
             </div>
 
-            <!-- VIEW: GOVERNANCE (4th YEAR / REVERSIONS) -->
+            <!-- VIEW: GOVERNANCE -->
             <div id="view-gov" class="view-container space-y-10">
                 <h2 class="font-['Orbitron'] text-3xl font-black text-indigo-400 uppercase italic">Lifecycle Governance</h2>
                 <div id="gov-list" class="grid grid-cols-2 gap-6"></div>
@@ -159,7 +155,7 @@
                 <div class="flex justify-between items-center">
                     <h2 class="font-['Orbitron'] text-3xl font-black text-emerald-400 uppercase italic">Live Lab Pulse</h2>
                     <div class="flex items-center gap-4">
-                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Update: 7s</span>
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Update Frequency: 7s</span>
                         <div class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
                     </div>
                 </div>
@@ -178,7 +174,7 @@
                     <button onclick="Admin.runNAAC(6)" class="glass p-8 text-[10px] font-black hover:border-cyan-400">CRIT 6</button>
                     <button onclick="Admin.runNAAC(7)" class="glass p-8 text-[10px] font-black hover:border-cyan-400">CRIT 7</button>
                 </div>
-                <div id="naac-output" class="hidden glass p-10 font-mono text-sm leading-relaxed text-emerald-400 border border-emerald-500/20 rounded-3xl"></div>
+                <div id="naac-output" class="hidden glass p-10 font-mono text-sm leading-relaxed text-emerald-400 border border-emerald-500/20 rounded-3xl whitespace-pre-wrap"></div>
             </div>
 
             <!-- VIEW: PROJECT HUB -->
@@ -189,12 +185,12 @@
 
             <!-- VIEW: DISCUSSION FEED -->
             <div id="view-feed" class="view-container space-y-10">
-                <h2 class="font-['Orbitron'] text-3xl font-black text-pink-500 uppercase italic">Sovereign Feed Management</h2>
+                <h2 class="font-['Orbitron'] text-3xl font-black text-pink-500 uppercase italic">Discussion Management</h2>
                 <div class="cyber-card p-10 bg-pink-500/5 border-pink-500/20 border">
                     <h4 class="text-xs font-black uppercase mb-6">Initiate Discussion Topic</h4>
-                    <input id="topic-title" placeholder="Topic Title (e.g. Internship Opportunities)" class="mb-4">
-                    <textarea id="topic-content" placeholder="Instructions or message for the students..." class="h-32 mb-6"></textarea>
-                    <button onclick="Admin.startDiscussion()" class="cyber-btn !bg-pink-600 !text-white">Activate Feed Node</button>
+                    <input id="topic-title" placeholder="Topic Title (e.g. Lab Exercise 04 Instructions)" class="mb-4">
+                    <textarea id="topic-content" placeholder="Context or directives for the student nodes..." class="h-32 mb-6"></textarea>
+                    <button onclick="Admin.startDiscussion()" class="cyber-btn !bg-pink-600 !text-white">Activate Topic Node</button>
                 </div>
             </div>
 
@@ -204,11 +200,11 @@
                 <div class="grid grid-cols-2 gap-10">
                     <div class="cyber-card p-10 border-t-4 border-yellow-500">
                         <h4 class="text-xs font-black uppercase mb-8">HOD Sovereignty Authorization</h4>
-                        <div id="hod-queue" class="space-y-4"></div>
+                        <div id="hod-queue" class="space-y-4 flex flex-col items-center justify-center min-h-[100px]"></div>
                     </div>
                     <div class="cyber-card p-10 border-t-4 border-red-500">
                         <h4 class="text-xs font-black uppercase mb-8">Hardware Reset Engine</h4>
-                        <input id="reset-uid" placeholder="Target Node ID" class="mb-6">
+                        <input id="reset-uid" placeholder="Node ID / Roll Number" class="mb-6">
                         <button onclick="Admin.resetHardware()" class="cyber-btn !bg-red-600 !text-white">Purge Device Binding</button>
                     </div>
                 </div>
@@ -218,7 +214,6 @@
     </div>
 
     <script>
-        // MASTER CONFIGURATION
         const API = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
         let ADMIN_NODE = null;
 
@@ -228,7 +223,7 @@
                 this.setupHandshake();
             },
 
-            // --- 1. AUTHENTICATION PROTOCOLS ---
+            // --- 1. AUTHENTICATION ---
             setupHandshake() {
                 const sID = "ADMIN-" + Math.random().toString(36).substr(2, 9).toUpperCase();
                 new QRCode(document.getElementById("qr-canvas"), { text: sID, width: 220, height: 220 });
@@ -246,20 +241,20 @@
             },
 
             developerLogin() {
-                const pass = prompt("ENTER SOVEREIGNTY KEY:");
+                const pass = prompt("ENTER ROOT ACCESS KEY:");
                 if (pass === "Pass3nadh") {
                     this.unlock({ name: "M. Thrinadh", uid: "DEV-ROOT", role: "DEVELOPER" });
                     document.getElementById('nav-dev').classList.remove('hidden');
                     document.getElementById('admin-tag').classList.add('text-yellow-500', 'shimmer');
                     this.tab('dev');
-                } else { alert("ACCESS DENIED"); }
+                } else { alert("SOVEREIGNTY CHALLENGE FAILED"); }
             },
 
             emergencyLogin() {
                 const token = prompt("ENTER STAFF OVERRIDE:");
                 if (btoa(token) === "dnNrYWRtaW4=") {
                     this.unlock({ name: "Staff Admin", uid: "STAFF-99", role: "ADMIN" });
-                } else { alert("INVALID TOKEN"); }
+                } else { alert("ACCESS DENIED"); }
             },
 
             unlock(user) {
@@ -273,7 +268,7 @@
                 lucide.createIcons();
             },
 
-            // --- 2. VIEW MANAGEMENT ---
+            // --- 2. VIEW NAVIGATION ---
             tab(t) {
                 document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active'));
                 document.getElementById('view-' + t).classList.add('view-active');
@@ -283,10 +278,11 @@
                 if (t === 'queue') this.loadQueue();
                 if (t === 'gov') this.loadGovQueue();
                 if (t === 'dev') this.loadDevQueue();
+                if (t === 'projects') this.loadProjects();
                 lucide.createIcons();
             },
 
-            // --- 3. CORE ANALYTICS ---
+            // --- 3. SYSTEM ANALYTICS ---
             async refreshStats() {
                 try {
                     const res = await fetch(`${API}?action=get_stats`);
@@ -301,7 +297,7 @@
                 setInterval(() => this.refreshStats(), 20000);
             },
 
-            // --- 4. DATA LOADER MODULES ---
+            // --- 4. DATA FETCHERS ---
             async loadQueue() {
                 const res = await fetch(`${API}?action=get_pending&isDev=false`);
                 const data = await res.json();
@@ -316,7 +312,7 @@
                         </div>
                         <button onclick="Admin.approveNode('${r.uid}')" class="bg-cyan-500 text-black px-6 py-2 rounded-xl text-[10px] font-black uppercase">Approve</button>
                     </div>
-                `).join('') || "<p class='text-slate-500 uppercase text-xs p-10'>No pending nodes found.</p>";
+                `).join('') || "<p class='text-slate-500 uppercase text-xs p-10'>Registry Secure. No pending nodes.</p>";
             },
 
             async loadGovQueue() {
@@ -328,26 +324,38 @@
                             <p class="text-xs font-black uppercase text-white">${r.name}</p>
                             <p class="text-[8px] text-indigo-400 font-bold uppercase">${r.type} Request</p>
                         </div>
-                        <button onclick="Admin.approveGov('${r.uid}')" class="bg-indigo-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase">AUTHORIZE</button>
+                        <button onclick="Admin.approveGov('${r.uid}')" class="bg-indigo-600 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase">AUTHORIZE</button>
                     </div>
-                `).join('') || "<p class='text-slate-500 uppercase text-xs p-10'>Governance clear.</p>";
+                `).join('') || "<p class='text-slate-500 uppercase text-xs p-10'>Governance state clear.</p>";
             },
 
             async loadDevQueue() {
                 const res = await fetch(`${API}?action=get_pending&isDev=true`);
                 const data = await res.json();
                 document.getElementById('hod-queue').innerHTML = data.map(r => `
-                    <div class="glass p-6 flex justify-between items-center border-l-4 border-yellow-500">
+                    <div class="glass p-6 flex justify-between items-center w-full border-l-4 border-yellow-500">
                         <div class="flex items-center gap-4">
-                            <img src="${r.photo}" class="w-12 h-12 rounded-full object-cover shadow-lg">
-                            <div><p class="text-xs font-black uppercase text-white">${r.name}</p><p class="text-[8px] text-slate-500 font-bold">HOD ACCESS REQUEST</p></div>
+                            <img src="${r.photo}" class="w-12 h-12 rounded-full object-cover">
+                            <div><p class="text-xs font-black uppercase text-white">${r.name}</p><p class="text-[8px] text-slate-500 font-bold uppercase">HOD Request</p></div>
                         </div>
                         <button onclick="Admin.approveNode('${r.uid}')" class="bg-yellow-500 text-black px-5 py-2 rounded-xl text-[10px] font-black">GRANT</button>
                     </div>
-                `).join('') || "<p class='text-slate-500 uppercase text-xs'>No HOD requests.</p>";
+                `).join('') || "<p class='text-slate-500 uppercase text-xs'>No HOD nodes awaiting.</p>";
             },
 
-            // --- 5. ACTION HANDLERS ---
+            async loadProjects() {
+                const res = await fetch(`${API}?action=get_submissions`);
+                const data = await res.json();
+                document.getElementById('project-list').innerHTML = data.map(s => `
+                    <div class="glass p-6 border-l-4 border-purple-500">
+                        <p class="text-[9px] text-slate-500 font-bold uppercase mb-2">UID: ${s.uid} | PC: ${s.pcId}</p>
+                        <h4 class="text-xs font-black text-white mb-4 truncate">${s.fileName}</h4>
+                        <a href="${s.fileLink}" target="_blank" class="text-[9px] font-black text-purple-400 uppercase hover:underline">Download Archive</a>
+                    </div>
+                `).join('') || "<p class='text-slate-500 uppercase text-xs p-10'>No handovers recorded.</p>";
+            },
+
+            // --- 5. ACTION COMMANDS ---
             async approveNode(uid) {
                 await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'approve_node', uid }) });
                 this.loadQueue(); this.loadDevQueue(); this.refreshStats();
@@ -368,26 +376,28 @@
                         <img src="${f.frame}" class="monitor-img">
                         <div class="p-4 flex gap-2">
                             <button onclick="Admin.whisper('${f.pc}')" class="flex-1 bg-cyan-500/10 text-cyan-400 text-[9px] font-black uppercase py-2 rounded-xl border border-cyan-400/20">Whisper</button>
-                            <button onclick="Admin.kill('${f.pc}')" class="bg-red-500/10 text-red-500 text-[9px] font-black uppercase px-3 rounded-xl border border-red-500/20">Kill</button>
+                            <button onclick="Admin.kill('${f.pc}')" class="bg-red-500/10 text-red-500 text-[9px] font-black uppercase px-4 rounded-xl border border-red-500/20">Kill</button>
                         </div>
                     </div>
                 `).join('');
             },
 
             async whisper(pcId) {
-                const msg = prompt(`Neural Whisper to ${pcId}:`);
+                const msg = prompt(`Transmit Neural Whisper to ${pcId}:`);
                 if (msg) await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'send_whisper', pcId, message: msg }) });
             },
 
             async kill(pcId) {
-                if (confirm(`Emergency lock on ${pcId}?`)) await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'remote_kill', pcId }) });
+                if (confirm(`Emergency lockdown on ${pcId}? Student will be hard-locked.`)) {
+                    await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'remote_kill', pcId }) });
+                }
             },
 
             async runNAAC(id) {
                 const out = document.getElementById('naac-output');
                 out.classList.remove('hidden');
-                out.innerText = `Connecting to Neural Oracle for Criterion ${id} analysis...`;
-                const res = await fetch(`${API}?action=groq&query=Generate Detailed NAAC Report for Criterion ${id}&user=Admin&role=HOD`);
+                out.innerText = `[HYBRID HANDSHAKE] Architecting Detailed Report for NAAC Criterion ${id}...`;
+                const res = await fetch(`${API}?action=groq&query=Detailed NAAC Report for Criterion ${id} for autonomous college&user=Admin&role=HOD`);
                 out.innerText = await res.text();
             },
 
@@ -395,26 +405,36 @@
                 const sid = document.getElementById('star-id').value;
                 const stars = document.getElementById('star-val').value;
                 const task = document.getElementById('star-task').value;
+                if(!sid) return alert("Enter Student Node ID.");
                 await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'assign_stars', sid, stars, task, admin: ADMIN_NODE.name }) });
-                alert("Node Credited.");
+                alert("Sovereign Stars Credited.");
             },
 
             async broadcastSignal() {
                 const msg = document.getElementById('signal-msg').value;
+                if(!msg) return;
                 await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'broadcast_alert', message: msg, level: 'High' }) });
-                alert("Signal Transmitted.");
+                alert("Global Signal Transmitted.");
             },
 
             async startDiscussion() {
                 const title = document.getElementById('topic-title').value;
                 const content = document.getElementById('topic-content').value;
-                await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'start_discussion', author: ADMIN_NODE.name, uid: ADMIN_NODE.uid, role: ADMIN_NODE.role, title, content }) });
-                alert("Topic Live."); this.tab('dash');
+                if(!title) return;
+                await fetch(API, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'start_discussion', author: ADMIN_NODE.name, uid: ADMIN_NODE.uid, role: ADMIN_NODE.role, title, content }) 
+                });
+                alert("Discussion Topic Published.");
+                this.tab('dash');
             },
 
             async resetHardware() {
                 const uid = document.getElementById('reset-uid').value;
-                if (confirm(`Reset binding for ${uid}?`)) await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'reset_device_binding', targetUid: uid }) });
+                if (confirm(`Purge hardware fingerprint for node ${uid}?`)) {
+                    await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'reset_device_binding', targetUid: uid }) });
+                    alert("Hardware Bind Released.");
+                }
             }
         };
 
