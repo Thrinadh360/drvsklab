@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>C-Sync | Node Initialization</title>
     
-    <!-- Dependencies -->
+    <!-- Professional Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --accent: #00f2ff; --accent-minor: #10b981; --bg: #000; }
+        :root { --accent: #00f2ff; --bg: #000; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; min-height: 100dvh; overflow-x: hidden; user-select: none; }
         
         .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.05); }
@@ -32,7 +32,7 @@
         .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 16px; padding: 18px; width: 100%; text-transform: uppercase; font-size: 11px; transition: 0.3s; border: none; cursor: pointer; }
         .cyber-btn:disabled { opacity: 0.4; filter: grayscale(1); cursor: not-allowed; }
 
-        /* Camera UI Overlay */
+        /* Camera UI */
         #camera-gate { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .video-box { width: 300px; height: 300px; border-radius: 50%; border: 4px solid var(--accent); overflow: hidden; position: relative; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
         .video-box::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent); animation: scan 2s infinite linear; }
@@ -42,7 +42,7 @@
         .view-active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .profile-upload-area { border: 2px dashed #1e293b; transition: 0.3s; }
+        .profile-upload-area { border: 2px dashed #1e293b; transition: 0.3s; cursor: pointer; }
         .profile-upload-area.active { border-color: var(--accent); background: rgba(0, 242, 255, 0.05); }
     </style>
 </head>
@@ -51,7 +51,7 @@
     <!-- STEP 1: ROLE SELECTION -->
     <div id="step-roles" class="view-step view-active pt-12">
         <h1 class="font-['Orbitron'] text-4xl font-black italic tracking-tighter mb-2">C-SYNC</h1>
-        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mb-12">Initialize Sovereign Hub Node</p>
+        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mb-12">Initialize Sovereign Node</p>
         
         <div class="grid gap-3">
             <button onclick="Reg.openForm('Student')" class="glass p-6 rounded-2xl text-left border-l-4 border-cyan-500 font-black uppercase text-[10px] flex justify-between items-center">
@@ -61,14 +61,14 @@
                 Minor Student Node <i data-lucide="chevron-right" class="w-4 h-4 text-emerald-400"></i>
             </button>
             <button onclick="Reg.openForm('Guest')" class="glass p-6 rounded-2xl text-left border-l-4 border-slate-500 font-black uppercase text-[10px] flex justify-between items-center">
-                Guest Node <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                Guest Node <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
             </button>
             <div class="my-6 border-t border-white/5"></div>
             <button onclick="Reg.openForm('Lecturer')" class="glass p-6 rounded-2xl text-left border-l-4 border-indigo-500 font-black uppercase text-[10px] flex justify-between items-center">
-                Lecturer <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                Lecturer <i data-lucide="chevron-right" class="w-4 h-4 text-indigo-400"></i>
             </button>
             <button onclick="Reg.openForm('Lab Assistant')" class="glass p-6 rounded-2xl text-left border-l-4 border-orange-500 font-black uppercase text-[10px] flex justify-between items-center">
-                Lab Assistant <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                Lab Assistant <i data-lucide="chevron-right" class="w-4 h-4 text-orange-400"></i>
             </button>
             <button onclick="Reg.openForm('HOD')" class="glass p-6 rounded-2xl text-left border-l-4 border-purple-500 font-black uppercase text-[10px] flex justify-between items-center">
                 HOD (Sovereign) <i data-lucide="chevron-right" class="w-4 h-4 text-purple-400"></i>
@@ -87,111 +87,111 @@
         
         <h2 id="form-title" class="font-['Orbitron'] text-cyan-400 text-2xl italic uppercase mb-8 tracking-tighter">Register</h2>
         
-        <div class="space-y-6">
+        <div class="space-y-8">
             
-            <!-- IDENTITY PHOTO (For Lab PC Welcome Screen) -->
+            <!-- IDENTITY PHOTO (FOR KIOSK DISPLAY) -->
             <div class="space-y-4">
                 <p class="text-[9px] text-cyan-400 font-black uppercase ml-1">Identity Photo (Kiosk Profile)</p>
                 <div onclick="document.getElementById('p-upload').click()" class="w-full h-44 glass rounded-3xl profile-upload-area flex flex-col items-center justify-center overflow-hidden relative">
                     <img id="p-preview" class="hidden w-full h-full object-cover">
                     <div id="p-placeholder" class="text-center">
                         <i data-lucide="user-plus" class="mx-auto mb-2 text-slate-600"></i>
-                        <p class="text-[8px] text-slate-500 uppercase font-black">Upload High-Resolution Face Photo</p>
+                        <p class="text-[8px] text-slate-500 uppercase font-black">Upload Profile Photo</p>
                     </div>
                 </div>
                 <input type="file" id="p-upload" class="hidden" accept="image/*" onchange="Reg.previewPhoto(this)">
             </div>
 
-            <!-- BIOMETRIC SIGNATURE BINDING -->
+            <!-- BIOMETRIC HANDSHAKE -->
             <div class="space-y-4">
                 <p class="text-[9px] text-cyan-400 font-black uppercase ml-1">Neural Handshake Binding</p>
                 <div onclick="Reg.startCamera()" class="p-5 glass rounded-2xl border-l-4 border-red-500 flex items-center justify-between group active:scale-95 transition-transform">
                     <div class="flex items-center gap-4">
-                        <div id="face-indicator" class="w-10 h-10 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center overflow-hidden">
+                        <div class="w-10 h-10 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center overflow-hidden">
                             <img id="face-captured-preview" class="hidden w-full h-full object-cover">
                             <i data-lucide="scan" id="face-icon" class="text-slate-500"></i>
                         </div>
                         <div>
-                            <p id="face-stat" class="text-[10px] font-black uppercase text-red-500">Bind Biometric Data</p>
+                            <p id="face-stat" class="text-[10px] font-black uppercase text-red-500">Bind Biometric DNA</p>
                             <p class="text-[7px] text-slate-500 uppercase">Hardware Hardware Secure</p>
                         </div>
                     </div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-700"></i>
+                    <i data-lucide="camera" class="w-4 h-4 text-slate-700"></i>
                 </div>
             </div>
 
+            <!-- IDENTITY TOKENS -->
             <div class="space-y-4">
-                <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Registry Tokens</p>
-                <input id="f-id" placeholder="Roll Number / Staff ID">
-                <input id="f-name" placeholder="Full Name">
+                <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Identity Tokens</p>
+                
+                <div class="flex gap-2">
+                    <select id="f-salutation" class="!w-1/3">
+                        <option value="Mr.">Mr.</option>
+                        <option value="Ms.">Ms.</option>
+                        <option value="Mrs.">Mrs.</option>
+                        <option value="Dr.">Dr.</option>
+                    </select>
+                    <input id="f-name" placeholder="Full Name">
+                </div>
+
+                <div class="text-left">
+                    <p class="text-[8px] text-slate-500 font-black uppercase ml-2 mb-1">Date of Birth</p>
+                    <input id="f-dob" type="date">
+                </div>
+
+                <input id="f-id" placeholder="Roll No / Staff ID">
                 
                 <div id="dynamic-fields" class="space-y-4"></div>
                 
                 <p class="text-[9px] text-slate-500 font-black uppercase ml-1">Communication Pulse</p>
-                <input id="f-phone" type="tel" placeholder="India Mobile (OTP linked)">
+                <input id="f-phone" type="tel" placeholder="India Mobile (10 Digits)">
                 
                 <div id="intl-gate" class="hidden">
                     <div class="p-5 glass rounded-3xl border-l-4 border-cyan-400">
                         <p class="text-[9px] text-cyan-400 font-black uppercase mb-3">Abroad Contact (Optional)</p>
                         <div class="flex gap-2">
                             <select id="f-intl-code" class="!w-1/3 !text-[11px]"></select>
-                            <input id="f-intl-num" placeholder="Intl Mobile Number" class="flex-1">
+                            <input id="f-intl-num" placeholder="Intl Number" class="flex-1">
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="p-5 glass rounded-2xl border-l-4 border-yellow-500">
-                <div class="flex items-center gap-3 mb-2">
-                    <i data-lucide="cpu" class="w-4 h-4 text-yellow-500"></i>
-                    <p class="text-[9px] text-yellow-500 font-black uppercase">Hardware DNA Lock</p>
-                </div>
-                <p class="text-[10px] text-slate-400 leading-relaxed font-medium">This node will be cryptographically locked to this smartphone's hardware ID.</p>
+                <p class="text-[9px] text-yellow-500 font-black uppercase mb-1">Hardware DNA Lock</p>
+                <p class="text-[10px] text-slate-400 leading-relaxed">This node will be cryptographically locked to this smartphone's hardware ID.</p>
             </div>
 
-            <button id="submit-btn" onclick="Reg.submit()" class="cyber-btn shadow-lg shadow-cyan-500/20">Initialize Hub Node</button>
+            <button id="submit-btn" onclick="Reg.submit()" class="cyber-btn shadow-lg">Initialize Hub Node</button>
         </div>
     </div>
 
-    <!-- CAMERA PORTAL OVERLAY -->
+    <!-- CAMERA PORTAL -->
     <div id="camera-gate">
         <div class="video-box mb-12">
             <video id="v-stream" autoplay muted playsinline class="w-full h-full object-cover"></video>
         </div>
         <div class="text-center mb-16">
             <h3 class="font-['Orbitron'] text-cyan-400 text-xl animate-pulse mb-2 uppercase italic">Neural Splicing</h3>
-            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Maintain still focus in the portal</p>
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Maintain focus in the portal</p>
         </div>
         <button onclick="Reg.takeSnap()" class="w-20 h-20 bg-white rounded-full border-8 border-white/20 active:scale-90 transition-transform"></button>
-        <button onclick="Reg.stopCamera()" class="mt-10 text-slate-500 text-[10px] font-black uppercase tracking-widest">Abort</button>
+        <button onclick="Reg.stopCamera()" class="mt-10 text-slate-500 text-[10px] font-black uppercase">Abort</button>
     </div>
 
     <script>
         const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
 
-        // --- FUZZY HARDWARE FINGERPRINTING (SELF-HEALING) ---
+        // --- HARDWARE FINGERPRINTING ---
         const generateFuzzyUUID = () => {
-            const dna = [
-                navigator.platform,
-                navigator.hardwareConcurrency || '8',
-                (screen.width * screen.height),
-                navigator.language,
-                (() => {
-                    const canvas = document.createElement('canvas');
-                    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                    const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-                    return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'generic';
-                })()
-            ].join('|');
+            const dna = [navigator.platform, navigator.hardwareConcurrency, (screen.width * screen.height), navigator.language].join('|');
             return btoa(dna);
         };
         const UUID = generateFuzzyUUID();
 
         const Reg = {
             role: '', faceData: null, profileData: null, stream: null,
-            countries: [
-                {n:"Afghanistan", c:"+93"}, {n:"Albania", c:"+355"}, {n:"Algeria", c:"+213"}, {n:"Andorra", c:"+376"}, {n:"Angola", c:"+244"}, {n:"Argentina", c:"+54"}, {n:"Australia", c:"+61"}, {n:"Austria", c:"+43"}, {n:"Bahrain", c:"+973"}, {n:"Bangladesh", c:"+880"}, {n:"Belgium", c:"+32"}, {n:"Brazil", c:"+55"}, {n:"Canada", c:"+1"}, {n:"China", c:"+86"}, {n:"France", c:"+33"}, {n:"Germany", c:"+49"}, {n:"India", c:"+91"}, {n:"Indonesia", c:"+62"}, {n:"Ireland", c:"+353"}, {n:"Italy", c:"+39"}, {n:"Japan", c:"+81"}, {n:"Kuwait", c:"+965"}, {n:"Malaysia", c:"+60"}, {n:"Netherlands", c:"+31"}, {n:"New Zealand", c:"+64"}, {n:"Oman", c:"+968"}, {n:"Pakistan", c:"+92"}, {n:"Philippines", c:"+63"}, {n:"Qatar", c:"+974"}, {n:"Russia", c:"+7"}, {n:"Saudi Arabia", c:"+966"}, {n:"Singapore", c:"+65"}, {n:"South Africa", c:"+27"}, {n:"South Korea", c:"+82"}, {n:"Spain", c:"+34"}, {n:"Sri Lanka", c:"+94"}, {n:"Switzerland", c:"+41"}, {n:"UAE", c:"+971"}, {n:"UK", c:"+44"}, {n:"USA", c:"+1"}
-            ],
+            countries: [{n:"Australia", c:"+61"}, {n:"Canada", c:"+1"}, {n:"Germany", c:"+49"}, {n:"India", c:"+91"}, {n:"Japan", c:"+81"}, {n:"Singapore", c:"+65"}, {n:"UK", c:"+44"}, {n:"USA", c:"+1"}],
 
             openForm(role) {
                 this.role = role;
@@ -204,35 +204,16 @@
                 document.getElementById('intl-gate').classList.add('hidden');
                 
                 if (role === 'Student') {
-                    dynamic.innerHTML = `
-                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1">Major Selection</p>
-                        <select id="f-dept"><option value="Computer Science">Computer Science</option><option value="Artificial Intelligence">Artificial Intelligence</option></select>
-                        <p class="text-[9px] text-cyan-500 font-black uppercase ml-1 mt-4">Year of Study</p>
-                        <select id="f-year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
-                    `;
+                    dynamic.innerHTML = `<select id="f-dept"><option value="Computer Science">Computer Science</option><option value="Artificial Intelligence">Artificial Intelligence</option></select>
+                                         <select id="f-year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>`;
                 } else if (role === 'Minor') {
-                    dynamic.innerHTML = `
-                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1">Minor Selection</p>
-                        <select id="f-dept"><option value="Mathematics">Mathematics</option><option value="Electronics">Electronics</option></select>
-                        <p class="text-[9px] text-emerald-500 font-black uppercase ml-1 mt-4">Year of Study</p>
-                        <select id="f-year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
-                    `;
-                } else if (role === 'Guest') {
-                    dynamic.innerHTML = `
-                        <p class="text-[9px] text-slate-400 font-black uppercase ml-1">Department / Organization Name</p>
-                        <input id="f-dept" placeholder="Enter manual org name">
-                    `;
+                    dynamic.innerHTML = `<select id="f-dept"><option value="Mathematics">Mathematics</option><option value="Electronics">Electronics</option></select>
+                                         <select id="f-year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>`;
                 } else if (role === 'Alumni') {
                     document.getElementById('intl-gate').classList.remove('hidden');
                     const sel = document.getElementById('f-intl-code');
                     sel.innerHTML = '<option value="">Code</option>' + this.countries.map(c => `<option value="${c.c}">${c.n} (${c.c})</option>`).join('');
-                    dynamic.innerHTML = `
-                        <input id="f-grad" placeholder="Graduation Year (YYYY)">
-                        <input id="f-comp" placeholder="Current Organization">
-                        <input id="f-loc" placeholder="Current City/Location">
-                        <input id="f-higher" placeholder="Higher Studies Pursued">
-                        <input id="f-dept" type="hidden" value="Alumni_CS">
-                    `;
+                    dynamic.innerHTML = `<input id="f-grad" placeholder="Graduation Year (YYYY)"><input id="f-comp" placeholder="Current Company"><input id="f-dept" type="hidden" value="Alumni_CS">`;
                 } else {
                     dynamic.innerHTML = `<input id="f-dept" value="Computer Science" readonly class="opacity-50">`;
                 }
@@ -242,11 +223,20 @@
             previewPhoto(input) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    this.profileData = e.target.result;
-                    document.getElementById('p-preview').src = this.profileData;
-                    document.getElementById('p-preview').classList.remove('hidden');
-                    document.getElementById('p-placeholder').classList.add('hidden');
-                    document.querySelector('.profile-upload-area').classList.add('active');
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height, max = 600;
+                        if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        this.profileData = canvas.toDataURL('image/jpeg', 0.6);
+                        document.getElementById('p-preview').src = this.profileData;
+                        document.getElementById('p-preview').classList.remove('hidden');
+                        document.getElementById('p-placeholder').classList.add('hidden');
+                        document.querySelector('.profile-upload-area').classList.add('active');
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(input.files[0]);
             },
@@ -256,7 +246,7 @@
                     document.getElementById('camera-gate').style.display = 'flex';
                     this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                     document.getElementById('v-stream').srcObject = this.stream;
-                } catch(e) { alert("Biometric Error: Camera Protocol Blocked."); this.stopCamera(); }
+                } catch(e) { alert("Camera Protocol Blocked."); this.stopCamera(); }
             },
 
             stopCamera() {
@@ -269,7 +259,7 @@
                 const c = document.createElement('canvas');
                 c.width = 400; c.height = 400;
                 c.getContext('2d').drawImage(v, 0, 0, 400, 400);
-                this.faceData = c.toDataURL('image/jpeg', 0.6);
+                this.faceData = c.toDataURL('image/jpeg', 0.5);
                 document.getElementById('face-captured-preview').src = this.faceData;
                 document.getElementById('face-captured-preview').classList.remove('hidden');
                 document.getElementById('face-icon').classList.add('hidden');
@@ -281,49 +271,31 @@
             async submit() {
                 const id = document.getElementById('f-id').value.trim();
                 const name = document.getElementById('f-name').value.trim();
+                const salutation = document.getElementById('f-salutation').value;
+                const dob = document.getElementById('f-dob').value;
                 let phone = document.getElementById('f-phone').value.trim();
                 const btn = document.getElementById('submit-btn');
 
-                if(!id || !name || !phone || !this.faceData || !this.profileData) {
-                    return alert("All markers mandatory: Photo, Face Data, ID, Name, and Mobile.");
-                }
+                if(!id || !name || !phone || !this.faceData || !this.profileData || !dob) return alert("All identity markers are mandatory.");
 
-                // Phone Sanitization (+91 auto-prepend)
                 phone = phone.replace(/[^0-9]/g, '');
                 if (phone.length === 10) phone = '+91' + phone;
-                else if (phone.length === 12 && phone.startsWith('91')) phone = '+' + phone;
 
-                btn.disabled = true;
-                btn.innerText = "INITIALIZING HUB NODE...";
+                btn.disabled = true; btn.innerText = "INITIALIZING HUB NODE...";
 
                 const payload = {
-                    action: 'register',
-                    id, name, phone, uuid: UUID, faceKey: this.faceData,
-                    role: this.role,
+                    action: 'register', id, name, salutation, dob, phone, uuid: UUID, faceKey: this.faceData, role: this.role,
                     dept: document.getElementById('f-dept')?.value || 'N/A',
                     year: document.getElementById('f-year')?.value || '',
-                    gradYear: document.getElementById('f-grad')?.value || '',
-                    location: document.getElementById('f-loc')?.value || '',
-                    company: document.getElementById('f-comp')?.value || '',
-                    higherStudies: document.getElementById('f-higher')?.value || '',
-                    intlCode: document.getElementById('f-intl-code')?.value || '',
-                    intlNumber: document.getElementById('f-intl-num')?.value || '',
-                    photo: this.profileData // Base64 Identity Photo
+                    photo: this.profileData
                 };
 
                 try {
                     await fetch(APPS_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
-                    
-                    // Local session save
-                    localStorage.setItem('csync_user_v805', JSON.stringify({
-                        id, name, role: this.role, dept: payload.dept, photo: this.profileData, phone: payload.phone
-                    }));
-
-                    setTimeout(() => {
-                        alert("Node Initialization Success. Your station OS profile is ready. Pending HOD Authorization.");
-                        location.href = 'mobile.html';
-                    }, 2000);
-                } catch(e) { alert("Registry Sync Failure."); btn.disabled = false; }
+                    localStorage.setItem('csync_user_v820', JSON.stringify({ id, name, salutation, photo: this.profileData, role: this.role, dept: payload.dept, phone }));
+                    alert("Node Initialized. Pending Departmental Verification.");
+                    location.href = 'mobile.html';
+                } catch(e) { alert("Registry Handshake Failure."); btn.disabled = false; }
             }
         };
         window.onload = () => lucide.createIcons();
