@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>C-Sync | Sovereign Node</title>
+    <title>C-Sync Sovereign Node</title>
     
     <!-- PWA & Native Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
 
     <!-- High-Tech Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --accent: #00f2ff; --bg: #000000; --card: rgba(15, 23, 42, 0.7); }
+        :root { --accent: #00f2ff; --bg: #000000; --card: rgba(15, 23, 42, 0.7); --safe-top: env(safe-area-inset-top); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; height: 100dvh; overflow: hidden; user-select: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; height: 100dvh; overflow: hidden; user-select: none; padding-top: var(--safe-top); }
         
         .glass { background: var(--card); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.05); }
         .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 14px; padding: 14px; transition: 0.3s; text-transform: uppercase; font-size: 10px; width: 100%; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(0,242,255,0.15); }
@@ -29,39 +30,43 @@
         .view-active { display: block !important; animation: slideUp 0.4s cubic-bezier(0, 0, 0.2, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Sentient Oracle HUD */
+        /* Oracle Sentient HUD */
         #oracle-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; padding: 25px; padding-top: 60px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #oracle-overlay.active { display: flex; transform: translateY(0); }
-        
         .ai-msg { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--accent); border-radius: 0 15px 15px 15px; padding: 15px; font-size: 13px; color: #cbd5e1; margin-bottom: 15px; width: 95%; white-space: pre-wrap; }
         .user-msg { background: rgba(255,255,255,0.05); border-radius: 15px 15px 0 15px; padding: 15px; font-size: 13px; align-self: flex-end; text-align: right; color: #fff; margin-bottom: 15px; width: 85%; margin-left: auto; }
 
-        /* Thinking Animation */
-        .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: dotPulse 1.4s infinite ease-in-out; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes dotPulse { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
-
-        /* Birthday Sentience */
+        /* Birthday Sentiment */
         .bday-card { background: linear-gradient(45deg, #0f172a, #1e1b4b); border: 2px solid #fbbf24; animation: bday-glow 3s infinite alternate; }
         @keyframes bday-glow { 0% { box-shadow: 0 0 10px #fbbf24; } 100% { box-shadow: 0 0 30px #f59e0b; } }
 
-        /* Navigation */
+        /* Nav */
         .bottom-nav { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
         .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; transition: 0.3s; }
         .nav-active { color: var(--accent); filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
 
         input, select, textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 14px !important; border-radius: 12px !important; width: 100%; font-size: 14px; }
         .shimmer { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
+        .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: dotPulse 1.4s infinite ease-in-out; }
+        @keyframes dotPulse { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+        /* Camera UI */
+        #camera-gate { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .cam-box { width: 300px; height: 300px; border-radius: 50%; border: 4px solid var(--accent); overflow: hidden; position: relative; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
+        .cam-box::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent); animation: scan 2s infinite linear; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- LOADING & SYNC OVERLAY -->
+    <!-- SPLASH / SYNC OVERLAY -->
     <div id="status-overlay" class="fixed inset-0 bg-black z-[9999] hidden flex flex-col items-center justify-center p-10 text-center">
-        <div class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-8"></div>
-        <h2 id="status-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter">Syncing Node...</h2>
-        <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Authenticating Hardware DNA</p>
+        <div class="w-32 h-32 mb-10 relative">
+            <img src="icon.svg" class="w-full h-full animate-pulse">
+            <div class="absolute inset-0 border-4 border-cyan-400 rounded-3xl animate-spin-slow opacity-20"></div>
+        </div>
+        <h2 id="status-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter shimmer">Initializing Node</h2>
+        <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Sovereign Registry Handshake</p>
     </div>
 
     <!-- IDENTITY BRIDGE -->
@@ -75,7 +80,20 @@
         </div>
     </div>
 
-    <!-- NEURAL ORACLE SENTIENT HUD -->
+    <!-- BIOMETRIC CAMERA PORTAL -->
+    <div id="camera-gate">
+        <div class="cam-box mb-12">
+            <video id="v-stream" autoplay muted playsinline class="w-full h-full object-cover"></video>
+        </div>
+        <div class="text-center mb-16">
+            <h3 class="font-['Orbitron'] text-cyan-400 text-xl animate-pulse mb-2 uppercase italic">Biometric Scan</h3>
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Face alignment required</p>
+        </div>
+        <button id="cam-trigger" class="w-20 h-20 bg-white rounded-full border-8 border-white/20 active:scale-90 transition-transform"></button>
+        <button onclick="UI.closeCamera()" class="mt-10 text-slate-500 text-[10px] font-black uppercase">Abort Handshake</button>
+    </div>
+
+    <!-- NEURAL ORACLE HUD -->
     <div id="oracle-overlay">
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
@@ -89,8 +107,7 @@
         </header>
 
         <div id="oracle-chat-box" class="flex-1 overflow-y-auto pr-2 space-y-4 flex flex-col-reverse">
-            <!-- Messages flow bottom-up visually but use reverse logic for typewriter -->
-            <div class="ai-msg">Neural Hub Active. State your directive, Doctor Krishna Student.</div>
+            <div class="ai-msg">Neural Hub Active. State your directive, Doctor Krishna Student. Conversational Loop available.</div>
         </div>
 
         <div id="ora-att-bar" class="hidden flex items-center gap-3 p-3 bg-white/5 rounded-xl mb-4 border border-white/10">
@@ -113,22 +130,43 @@
         </div>
     </div>
 
-    <!-- MAIN APP WRAPPER -->
+    <!-- SOVEREIGN PROFILE OVERLAY -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/90 z-[9999] hidden flex flex-col items-center justify-end">
+        <div class="glass w-full max-w-xl rounded-t-[3rem] p-10 border-t-4 border-cyan-400 transform translate-y-full transition-transform duration-500" id="profile-card">
+            <button onclick="UI.closeProfile()" class="absolute top-6 right-8 text-slate-500"><i data-lucide="chevron-down"></i></button>
+            <div class="text-center mb-8">
+                <div class="relative inline-block">
+                    <img id="m-pic" src="" class="w-32 h-32 rounded-full border-4 border-cyan-400 object-cover mx-auto mb-4 shadow-2xl">
+                    <div class="absolute inset-0 border-2 border-dashed border-cyan-400 rounded-full animate-spin-slow"></div>
+                </div>
+                <h2 id="m-name" class="font-['Orbitron'] text-2xl font-black uppercase text-white tracking-tighter"></h2>
+                <p id="m-meta" class="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.3em]"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <button onclick="UI.comm('tel')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-emerald-500"><i data-lucide="phone" class="text-emerald-500"></i><span class="text-[9px] font-black uppercase">Voice</span></button>
+                <button onclick="UI.comm('sms')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-cyan-500"><i data-lucide="message-square" class="text-cyan-500"></i><span class="text-[9px] font-black uppercase">Text</span></button>
+                <button onclick="UI.comm('tele')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-blue-500"><i data-lucide="send" class="text-blue-500"></i><span class="text-[9px] font-black uppercase">Telegram</span></button>
+                <button id="btn-linkedin" onclick="UI.comm('link')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-indigo-500"><i data-lucide="linkedin" class="text-indigo-500"></i><span class="text-[9px] font-black uppercase">LinkedIn</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP STRUCTURE -->
     <div id="app-wrapper" class="flex flex-col h-full p-6">
         
         <!-- DASHBOARD VIEW -->
         <div id="view-dashboard" class="view-container view-active">
             <header class="flex justify-between items-center mb-10">
                 <h1 class="font-['Orbitron'] text-2xl italic font-black tracking-tighter">C-SYNC</h1>
-                <div class="flex items-center gap-3 glass px-4 py-2 rounded-full border-white/5">
+                <div class="flex items-center gap-3 glass px-4 py-2 rounded-full">
                     <div id="h-streak" class="text-orange-500 font-black text-xs">🔥 0</div>
                     <div id="h-stars" class="text-yellow-500 font-black text-xs">⭐ 0</div>
                 </div>
             </header>
 
+            <div id="global-alert-zone" class="hidden space-y-4 mb-8"></div>
             <div id="bday-container"></div>
 
-            <!-- IDENTITY BENTO -->
             <div class="glass p-6 rounded-[2.5rem] mb-8 flex items-center gap-5 border-l-4 border-cyan-400 shimmer">
                 <img id="h-avatar" class="w-16 h-16 rounded-full border-2 border-white/10 object-cover shadow-2xl">
                 <div>
@@ -139,8 +177,8 @@
 
             <div onclick="UI.toggleOracle(true)" class="glass p-8 rounded-[3rem] border-t-4 border-cyan-400 mb-8 bg-gradient-to-br from-cyan-950/20 active:scale-95 transition-transform">
                 <h4 class="text-cyan-400 font-black uppercase text-[10px] mb-2 tracking-widest">Neural Oracle</h4>
-                <p class="text-white text-xl font-bold leading-tight mb-4">Engage Multimodal AI Intelligence</p>
-                <div class="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500">
+                <p class="text-white text-xl font-bold leading-tight">Engage Multimodal Intelligence</p>
+                <div class="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 mt-4">
                     <span>Analyze</span> • <span>Vision</span> • <span>Conversational</span>
                 </div>
             </div>
@@ -148,37 +186,38 @@
             <div id="hub-modules" class="grid grid-cols-2 gap-4"></div>
         </div>
 
-        <!-- NEXUS DIRECTORY -->
+        <!-- NEXUS VIEW -->
         <div id="view-nexus" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase tracking-tighter">Nexus Directory</h2>
             <div class="mb-6"><input id="nexus-search" oninput="UI.filterNexus()" placeholder="Search by name or roll no..." class="!py-4 shadow-xl"></div>
             <div id="nexus-list" class="space-y-3"></div>
         </div>
 
-        <!-- BOARD (RANKINGS) -->
+        <!-- BOARD VIEW -->
         <div id="view-rankings" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Leadership Board</h2>
             <div id="leader-list" class="space-y-4"></div>
         </div>
 
-        <!-- FEED -->
+        <!-- FEED VIEW -->
         <div id="view-discuss" class="view-container">
-            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Feed Hub</h2>
+            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Feed</h2>
             <div id="topic-list" class="space-y-4"></div>
         </div>
 
-        <!-- PROFILE -->
+        <!-- PROFILE VIEW -->
         <div id="view-profile" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Node Identity</h2>
             <div class="glass p-8 rounded-[3rem] space-y-6 text-center">
-                <div onclick="document.getElementById('p-edit-upload').click()" class="relative w-28 h-28 rounded-full border-2 border-cyan-400 mx-auto overflow-hidden shadow-2xl">
+                <div onclick="document.getElementById('p-edit-upload').click()" class="relative w-28 h-28 rounded-full border-2 border-cyan-400 mx-auto overflow-hidden shadow-2xl cursor-pointer">
                     <img id="p-edit-preview" class="w-full h-full object-cover">
                     <input type="file" id="p-edit-upload" class="hidden" accept="image/*" onchange="UI.previewProfileUpdate(this)">
                 </div>
-                <input id="p-name" placeholder="Display Name" class="text-center font-bold">
+                <input id="p-name" placeholder="Full Name" class="text-center font-bold">
+                <input id="p-linkedin" placeholder="LinkedIn URL" class="text-center">
                 <input id="p-phone" placeholder="Mobile Number" class="text-center font-bold">
                 <button onclick="UI.syncProfileUpdate()" id="sync-btn" class="cyber-btn shadow-lg">Sync Node DNA</button>
-                <button onclick="UI.logout()" class="text-red-500 font-black text-[9px] uppercase underline mt-4 tracking-widest">Unbind Node Hardware</button>
+                <button onclick="UI.logout()" class="text-red-500 font-black text-[9px] uppercase underline mt-4 tracking-widest">Unbind Hardware Node</button>
             </div>
         </div>
     </div>
@@ -187,10 +226,9 @@
     <div id="qr-modal" class="fixed inset-0 bg-black/95 z-[9999] hidden flex flex-col items-center justify-center p-10">
         <button onclick="UI.closeQR()" class="absolute top-10 right-10 text-white"><i data-lucide="x" class="w-10 h-10"></i></button>
         <div id="qr-reader" class="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-cyan-400 shadow-2xl"></div>
-        <p class="text-cyan-400 font-['Orbitron'] mt-8 animate-pulse text-xs uppercase tracking-widest text-center">Institutional Pulse Active</p>
     </div>
 
-    <!-- PERSISTENT NAVIGATION -->
+    <!-- PERSISTENT NAV -->
     <nav id="bottom-nav" class="bottom-nav hidden">
         <button onclick="UI.switchTab('dashboard')" class="nav-item nav-active" id="nav-dashboard"><i data-lucide="shield"></i><span>HUB</span></button>
         <button onclick="UI.switchTab('nexus')" class="nav-item" id="nav-nexus"><i data-lucide="users"></i><span>NEXUS</span></button>
@@ -200,12 +238,11 @@
     </nav>
 
     <script>
-        const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
+        const APPS_URL = "YOUR_DEPLOYED_WEB_APP_URL";
         
-        // --- HARDWARE FINGERPRINTING ---
         const generateFuzzyUUID = () => btoa([navigator.platform, navigator.hardwareConcurrency, (screen.width * screen.height), navigator.language].join('|'));
         const UUID = generateFuzzyUUID();
-        let USER = JSON.parse(localStorage.getItem('csync_user_v820'));
+        let USER = JSON.parse(localStorage.getItem('csync_user_v1000'));
         let nexusData = [], isConversationalMode = false, isSpeaking = false, isProcessingScan = false, ttsEnabled = true, attachment = null;
 
         const UI = {
@@ -231,7 +268,7 @@
                     const status = await res.text();
                     if (status === "Approved") { ov.classList.add('hidden'); this.boot(); }
                     else if (status === "Pending") { document.getElementById('status-msg').innerText = "Awaiting institutional verify..."; }
-                    else { document.getElementById('status-msg').innerText = "Hardware Mismatch. Unbind Node."; }
+                    else { document.getElementById('status-msg').innerText = "Hardware Mismatch. Unbind current node."; }
                 } catch(e) { this.boot(); ov.classList.add('hidden'); }
             },
 
@@ -245,7 +282,7 @@
                 document.getElementById('p-phone').value = USER.phone;
                 document.getElementById('h-meta').innerText = `${USER.role}: ${USER.dept}`;
                 
-                // LIVE STAT SYNC (FIX FOR ZEROES)
+                // Live stats fetch
                 try {
                     const res = await fetch(`${APPS_URL}?action=get_user_stats&uid=${USER.id}`);
                     const stats = await res.json();
@@ -258,35 +295,90 @@
                 this.refreshFeed();
                 this.refreshNexus();
                 this.checkBirthdays();
+                this.refreshAlerts();
+                setInterval(() => this.refreshAlerts(), 60000);
             },
 
             renderHubModules() {
                 const container = document.getElementById('hub-modules');
-                let modules = `<button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-cyan-500"><i data-lucide="map-pin" class="text-cyan-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Presence</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Geofence Mark</p></button>`;
+                let modules = `<button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-cyan-500"><i data-lucide="map-pin" class="text-cyan-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Presence</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Biometric Handshake</p></button>`;
                 if (USER.role !== 'Alumni') modules += `<button onclick="UI.openQR('lab')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500"><i data-lucide="scan-line" class="text-emerald-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Lab PC</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Station Unlock</p></button>`;
-                if (['HOD', 'Lecturer'].includes(USER.role)) modules += `<button onclick="UI.openQR('admin')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500 col-span-2"><i data-lucide="monitor-check" class="text-yellow-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Command Hub Auth</h4></button>`;
+                if (['HOD', 'Lecturer', 'Lab Assistant'].includes(USER.role)) {
+                    modules += `<button onclick="UI.openQR('admin')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500 col-span-2"><i data-lucide="monitor-check" class="text-yellow-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Authorize Command Hub</h4></button>`;
+                }
                 container.innerHTML = modules; lucide.createIcons();
             },
 
-            // --- BIRTHDAY SENTIENCE ---
+            // --- BIRTHDAY & ALERTS ---
             async checkBirthdays() {
                 const res = await fetch(`${APPS_URL}?action=get_birthdays`);
                 const bdays = await res.json();
                 if (bdays.length > 0) {
                     const b = bdays[0];
-                    const bdayHUD = `<div class="bday-card p-6 rounded-[2.5rem] mb-8 relative overflow-hidden border-2 border-yellow-500 shadow-xl"><div class="relative z-10 flex items-center gap-4"><img src="${b.pic}" class="w-16 h-16 rounded-full border-2 border-white object-cover"><div><h4 class="text-yellow-400 font-black text-[10px] uppercase mb-1">Celebration Protocol</h4><p class="text-white text-lg font-black leading-tight">Many more happy returns, ${b.salutation} ${b.name}!</p></div></div></div>`;
-                    document.getElementById('bday-container').innerHTML = bdayHUD;
-                    this.confirmAction(`Celebration protocol active. Happy birthday to ${b.salutation} ${b.name}. Dr. V.S. Krishna G-D-C wishes you a wonderful day.`);
+                    document.getElementById('bday-container').innerHTML = `
+                        <div class="bday-card p-6 rounded-[2.5rem] mb-8 relative overflow-hidden border-2 border-yellow-500 shadow-xl">
+                            <div class="relative z-10 flex items-center gap-4">
+                                <img src="${b.pic}" class="w-16 h-16 rounded-full border-2 border-white object-cover">
+                                <div>
+                                    <h4 class="text-yellow-400 font-black text-[10px] uppercase mb-1">Celebration Pulse</h4>
+                                    <p class="text-white text-lg font-black leading-tight">Many more happy returns, ${b.salutation} ${b.name}!</p>
+                                </div>
+                            </div>
+                        </div>`;
+                    this.confirmAction(`Happy birthday to ${b.salutation} ${b.name}. Dr. V.S. Krishna G-D-C wishes you a wonderful day.`);
                 }
             },
 
-            // --- CONVERSATIONAL AI & TYPEWRITER ---
+            async refreshAlerts() {
+                const res = await fetch(`${APPS_URL}?action=get_active_alerts`);
+                const alerts = await res.json();
+                const zone = document.getElementById('global-alert-zone');
+                if (alerts.length > 0) {
+                    zone.classList.remove('hidden');
+                    zone.innerHTML = alerts.map(a => `<div class="glass p-5 rounded-3xl border-l-4 border-orange-500 bg-orange-500/5 animate-pulse"><span class="text-[8px] font-black text-orange-500 uppercase tracking-widest">${a.role} SIGNAL</span><p class="text-xs text-white font-medium mt-1">${a.message}</p></div>`).join('');
+                } else zone.classList.add('hidden');
+            },
+
+            // --- ATTENDANCE BIOMETRICS ---
+            async markPresence() {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    this.tempCoords = `${pos.coords.latitude},${pos.coords.longitude}`;
+                    this.confirmAction("Geofence verified. Point camera for biometric handshake.");
+                    document.getElementById('camera-gate').style.display = 'flex';
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                    document.getElementById('v-stream').srcObject = stream;
+                    document.getElementById('cam-trigger').onclick = () => this.captureAttendance(stream);
+                }, () => alert("GPS Pulse Lost."));
+            },
+
+            captureAttendance(stream) {
+                const v = document.getElementById('v-stream'), c = document.createElement('canvas');
+                c.width = 400; c.height = 400; c.getContext('2d').drawImage(v, 0, 0, 400, 400);
+                const face = c.toDataURL('image/jpeg', 0.5);
+                stream.getTracks().forEach(t => t.stop());
+                document.getElementById('camera-gate').style.display = 'none';
+                this.submitAttendance(face);
+            },
+
+            async submitAttendance(face) {
+                document.getElementById('status-overlay').classList.remove('hidden');
+                document.getElementById('status-msg').innerText = "Neural DNA Handshake...";
+                const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'attendance', id: USER.id, name: USER.name, coords: this.tempCoords, liveFace: face }) });
+                const status = await res.text();
+                document.getElementById('status-overlay').classList.add('hidden');
+                if (status === "BIO_VERIFIED") { this.confirmAction("Attendance authorised. Streak incremented."); this.boot(); }
+                else if (status === "OUTSIDE_HOURS") this.confirmAction("Access Denied: Timing window mismatch.");
+                else if (status === "HOLIDAY_OFF") this.confirmAction("System Standby: Institutional Holiday.");
+                else this.confirmAction("Biometric Mismatch. Protocol rejected.");
+            },
+
+            // --- SENTIENT ORACLE ---
             toggleOracle(show) { const el = document.getElementById('oracle-overlay'); el.style.display = 'flex'; setTimeout(() => el.classList.toggle('active', show), 10); },
             
             toggleConversationalMode() {
                 isConversationalMode = !isConversationalMode;
                 document.getElementById('conv-btn').classList.toggle('text-cyan-400', isConversationalMode);
-                if (isConversationalMode) { this.confirmAction("Conversational protocol engaged."); this.startSTT(); }
+                if (isConversationalMode) this.startSTT();
             },
 
             startSTT() {
@@ -300,13 +392,10 @@
 
             speak(txt) {
                 window.speechSynthesis.cancel(); isSpeaking = true;
-                let audio = txt.replace(/\bDr\./g, 'Doctor').replace(/\bMr\./g, 'Mister').replace(/\bMs\./g, 'Miss').replace(/\bMrs\./g, 'Missus').replace(/\bGDC\b/g, 'G-D-C');
+                let audio = txt.replace(/\bDr\./g, 'Doctor').replace(/\bMr\./g, 'Mister').replace(/\bGDC\b/g, 'G-D-C');
                 const msg = new SpeechSynthesisUtterance(audio);
                 msg.onstart = () => { document.getElementById('ora-pulse').classList.add('bg-purple-500'); };
-                msg.onend = () => { 
-                    isSpeaking = false; document.getElementById('ora-pulse').classList.remove('bg-purple-500');
-                    if(isConversationalMode) setTimeout(() => this.startSTT(), 600); 
-                };
+                msg.onend = () => { isSpeaking = false; document.getElementById('ora-pulse').classList.remove('bg-purple-500'); if(isConversationalMode) setTimeout(() => this.startSTT(), 600); };
                 window.speechSynthesis.speak(msg);
             },
 
@@ -319,12 +408,11 @@
             async askOracle() {
                 const q = document.getElementById('ora-input').value; if (!q && !attachment) return;
                 const box = document.getElementById('oracle-chat-box');
-                box.insertAdjacentHTML('afterbegin', `<div class="user-msg">${q || "Visual scan active."}</div>`);
+                box.insertAdjacentHTML('afterbegin', `<div class="user-msg">${q || "Visual Scan"}</div>`);
                 document.getElementById('ora-input').value = "";
                 const tid = "ai-" + Date.now();
                 box.insertAdjacentHTML('afterbegin', `<div class="ai-msg" id="${tid}"><div class="flex gap-1"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`);
                 box.scrollTop = 0;
-
                 try {
                     const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'oracle_query', query: q, user: USER.name, role: USER.role, attachment }) });
                     const text = (await res.text()).replace(/^"|"$/g, '');
@@ -334,7 +422,6 @@
                 } catch(e) { document.getElementById(tid).innerText = "Hub Timeout."; }
             },
 
-            // --- IMAGE SPLICING (COMPRESSION) ---
             handleOracleFile(input) {
                 const file = input.files[0]; if (!file) return;
                 const reader = new FileReader();
@@ -357,7 +444,7 @@
 
             clearAttachment() { attachment = null; document.getElementById('ora-att-bar').classList.add('hidden'); },
 
-            // --- NEXUS DIRECTORY ---
+            // --- NEXUS & FEED ---
             async refreshNexus() {
                 const res = await fetch(`${APPS_URL}?action=get_nexus`);
                 nexusData = await res.json();
@@ -365,33 +452,78 @@
             },
 
             renderNexus(data) {
-                document.getElementById('nexus-list').innerHTML = data.map(n => `
-                    <div class="glass p-4 rounded-2xl flex items-center gap-4 border-l-2 border-white/10">
-                        <img src="${n.pic}" class="w-10 h-10 rounded-full object-cover grayscale hover:grayscale-0">
+                document.getElementById('nexus-list').innerHTML = data.map((n, index) => `
+                    <div onclick="UI.showProfile(${index})" class="glass p-4 rounded-2xl flex items-center gap-4 border-l-2 border-white/10 active:bg-cyan-400/5 cursor-pointer">
+                        <img src="${n.pic}" class="w-12 h-12 rounded-full object-cover">
                         <div class="flex-1">
-                            <h4 class="text-[11px] font-black text-white uppercase">${n.name}</h4>
-                            <p class="text-[7px] text-slate-500 uppercase">${n.role} • ${n.dept}</p>
+                            <h4 class="text-[11px] font-black text-white uppercase">${n.salutation} ${n.name}</h4>
+                            <p class="text-[7px] text-slate-500 uppercase tracking-widest">${n.role} // ${n.dept}</p>
                         </div>
-                        <a href="https://t.me/${n.phone}" class="p-2 bg-cyan-500/10 rounded-full"><i data-lucide="send" class="w-3 h-3 text-cyan-400"></i></a>
                     </div>`).join('');
                 lucide.createIcons();
             },
 
             filterNexus() {
                 const q = document.getElementById('nexus-search').value.toLowerCase();
-                this.renderNexus(nexusData.filter(n => n.name.toLowerCase().includes(q) || n.uid.toLowerCase().includes(q)));
+                this.renderNexus(nexusData.filter(n => n.name.toLowerCase().includes(q) || n.uid.toString().includes(q)));
             },
 
-            // --- SYSTEM ACTIONS ---
-            async markPresence() {
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'attendance', id: USER.id, name: USER.name, coords: `${pos.coords.latitude},${pos.coords.longitude}` }) });
-                    const status = await res.text();
-                    if(status === "OUT_OF_BOUNDS") this.confirmAction("Access Denied. Node outside geofence.");
-                    else this.confirmAction("Handshake recorded. Welcome to Doctor Krishna G-D-C.");
-                }, () => alert("GPS Pulse Lost."));
+            showProfile(index) {
+                const n = nexusData[index]; this.selectedCandidate = n;
+                document.getElementById('m-pic').src = n.pic;
+                document.getElementById('m-name').innerText = `${n.salutation} ${n.name}`;
+                document.getElementById('m-meta').innerText = `${n.role} • ${n.dept}`;
+                const lBtn = document.getElementById('btn-linkedin');
+                if (n.linkedin) lBtn.classList.remove('opacity-30', 'pointer-events-none');
+                else lBtn.classList.add('opacity-30', 'pointer-events-none');
+                const modal = document.getElementById('profile-modal');
+                modal.classList.remove('hidden'); modal.classList.add('flex');
+                setTimeout(() => document.getElementById('profile-card').classList.remove('translate-y-full'), 10);
             },
 
+            closeProfile() {
+                document.getElementById('profile-card').classList.add('translate-y-full');
+                setTimeout(() => document.getElementById('profile-modal').classList.add('hidden'), 500);
+            },
+
+            comm(type) {
+                const n = this.selectedCandidate; if (!n) return;
+                const phone = n.phone.replace(/[^0-9+]/g, '');
+                if(type === 'tel') window.location.href = `tel:${phone}`;
+                else if(type === 'sms') window.location.href = `sms:${phone}`;
+                else if(type === 'tele') window.open(`https://t.me/${phone}`, '_blank');
+                else if(type === 'link') window.open(n.linkedin, '_blank');
+            },
+
+            async refreshFeed() {
+                const res = await fetch(`${APPS_URL}?action=get_feed`);
+                const data = await res.json();
+                const list = document.getElementById('topic-list');
+                list.innerHTML = data.topics.map(t => {
+                    const topicReplies = data.replies.filter(r => r[1] === t[0]);
+                    return `
+                        <div class="glass p-6 rounded-[2.5rem] border-l-4 border-cyan-400 mb-8">
+                            <p class="text-[8px] text-slate-500 uppercase font-black mb-2">Staff: ${t[2]}</p>
+                            <h4 class="text-xs font-black text-white mb-2 uppercase">${t[4]}</h4>
+                            <p class="text-[10px] text-slate-400 mb-4">${t[5]}</p>
+                            <div class="space-y-3 mb-4 pl-4 border-l border-white/5">
+                                ${topicReplies.map(r => `<div class="bg-white/5 p-3 rounded-xl"><p class="text-[7px] text-cyan-400 font-black mb-1">${r[5]}:</p><p class="text-[10px] text-slate-300">${r[6]}</p>
+                                <button onclick="UI.replyTo('${t[0]}', '${r[0]}', '${r[5]}')" class="text-[6px] text-slate-500 uppercase mt-2 underline">Enhance idea</button></div>`).join('')}
+                            </div>
+                            <button onclick="UI.replyTo('${t[0]}')" class="cyber-btn !py-2 !text-[8px]">Add Viewpoint</button>
+                        </div>`;
+                }).join('');
+            },
+
+            async replyTo(topicId, parentID = "", parentName = "") {
+                const msg = prompt(parentName ? `Enhancing ${parentName}'s idea:` : "Add Viewpoint:");
+                if (!msg) return;
+                const finalMsg = parentName ? `(Tag: @${parentName}) ${msg}` : msg;
+                await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'post_reply', topicId, parentID, uid: USER.id, name: USER.name, msg: finalMsg }) });
+                this.refreshFeed();
+            },
+
+            // --- SYSTEM ---
             openQR(type) {
                 if (isProcessingScan) return;
                 document.getElementById('qr-modal').classList.remove('hidden');
@@ -405,7 +537,7 @@
                             await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'lab_session', id: USER.id, pcId: pc.id, photo: USER.photo }) });
                             this.confirmAction(`Station ${pc.id} unlocked.`);
                         } else {
-                            await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'authorize_desktop', sessionID: code, userName: USER.name, uid: USER.id }) });
+                            await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'authorize_desktop', sessionID: code, userName: USER.name, uid: USER.id, role: USER.role }) });
                             this.confirmAction("Command Hub authorized.");
                         }
                     } catch(e) {}
@@ -416,16 +548,17 @@
             closeQR() { if(this.scanner) this.scanner.stop().catch(()=>{}); document.getElementById('qr-modal').classList.add('hidden'); },
 
             async syncProfileUpdate() {
-                const name = document.getElementById('p-name').value, phone = document.getElementById('p-phone').value;
-                const photo = document.getElementById('p-edit-preview').src;
-                await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', uid: USER.id, name, phone, photo }) });
-                USER.name = name; USER.phone = phone; USER.photo = photo;
-                localStorage.setItem('csync_user_v820', JSON.stringify(USER));
+                const name = document.getElementById('p-name').value, phone = document.getElementById('p-phone').value, link = document.getElementById('p-linkedin').value;
+                const photo = document.getElementById('p-edit-preview').src, btn = document.getElementById('sync-btn');
+                btn.innerText = "SPLICING DNA...";
+                await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', uid: USER.id, name, phone, linkedin: link, photo }) });
+                USER.name = name; USER.phone = phone; USER.photo = photo; USER.linkedin = link;
+                localStorage.setItem('csync_user_v1000', JSON.stringify(USER));
                 this.confirmAction("Identity synced."); location.reload();
             },
 
             previewProfileUpdate(input) {
-                const r = new FileReader(); r.onload = (e) => document.getElementById('p-edit-preview').src = e.target.result;
+                const reader = new FileReader(); reader.onload = (e) => document.getElementById('p-edit-preview').src = e.target.result;
                 reader.readAsDataURL(input.files[0]);
             },
 
@@ -437,7 +570,7 @@
                     const res = await fetch(`${APPS_URL}?action=verify_bridge&uuid=${UUID}&rollNo=${rollNo}`);
                     const data = await res.json();
                     if (data.status === "VERIFIED") {
-                        USER = data; localStorage.setItem('csync_user_v820', JSON.stringify(data));
+                        USER = data; localStorage.setItem('csync_user_v1000', JSON.stringify(data));
                         this.confirmAction("Identity bridged."); setTimeout(() => location.reload(), 1500);
                     } else alert("Sync failed.");
                 } catch(e) { alert("Handshake error."); }
@@ -448,7 +581,6 @@
                 document.getElementById('view-'+t).classList.add('view-active');
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
                 document.getElementById('nav-'+t).classList.add('nav-active');
-                if (t === 'discuss') this.refreshFeed();
                 lucide.createIcons();
             },
 
@@ -456,17 +588,6 @@
                 const res = await fetch(`${APPS_URL}?action=get_leadership`);
                 const data = await res.json();
                 document.getElementById('leader-list').innerHTML = data.map(r => `<div class="glass p-5 rounded-2xl flex items-center gap-4"><img src="${r.pic}" class="w-12 h-12 rounded-full object-cover"><div><h4 class="text-xs font-black uppercase text-white">${r.name}</h4><p class="text-[7px] text-slate-500 uppercase">🔥 ${r.streak} • ⭐ ${r.stars}</p></div></div>`).join('');
-            },
-
-            async refreshFeed() {
-                const res = await fetch(`${APPS_URL}?action=get_discussions`);
-                const data = await res.json();
-                document.getElementById('topic-list').innerHTML = data.map(t => `<div class="glass p-6 rounded-[2.5rem] border-l-4 border-cyan-400 mb-4 shadow-xl"><p class="text-[8px] text-slate-500 uppercase font-black mb-2">Directive: ${t[2]}</p><h4 class="text-xs font-black text-white mb-2 uppercase">${t[4]}</h4><p class="text-[10px] text-slate-400 mb-4">${t[5]}</p><button onclick="UI.viewTopic('${t[0]}', '${t[4]}')" class="text-[8px] text-cyan-400 font-black uppercase">Join Discussion</button></div>`).join('');
-            },
-
-            async viewTopic(tid, title) {
-                const msg = prompt(`FEED: ${title}\n\nEnter response:`);
-                if(msg) { await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'post_reply', topicId: tid, uid: USER.id, name: USER.name, msg }) }); this.confirmAction("Synced."); }
             },
 
             logout() { if(confirm("Unbind Hardware Node?")) { localStorage.clear(); location.reload(); } }
