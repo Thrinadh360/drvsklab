@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>C-Sync | Sovereign Mobile Node</title>
+    <title>C-Sync | Sovereign Node</title>
     
-    <!-- PWA & Mobile Optimization -->
+    <!-- PWA & Native Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
@@ -21,25 +21,32 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; height: 100dvh; overflow: hidden; user-select: none; }
         
-        /* High-Definition UI Components */
         .glass { background: var(--card); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.05); }
         .cyber-btn { background: var(--accent); color: black; font-weight: 900; border-radius: 14px; padding: 14px; transition: 0.3s; text-transform: uppercase; font-size: 10px; width: 100%; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(0,242,255,0.15); }
         .cyber-btn:active { transform: scale(0.96); opacity: 0.8; }
 
-        /* View State Management */
         .view-container { display: none; height: 100%; overflow-y: auto; padding-bottom: 140px; scroll-behavior: smooth; }
         .view-active { display: block !important; animation: slideUp 0.4s cubic-bezier(0, 0, 0.2, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Neural Oracle Sentient HUD */
+        /* Sentient Oracle HUD */
         #oracle-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; padding: 25px; padding-top: 60px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #oracle-overlay.active { display: flex; transform: translateY(0); }
         
-        /* Messaging Pulse */
-        .ai-msg { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--accent); border-radius: 0 15px 15px 15px; padding: 15px; font-size: 13px; color: #cbd5e1; margin-bottom: 15px; width: 90%; }
-        .user-msg { background: rgba(255,255,255,0.05); border-radius: 15px 15px 0 15px; padding: 15px; font-size: 13px; align-self: flex-end; text-align: right; color: #fff; margin-bottom: 15px; width: 90%; margin-left: auto; }
+        .ai-msg { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--accent); border-radius: 0 15px 15px 15px; padding: 15px; font-size: 13px; color: #cbd5e1; margin-bottom: 15px; width: 95%; white-space: pre-wrap; }
+        .user-msg { background: rgba(255,255,255,0.05); border-radius: 15px 15px 0 15px; padding: 15px; font-size: 13px; align-self: flex-end; text-align: right; color: #fff; margin-bottom: 15px; width: 85%; margin-left: auto; }
 
-        /* Navigation Architecture */
+        /* Thinking Animation */
+        .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: dotPulse 1.4s infinite ease-in-out; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotPulse { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+        /* Birthday Sentience */
+        .bday-card { background: linear-gradient(45deg, #0f172a, #1e1b4b); border: 2px solid #fbbf24; animation: bday-glow 3s infinite alternate; }
+        @keyframes bday-glow { 0% { box-shadow: 0 0 10px #fbbf24; } 100% { box-shadow: 0 0 30px #f59e0b; } }
+
+        /* Navigation */
         .bottom-nav { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
         .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; transition: 0.3s; }
         .nav-active { color: var(--accent); filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
@@ -50,25 +57,25 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- LOADING & NEURAL SYNC OVERLAY -->
+    <!-- LOADING & SYNC OVERLAY -->
     <div id="status-overlay" class="fixed inset-0 bg-black z-[9999] hidden flex flex-col items-center justify-center p-10 text-center">
         <div class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-8"></div>
         <h2 id="status-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter">Syncing Node...</h2>
-        <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest">Authenticating Hardware Identity</p>
+        <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Authenticating Hardware DNA</p>
     </div>
 
-    <!-- CROSS-BROWSER IDENTITY BRIDGE -->
+    <!-- IDENTITY BRIDGE -->
     <div id="bridge-overlay" class="fixed inset-0 bg-black z-[9000] hidden flex items-center justify-center p-8">
-        <div class="glass p-8 rounded-[3rem] text-center w-full max-w-sm border-t-4 border-cyan-400">
+        <div class="glass p-8 rounded-[3rem] text-center w-full max-w-sm border-t-4 border-cyan-400 shadow-2xl">
             <i data-lucide="zap" class="w-12 h-12 text-cyan-400 mx-auto mb-6"></i>
             <h2 class="font-['Orbitron'] text-white text-lg mb-2 uppercase tracking-tighter">Bridge Identity</h2>
             <p id="bridge-msg" class="text-[10px] text-slate-500 uppercase font-black mb-8"></p>
-            <input id="bridge-roll" placeholder="ENTER YOUR ROLL NO" class="text-center mb-6 !text-lg font-['Orbitron'] tracking-widest">
+            <input id="bridge-roll" placeholder="ENTER ROLL NO" class="text-center mb-6 !text-lg font-['Orbitron'] tracking-widest">
             <button onclick="UI.completeBridge()" class="cyber-btn">Authorize Node</button>
         </div>
     </div>
 
-    <!-- NEURAL ORACLE HUD (CONVERSATIONAL) -->
+    <!-- NEURAL ORACLE SENTIENT HUD -->
     <div id="oracle-overlay">
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
@@ -82,22 +89,22 @@
         </header>
 
         <div id="oracle-chat-box" class="flex-1 overflow-y-auto pr-2 space-y-4 flex flex-col-reverse">
-            <!-- Messages flow bottom-up -->
-            <div class="ai-msg">Neural Link Established. I am Krishna, your sentient companion. Conversational protocol active. State your directive.</div>
+            <!-- Messages flow bottom-up visually but use reverse logic for typewriter -->
+            <div class="ai-msg">Neural Hub Active. State your directive, Doctor Krishna Student.</div>
         </div>
 
         <div id="ora-att-bar" class="hidden flex items-center gap-3 p-3 bg-white/5 rounded-xl mb-4 border border-white/10">
             <i data-lucide="image" class="w-4 h-4 text-cyan-400"></i>
-            <span id="ora-att-name" class="text-[10px] truncate flex-1">visual_data.jpg</span>
+            <span id="ora-att-name" class="text-[10px] truncate flex-1 opacity-50">Visual Data Spliced</span>
             <button onclick="UI.clearAttachment()"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
 
         <div class="mt-4 pb-10 space-y-4">
             <div class="flex items-center gap-2">
-                <button onclick="document.getElementById('ora-file').click()" class="glass p-5 rounded-2xl text-cyan-400"><i data-lucide="paperclip"></i></button>
-                <input type="file" id="ora-file" class="hidden" onchange="UI.handleOracleFile(this)">
+                <button onclick="document.getElementById('ora-file').click()" class="glass p-5 rounded-2xl text-cyan-400"><i data-lucide="camera"></i></button>
+                <input type="file" id="ora-file" class="hidden" accept="image/*" onchange="UI.handleOracleFile(this)">
                 <div class="relative flex-1">
-                    <input id="ora-input" placeholder="Directive..." class="!py-5 pr-14 shadow-2xl">
+                    <input id="ora-input" placeholder="Speak directive..." class="!py-5 pr-14 shadow-2xl">
                     <button onclick="UI.startSTT()" id="ora-mic" class="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-400"><i data-lucide="mic"></i></button>
                 </div>
                 <button onclick="UI.askOracle()" class="bg-cyan-400 text-black p-5 rounded-2xl font-black"><i data-lucide="send"></i></button>
@@ -106,7 +113,7 @@
         </div>
     </div>
 
-    <!-- MAIN APP STRUCTURE -->
+    <!-- MAIN APP WRAPPER -->
     <div id="app-wrapper" class="flex flex-col h-full p-6">
         
         <!-- DASHBOARD VIEW -->
@@ -119,6 +126,8 @@
                 </div>
             </header>
 
+            <div id="bday-container"></div>
+
             <!-- IDENTITY BENTO -->
             <div class="glass p-6 rounded-[2.5rem] mb-8 flex items-center gap-5 border-l-4 border-cyan-400 shimmer">
                 <img id="h-avatar" class="w-16 h-16 rounded-full border-2 border-white/10 object-cover shadow-2xl">
@@ -128,64 +137,63 @@
                 </div>
             </div>
 
-            <!-- ORACLE WIDGET -->
             <div onclick="UI.toggleOracle(true)" class="glass p-8 rounded-[3rem] border-t-4 border-cyan-400 mb-8 bg-gradient-to-br from-cyan-950/20 active:scale-95 transition-transform">
                 <h4 class="text-cyan-400 font-black uppercase text-[10px] mb-2 tracking-widest">Neural Oracle</h4>
                 <p class="text-white text-xl font-bold leading-tight mb-4">Engage Multimodal AI Intelligence</p>
                 <div class="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500">
-                    <span>Analyze</span> • <span>Vision</span> • <span>Voice</span>
-                    <i data-lucide="chevron-right" class="w-3 h-3 ml-auto"></i>
+                    <span>Analyze</span> • <span>Vision</span> • <span>Conversational</span>
                 </div>
             </div>
 
-            <!-- MODULE GRID -->
-            <div id="hub-modules" class="grid grid-cols-2 gap-4">
-                <!-- Modules injected dynamically by UI.renderHubModules -->
-            </div>
+            <div id="hub-modules" class="grid grid-cols-2 gap-4"></div>
         </div>
 
-        <!-- RANKINGS VIEW -->
+        <!-- NEXUS DIRECTORY -->
+        <div id="view-nexus" class="view-container">
+            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase tracking-tighter">Nexus Directory</h2>
+            <div class="mb-6"><input id="nexus-search" oninput="UI.filterNexus()" placeholder="Search by name or roll no..." class="!py-4 shadow-xl"></div>
+            <div id="nexus-list" class="space-y-3"></div>
+        </div>
+
+        <!-- BOARD (RANKINGS) -->
         <div id="view-rankings" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Leadership Board</h2>
             <div id="leader-list" class="space-y-4"></div>
         </div>
 
-        <!-- SOVEREIGN FEED VIEW -->
+        <!-- FEED -->
         <div id="view-discuss" class="view-container">
-            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Sovereign Feed</h2>
+            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Feed Hub</h2>
             <div id="topic-list" class="space-y-4"></div>
         </div>
 
-        <!-- PROFILE / IDENTITY SYNC VIEW -->
+        <!-- PROFILE -->
         <div id="view-profile" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Node Identity</h2>
             <div class="glass p-8 rounded-[3rem] space-y-6 text-center">
                 <div onclick="document.getElementById('p-edit-upload').click()" class="relative w-28 h-28 rounded-full border-2 border-cyan-400 mx-auto overflow-hidden shadow-2xl">
                     <img id="p-edit-preview" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 flex items-center justify-center transition-all">
-                        <i data-lucide="camera" class="text-white"></i>
-                    </div>
                     <input type="file" id="p-edit-upload" class="hidden" accept="image/*" onchange="UI.previewProfileUpdate(this)">
                 </div>
-                <input id="p-name" placeholder="Full Name" class="text-center font-bold">
-                <input id="p-phone" placeholder="Mobile Node No" class="text-center font-bold">
+                <input id="p-name" placeholder="Display Name" class="text-center font-bold">
+                <input id="p-phone" placeholder="Mobile Number" class="text-center font-bold">
                 <button onclick="UI.syncProfileUpdate()" id="sync-btn" class="cyber-btn shadow-lg">Sync Node DNA</button>
-                <button onclick="UI.logout()" class="text-red-500 font-black text-[9px] uppercase underline mt-4 tracking-widest">Unbind Hardware Node</button>
+                <button onclick="UI.logout()" class="text-red-500 font-black text-[9px] uppercase underline mt-4 tracking-widest">Unbind Node Hardware</button>
             </div>
         </div>
-
     </div>
 
-    <!-- QR SCANNER MODAL -->
+    <!-- MODAL: QR SCANNER -->
     <div id="qr-modal" class="fixed inset-0 bg-black/95 z-[9999] hidden flex flex-col items-center justify-center p-10">
         <button onclick="UI.closeQR()" class="absolute top-10 right-10 text-white"><i data-lucide="x" class="w-10 h-10"></i></button>
         <div id="qr-reader" class="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-cyan-400 shadow-2xl"></div>
-        <p class="text-cyan-400 font-['Orbitron'] mt-8 animate-pulse text-xs uppercase tracking-widest text-center">Scanning Institutional Pulse</p>
+        <p class="text-cyan-400 font-['Orbitron'] mt-8 animate-pulse text-xs uppercase tracking-widest text-center">Institutional Pulse Active</p>
     </div>
 
     <!-- PERSISTENT NAVIGATION -->
     <nav id="bottom-nav" class="bottom-nav hidden">
         <button onclick="UI.switchTab('dashboard')" class="nav-item nav-active" id="nav-dashboard"><i data-lucide="shield"></i><span>HUB</span></button>
+        <button onclick="UI.switchTab('nexus')" class="nav-item" id="nav-nexus"><i data-lucide="users"></i><span>NEXUS</span></button>
         <button onclick="UI.switchTab('rankings')" class="nav-item" id="nav-rankings"><i data-lucide="trophy"></i><span>BOARD</span></button>
         <button onclick="UI.switchTab('discuss')" class="nav-item" id="nav-discuss"><i data-lucide="messages-square"></i><span>FEED</span></button>
         <button onclick="UI.switchTab('profile')" class="nav-item" id="nav-profile"><i data-lucide="settings"></i><span>NODE</span></button>
@@ -194,39 +202,23 @@
     <script>
         const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
         
-        // --- FUZZY HARDWARE FINGERPRINTING ---
-        const generateFuzzyUUID = () => {
-            const dna = [
-                navigator.platform,
-                navigator.hardwareConcurrency || '8',
-                (screen.width * screen.height),
-                navigator.language,
-                (() => {
-                    const canvas = document.createElement('canvas');
-                    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                    const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-                    return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'generic';
-                })()
-            ].join('|');
-            return btoa(dna);
-        };
-
+        // --- HARDWARE FINGERPRINTING ---
+        const generateFuzzyUUID = () => btoa([navigator.platform, navigator.hardwareConcurrency, (screen.width * screen.height), navigator.language].join('|'));
         const UUID = generateFuzzyUUID();
-        let USER = JSON.parse(localStorage.getItem('csync_user_v810'));
-        let attachment = null, ttsEnabled = true, isConversationalMode = false, isSpeaking = false;
+        let USER = JSON.parse(localStorage.getItem('csync_user_v820'));
+        let nexusData = [], isConversationalMode = false, isSpeaking = false, isProcessingScan = false, ttsEnabled = true, attachment = null;
 
         const UI = {
             async init() {
                 lucide.createIcons();
                 if (USER) { this.checkStatus(); return; }
 
-                // CROSS-BROWSER AUTO-DETECTION
                 try {
                     const res = await fetch(`${APPS_URL}?action=identify_device&uuid=${UUID}`);
                     const data = await res.json();
                     if (data.status === "SOFT_MATCH") {
                         document.getElementById('bridge-overlay').style.display = 'flex';
-                        document.getElementById('bridge-msg').innerText = `Device DNA Recognised. Are you ${data.hints[0].name}?`;
+                        document.getElementById('bridge-msg').innerText = `Hardware Recognised. Are you ${data.hints[0].name}?`;
                         lucide.createIcons();
                     } else { location.href = 'register.html'; }
                 } catch(e) { location.href = 'register.html'; }
@@ -237,18 +229,13 @@
                 try {
                     const res = await fetch(`${APPS_URL}?action=check_status&uid=${USER.id}&uuid=${UUID}`);
                     const status = await res.text();
-                    if (status === "Approved") {
-                        ov.classList.add('hidden');
-                        this.boot();
-                    } else if (status === "Pending") {
-                        document.getElementById('status-msg').innerText = "Awaiting Institutional Authorization...";
-                    } else {
-                        document.getElementById('status-msg').innerText = "Hardware Identity Conflict. Unbind Current Node.";
-                    }
+                    if (status === "Approved") { ov.classList.add('hidden'); this.boot(); }
+                    else if (status === "Pending") { document.getElementById('status-msg').innerText = "Awaiting institutional verify..."; }
+                    else { document.getElementById('status-msg').innerText = "Hardware Mismatch. Unbind Node."; }
                 } catch(e) { this.boot(); ov.classList.add('hidden'); }
             },
 
-            boot() {
+            async boot() {
                 document.getElementById('bottom-nav').classList.remove('hidden');
                 this.switchTab('dashboard');
                 document.getElementById('h-name').innerText = USER.name;
@@ -257,184 +244,203 @@
                 document.getElementById('p-name').value = USER.name;
                 document.getElementById('p-phone').value = USER.phone;
                 document.getElementById('h-meta').innerText = `${USER.role}: ${USER.dept}`;
+                
+                // LIVE STAT SYNC (FIX FOR ZEROES)
+                try {
+                    const res = await fetch(`${APPS_URL}?action=get_user_stats&uid=${USER.id}`);
+                    const stats = await res.json();
+                    document.getElementById('h-streak').innerText = `🔥 ${stats.streak}`;
+                    document.getElementById('h-stars').innerText = `⭐ ${stats.stars}`;
+                } catch(e) {}
+
                 this.renderHubModules();
                 this.refreshLeadership();
                 this.refreshFeed();
+                this.refreshNexus();
+                this.checkBirthdays();
             },
 
             renderHubModules() {
                 const container = document.getElementById('hub-modules');
-                let modules = `
-                    <button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-cyan-500">
-                        <i data-lucide="map-pin" class="text-cyan-500 w-5 h-5 mb-3"></i>
-                        <h4 class="text-[10px] font-black uppercase text-white">Presence</h4>
-                        <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Geofence Mark</p>
-                    </button>`;
-                
-                if (USER.role !== 'Alumni') {
-                    modules += `
-                    <button onclick="UI.openQR('lab')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500">
-                        <i data-lucide="scan-line" class="text-emerald-500 w-5 h-5 mb-3"></i>
-                        <h4 class="text-[10px] font-black uppercase text-white">Lab PC</h4>
-                        <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Unlock Station</p>
-                    </button>`;
-                }
-
-                if (['HOD', 'Lecturer'].includes(USER.role)) {
-                    modules += `
-                    <button onclick="UI.openQR('admin')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500 col-span-2">
-                        <i data-lucide="monitor-check" class="text-yellow-500 w-5 h-5 mb-3"></i>
-                        <h4 class="text-[10px] font-black uppercase text-white">Authorize Command Hub</h4>
-                        <p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Desktop Auth Handshake</p>
-                    </button>`;
-                }
-
-                container.innerHTML = modules;
-                lucide.createIcons();
+                let modules = `<button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-cyan-500"><i data-lucide="map-pin" class="text-cyan-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Presence</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Geofence Mark</p></button>`;
+                if (USER.role !== 'Alumni') modules += `<button onclick="UI.openQR('lab')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500"><i data-lucide="scan-line" class="text-emerald-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Lab PC</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Station Unlock</p></button>`;
+                if (['HOD', 'Lecturer'].includes(USER.role)) modules += `<button onclick="UI.openQR('admin')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500 col-span-2"><i data-lucide="monitor-check" class="text-yellow-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Command Hub Auth</h4></button>`;
+                container.innerHTML = modules; lucide.createIcons();
             },
 
-            // --- NEURAL ORACLE SENTIENCE ---
-            toggleOracle(show) { 
-                const el = document.getElementById('oracle-overlay'); 
-                el.style.display = 'flex'; 
-                setTimeout(() => el.classList.toggle('active', show), 10); 
-                if (!show) setTimeout(() => el.style.display = 'none', 500);
+            // --- BIRTHDAY SENTIENCE ---
+            async checkBirthdays() {
+                const res = await fetch(`${APPS_URL}?action=get_birthdays`);
+                const bdays = await res.json();
+                if (bdays.length > 0) {
+                    const b = bdays[0];
+                    const bdayHUD = `<div class="bday-card p-6 rounded-[2.5rem] mb-8 relative overflow-hidden border-2 border-yellow-500 shadow-xl"><div class="relative z-10 flex items-center gap-4"><img src="${b.pic}" class="w-16 h-16 rounded-full border-2 border-white object-cover"><div><h4 class="text-yellow-400 font-black text-[10px] uppercase mb-1">Celebration Protocol</h4><p class="text-white text-lg font-black leading-tight">Many more happy returns, ${b.salutation} ${b.name}!</p></div></div></div>`;
+                    document.getElementById('bday-container').innerHTML = bdayHUD;
+                    this.confirmAction(`Celebration protocol active. Happy birthday to ${b.salutation} ${b.name}. Dr. V.S. Krishna G-D-C wishes you a wonderful day.`);
+                }
             },
 
+            // --- CONVERSATIONAL AI & TYPEWRITER ---
+            toggleOracle(show) { const el = document.getElementById('oracle-overlay'); el.style.display = 'flex'; setTimeout(() => el.classList.toggle('active', show), 10); },
+            
             toggleConversationalMode() {
                 isConversationalMode = !isConversationalMode;
                 document.getElementById('conv-btn').classList.toggle('text-cyan-400', isConversationalMode);
-                document.getElementById('conv-btn').classList.toggle('bg-cyan-400/10', isConversationalMode);
-                if (isConversationalMode) {
-                    this.confirmAction("Conversational protocol active.");
-                    this.startSTT();
-                }
+                if (isConversationalMode) { this.confirmAction("Conversational protocol engaged."); this.startSTT(); }
             },
 
             startSTT() {
                 if (isSpeaking) return;
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SpeechRecognition) return alert("Speech recognition not supported on this node.");
-                
-                const rec = new SpeechRecognition();
-                rec.lang = 'en-US';
-                rec.start();
-
-                rec.onstart = () => {
-                    document.getElementById('ora-pulse').classList.add('animate-ping', 'bg-cyan-400');
-                    document.getElementById('oracle-status-text').innerText = "Oracle Listening...";
-                };
-
-                rec.onresult = (e) => {
-                    document.getElementById('ora-input').value = e.results[0][0].transcript;
-                    this.askOracle();
-                };
-
-                rec.onend = () => {
-                    document.getElementById('ora-pulse').classList.remove('animate-ping');
-                };
+                const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                rec.lang = 'en-US'; rec.start();
+                rec.onstart = () => { document.getElementById('ora-pulse').classList.add('animate-ping'); document.getElementById('oracle-status-text').innerText = "Krishna Listening..."; };
+                rec.onresult = (e) => { document.getElementById('ora-input').value = e.results[0][0].transcript; this.askOracle(); };
+                rec.onend = () => { document.getElementById('ora-pulse').classList.remove('animate-ping'); };
             },
 
             speak(txt) {
                 window.speechSynthesis.cancel(); isSpeaking = true;
-                // Dr. fix
-                let audioText = txt.replace(/\bDr\./g, 'Doctor').replace(/\bGDC\b/g, 'G-D-C').replace(/\bVSK\b/g, 'V-S-K');
-                const msg = new SpeechSynthesisUtterance(audioText);
+                let audio = txt.replace(/\bDr\./g, 'Doctor').replace(/\bMr\./g, 'Mister').replace(/\bMs\./g, 'Miss').replace(/\bMrs\./g, 'Missus').replace(/\bGDC\b/g, 'G-D-C');
+                const msg = new SpeechSynthesisUtterance(audio);
                 msg.onstart = () => { document.getElementById('ora-pulse').classList.add('bg-purple-500'); };
                 msg.onend = () => { 
-                    isSpeaking = false; 
-                    document.getElementById('ora-pulse').classList.remove('bg-purple-500');
-                    document.getElementById('oracle-status-text').innerText = "System Standby";
+                    isSpeaking = false; document.getElementById('ora-pulse').classList.remove('bg-purple-500');
                     if(isConversationalMode) setTimeout(() => this.startSTT(), 600); 
                 };
                 window.speechSynthesis.speak(msg);
             },
 
+            typeWriter(text, elementId) {
+                let i = 0; const container = document.getElementById(elementId); container.innerHTML = "";
+                const type = () => { if (i < text.length) { container.innerHTML += text.charAt(i); i++; setTimeout(type, 15); } };
+                type();
+            },
+
             async askOracle() {
                 const q = document.getElementById('ora-input').value; if (!q && !attachment) return;
                 const box = document.getElementById('oracle-chat-box');
-                box.insertAdjacentHTML('afterbegin', `<div class="user-msg">${q || "Multimodal visual data scan."}</div>`);
+                box.insertAdjacentHTML('afterbegin', `<div class="user-msg">${q || "Visual scan active."}</div>`);
                 document.getElementById('ora-input').value = "";
-                const tid = "ai-" + Date.now(); box.insertAdjacentHTML('afterbegin', `<div class="ai-msg" id="${tid}">[SPLICING NEURAL HANDSHAKE]...</div>`);
-                
+                const tid = "ai-" + Date.now();
+                box.insertAdjacentHTML('afterbegin', `<div class="ai-msg" id="${tid}"><div class="flex gap-1"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`);
+                box.scrollTop = 0;
+
                 try {
-                    const res = await fetch(APPS_URL, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ action: 'oracle_query', query: q, user: USER.name, role: USER.role, attachment }) 
-                    });
-                    const text = await res.text();
-                    document.getElementById(tid).innerText = text.replace(/^"|"$/g, '');
+                    const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'oracle_query', query: q, user: USER.name, role: USER.role, attachment }) });
+                    const text = (await res.text()).replace(/^"|"$/g, '');
+                    this.typeWriter(text, tid);
                     if(ttsEnabled) this.speak(text);
-                } catch(e) { document.getElementById(tid).innerText = "Oracle link failed. Timeout."; }
+                    this.clearAttachment();
+                } catch(e) { document.getElementById(tid).innerText = "Hub Timeout."; }
             },
 
-            // --- QR HANDSHAKES ---
-            openQR(type) {
-                document.getElementById('qr-modal').classList.remove('hidden');
-                this.scanner = new Html5Qrcode("qr-reader");
-                this.scanner.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, async (code) => {
-                    if (type === 'lab') {
-                        const pc = JSON.parse(code);
-                        await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'lab_session', id: USER.id, pcId: pc.id, photo: USER.photo, coords: this.lastCoords }) });
-                        this.confirmAction(`Station ${pc.id} unlocked. Protocol Engaged.`);
-                    } else {
-                        await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'authorize_desktop', sessionID: code, userName: USER.name, uid: USER.id }) });
-                        this.confirmAction("Command Hub authorized.");
-                    }
-                    this.closeQR();
-                });
+            // --- IMAGE SPLICING (COMPRESSION) ---
+            handleOracleFile(input) {
+                const file = input.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height, max = 800;
+                        if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        attachment = { name: file.name, type: 'image/jpeg', data: canvas.toDataURL('image/jpeg', 0.5) };
+                        document.getElementById('ora-att-bar').classList.remove('hidden');
+                        this.confirmAction("Visual data spliced.");
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             },
 
-            closeQR() { if(this.scanner) this.scanner.stop(); document.getElementById('qr-modal').classList.add('hidden'); },
+            clearAttachment() { attachment = null; document.getElementById('ora-att-bar').classList.add('hidden'); },
 
-            // --- DATA SYNC & ACTIONS ---
-            async syncProfileUpdate() {
-                const name = document.getElementById('p-name').value, phone = document.getElementById('p-phone').value;
-                const photo = document.getElementById('p-edit-preview').src;
-                const btn = document.getElementById('sync-btn'); btn.innerText = "SPLICING...";
-                
-                try {
-                    await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', uid: USER.id, name, phone, photo }) });
-                    USER.name = name; USER.phone = phone; USER.photo = photo;
-                    localStorage.setItem('csync_user_v810', JSON.stringify(USER));
-                    this.confirmAction("Identity synced.");
-                    setTimeout(() => location.reload(), 1500);
-                } catch(e) { btn.innerText = "Sync Identity"; alert("Sync Failed."); }
+            // --- NEXUS DIRECTORY ---
+            async refreshNexus() {
+                const res = await fetch(`${APPS_URL}?action=get_nexus`);
+                nexusData = await res.json();
+                this.renderNexus(nexusData);
             },
 
-            previewProfileUpdate(input) {
-                const reader = new FileReader(); reader.onload = (e) => document.getElementById('p-edit-preview').src = e.target.result;
-                reader.readAsDataURL(input.files[0]);
+            renderNexus(data) {
+                document.getElementById('nexus-list').innerHTML = data.map(n => `
+                    <div class="glass p-4 rounded-2xl flex items-center gap-4 border-l-2 border-white/10">
+                        <img src="${n.pic}" class="w-10 h-10 rounded-full object-cover grayscale hover:grayscale-0">
+                        <div class="flex-1">
+                            <h4 class="text-[11px] font-black text-white uppercase">${n.name}</h4>
+                            <p class="text-[7px] text-slate-500 uppercase">${n.role} • ${n.dept}</p>
+                        </div>
+                        <a href="https://t.me/${n.phone}" class="p-2 bg-cyan-500/10 rounded-full"><i data-lucide="send" class="w-3 h-3 text-cyan-400"></i></a>
+                    </div>`).join('');
+                lucide.createIcons();
             },
 
+            filterNexus() {
+                const q = document.getElementById('nexus-search').value.toLowerCase();
+                this.renderNexus(nexusData.filter(n => n.name.toLowerCase().includes(q) || n.uid.toLowerCase().includes(q)));
+            },
+
+            // --- SYSTEM ACTIONS ---
             async markPresence() {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
-                    this.lastCoords = `${pos.coords.latitude},${pos.coords.longitude}`;
-                    const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'attendance', id: USER.id, name: USER.name, coords: this.lastCoords }) });
+                    const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'attendance', id: USER.id, name: USER.name, coords: `${pos.coords.latitude},${pos.coords.longitude}` }) });
                     const status = await res.text();
-                    if(status === "OUT_OF_BOUNDS") this.confirmAction("Access Denied. Outside geofence.");
+                    if(status === "OUT_OF_BOUNDS") this.confirmAction("Access Denied. Node outside geofence.");
                     else this.confirmAction("Handshake recorded. Welcome to Doctor Krishna G-D-C.");
                 }, () => alert("GPS Pulse Lost."));
             },
 
-            confirmAction(msg) {
-                if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-                if (ttsEnabled) this.speak(msg);
+            openQR(type) {
+                if (isProcessingScan) return;
+                document.getElementById('qr-modal').classList.remove('hidden');
+                this.scanner = new Html5Qrcode("qr-reader");
+                this.scanner.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, async (code) => {
+                    if (isProcessingScan) return;
+                    isProcessingScan = true;
+                    try {
+                        if (type === 'lab') {
+                            const pc = JSON.parse(code);
+                            await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'lab_session', id: USER.id, pcId: pc.id, photo: USER.photo }) });
+                            this.confirmAction(`Station ${pc.id} unlocked.`);
+                        } else {
+                            await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'authorize_desktop', sessionID: code, userName: USER.name, uid: USER.id }) });
+                            this.confirmAction("Command Hub authorized.");
+                        }
+                    } catch(e) {}
+                    setTimeout(() => { this.closeQR(); isProcessingScan = false; }, 2000);
+                });
             },
 
+            closeQR() { if(this.scanner) this.scanner.stop().catch(()=>{}); document.getElementById('qr-modal').classList.add('hidden'); },
+
+            async syncProfileUpdate() {
+                const name = document.getElementById('p-name').value, phone = document.getElementById('p-phone').value;
+                const photo = document.getElementById('p-edit-preview').src;
+                await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', uid: USER.id, name, phone, photo }) });
+                USER.name = name; USER.phone = phone; USER.photo = photo;
+                localStorage.setItem('csync_user_v820', JSON.stringify(USER));
+                this.confirmAction("Identity synced."); location.reload();
+            },
+
+            previewProfileUpdate(input) {
+                const r = new FileReader(); r.onload = (e) => document.getElementById('p-edit-preview').src = e.target.result;
+                reader.readAsDataURL(input.files[0]);
+            },
+
+            confirmAction(msg) { if (navigator.vibrate) navigator.vibrate([30, 50, 30]); if (ttsEnabled) this.speak(msg); },
+
             async completeBridge() {
-                const rollNo = document.getElementById('bridge-roll').value.trim();
-                if(!rollNo) return;
+                const rollNo = document.getElementById('bridge-roll').value.trim(); if(!rollNo) return;
                 try {
                     const res = await fetch(`${APPS_URL}?action=verify_bridge&uuid=${UUID}&rollNo=${rollNo}`);
                     const data = await res.json();
                     if (data.status === "VERIFIED") {
-                        USER = data;
-                        localStorage.setItem('csync_user_v810', JSON.stringify(data));
-                        this.confirmAction("Identity bridged.");
-                        setTimeout(() => location.reload(), 1500);
-                    } else { alert("Sync failed."); }
-                } catch(e) { alert("Identity handshake error."); }
+                        USER = data; localStorage.setItem('csync_user_v820', JSON.stringify(data));
+                        this.confirmAction("Identity bridged."); setTimeout(() => location.reload(), 1500);
+                    } else alert("Sync failed.");
+                } catch(e) { alert("Handshake error."); }
             },
 
             switchTab(t) {
@@ -442,56 +448,28 @@
                 document.getElementById('view-'+t).classList.add('view-active');
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
                 document.getElementById('nav-'+t).classList.add('nav-active');
+                if (t === 'discuss') this.refreshFeed();
                 lucide.createIcons();
             },
 
             async refreshLeadership() {
                 const res = await fetch(`${APPS_URL}?action=get_leadership`);
                 const data = await res.json();
-                document.getElementById('leader-list').innerHTML = data.map(r => `
-                    <div class="glass p-5 rounded-2xl flex items-center gap-4">
-                        <img src="${r.pic}" class="w-12 h-12 rounded-full object-cover">
-                        <div>
-                            <h4 class="text-xs font-black uppercase text-white">${r.name}</h4>
-                            <p class="text-[7px] text-slate-500 uppercase font-black tracking-widest">🔥 ${r.streak} • ⭐ ${r.stars}</p>
-                        </div>
-                    </div>`).join('');
+                document.getElementById('leader-list').innerHTML = data.map(r => `<div class="glass p-5 rounded-2xl flex items-center gap-4"><img src="${r.pic}" class="w-12 h-12 rounded-full object-cover"><div><h4 class="text-xs font-black uppercase text-white">${r.name}</h4><p class="text-[7px] text-slate-500 uppercase">🔥 ${r.streak} • ⭐ ${r.stars}</p></div></div>`).join('');
             },
 
             async refreshFeed() {
                 const res = await fetch(`${APPS_URL}?action=get_discussions`);
                 const data = await res.json();
-                document.getElementById('topic-list').innerHTML = data.map(t => `
-                    <div class="glass p-6 rounded-[2.5rem] border-l-4 border-cyan-400 mb-4">
-                        <p class="text-[8px] text-slate-500 uppercase font-black mb-2">Staff: ${t[2]}</p>
-                        <h4 class="text-xs font-black text-white mb-2 uppercase">${t[4]}</h4>
-                        <p class="text-[10px] text-slate-400 leading-relaxed mb-4 line-clamp-3">${t[5]}</p>
-                        <button onclick="UI.viewTopic('${t[0]}', '${t[4]}')" class="text-[8px] text-cyan-400 font-black uppercase tracking-widest">Open Node Feed</button>
-                    </div>`).join('');
+                document.getElementById('topic-list').innerHTML = data.map(t => `<div class="glass p-6 rounded-[2.5rem] border-l-4 border-cyan-400 mb-4 shadow-xl"><p class="text-[8px] text-slate-500 uppercase font-black mb-2">Directive: ${t[2]}</p><h4 class="text-xs font-black text-white mb-2 uppercase">${t[4]}</h4><p class="text-[10px] text-slate-400 mb-4">${t[5]}</p><button onclick="UI.viewTopic('${t[0]}', '${t[4]}')" class="text-[8px] text-cyan-400 font-black uppercase">Join Discussion</button></div>`).join('');
             },
 
             async viewTopic(tid, title) {
                 const msg = prompt(`FEED: ${title}\n\nEnter response:`);
-                if(msg) {
-                    await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'post_reply', topicId: tid, uid: USER.id, name: USER.name, msg }) });
-                    this.confirmAction("Response synced.");
-                }
+                if(msg) { await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'post_reply', topicId: tid, uid: USER.id, name: USER.name, msg }) }); this.confirmAction("Synced."); }
             },
 
-            handleOracleFile(input) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    attachment = { name: file.name, type: file.type, data: e.target.result };
-                    document.getElementById('ora-att-bar').classList.remove('hidden');
-                    document.getElementById('ora-att-name').innerText = file.name;
-                };
-                reader.readAsDataURL(file);
-            },
-
-            clearAttachment() { attachment = null; document.getElementById('ora-att-bar').classList.add('hidden'); },
-
-            logout() { if(confirm("Unbind Node Hardware?")) { localStorage.clear(); location.reload(); } }
+            logout() { if(confirm("Unbind Hardware Node?")) { localStorage.clear(); location.reload(); } }
         };
 
         window.onload = () => UI.init();
