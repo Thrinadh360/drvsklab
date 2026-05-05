@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C-Sync | Station Terminal OS</title>
     
-    <!-- Dependencies -->
+    <!-- Professional Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -16,88 +16,98 @@
         :root { --accent: #00f2ff; --bg: #000; }
         body { background: var(--bg); color: white; margin: 0; overflow: hidden; font-family: sans-serif; cursor: none; }
         
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; }
+        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(50px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2.5rem; }
         
-        /* Binding UI */
-        #view-setup { position: fixed; inset: 0; background: #000; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        select { background: #0f172a !important; border: 2px solid var(--accent) !important; color: white !important; padding: 20px !important; border-radius: 15px !important; font-size: 24px !important; font-family: 'Orbitron'; width: 300px; text-align: center; cursor: pointer; outline: none; }
+        /* Binding Interface */
+        #view-setup { position: fixed; inset: 0; background: #000; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #020617 0%, #000 100%); }
+        select { background: #0f172a !important; border: 2px solid var(--accent) !important; color: white !important; padding: 20px !important; border-radius: 15px !important; font-size: 24px !important; font-family: 'Orbitron'; width: 350px; text-align: center; cursor: pointer; outline: none; box-shadow: 0 0 30px rgba(0,242,255,0.1); }
 
-        /* HUD & Pulse */
-        #whisper-hud { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: 60%; z-index: 10000; display: none; animation: slideDown 0.5s ease; }
-        @keyframes slideDown { from { transform: translate(-50%, -100%); } to { transform: translate(-50%, 0); } }
-        .qr-box { position: relative; padding: 20px; background: white; border-radius: 20px; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--accent); animation: scan 2s infinite linear; z-index: 10; }
+        /* HUD Intercom */
+        #whisper-hud { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: 60%; z-index: 10000; display: none; animation: slideDown 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+        @keyframes slideDown { from { transform: translate(-50%, -150%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+        /* Security QR Pulse */
+        .qr-box { position: relative; padding: 25px; background: white; border-radius: 30px; box-shadow: 0 0 60px rgba(0,242,255,0.2); transition: 0.5s; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: var(--accent); animation: scan 2.5s infinite linear; z-index: 10; box-shadow: 0 0 15px var(--accent); }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-        .pc-id-bg { font-family: 'Orbitron', sans-serif; letter-spacing: -5px; user-select: none; }
+
+        .pc-id-watermark { font-family: 'Orbitron', sans-serif; letter-spacing: -8px; user-select: none; pointer-events: none; }
+        .animate-flicker { animation: flicker 3s infinite; }
+        @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-    <!-- 1. HARDWARE BINDING OVERLAY (FIRST RUN ONLY) -->
+    <!-- 1. HARDWARE BINDING GATE (FIRST RUN) -->
     <div id="view-setup" class="hidden">
         <div class="text-center">
-            <h1 class="font-['Orbitron'] text-cyan-400 text-4xl mb-2 font-black italic">HARDWARE BINDING</h1>
-            <p class="text-slate-500 font-bold uppercase tracking-[0.4em] mb-10 text-[10px]">Select Station ID to Link Hardware</p>
+            <div class="w-20 h-20 bg-cyan-400/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-cyan-400/30">
+                <i data-lucide="cpu" class="text-cyan-400 w-10 h-10 animate-pulse"></i>
+            </div>
+            <h1 class="font-['Orbitron'] text-white text-5xl mb-3 font-black italic tracking-tighter">HARDWARE BINDING</h1>
+            <p class="text-slate-500 font-bold uppercase tracking-[0.5em] mb-12 text-[11px]">Department of Computer Science // Dr. VSK GDC</p>
             
             <select id="setup-id-select">
-                <option value="" disabled selected>CHOOSE STATION</option>
-                <!-- Generated by JS -->
+                <option value="" disabled selected>SELECT STATION ID</option>
+                <!-- Generated dynamically CS-01 to CS-50 -->
             </select>
 
-            <button onclick="Kiosk.bindHardware()" class="mt-10 block mx-auto bg-cyan-400 text-black font-black font-['Orbitron'] px-12 py-4 rounded-full hover:scale-105 transition-transform">INITIALIZE BINDING</button>
+            <button onclick="Kiosk.bindHardware()" class="mt-12 block mx-auto bg-cyan-400 text-black font-black font-['Orbitron'] px-16 py-5 rounded-2xl hover:bg-white hover:scale-105 transition-all shadow-xl shadow-cyan-400/20">INITIALIZE NODE</button>
         </div>
     </div>
 
-    <!-- 2. NEURAL WHISPER HUD -->
-    <div id="whisper-hud" class="glass p-10 border-l-[10px] border-cyan-400">
-        <div class="flex items-center gap-6">
-            <i data-lucide="zap" class="w-12 h-12 text-cyan-400 animate-pulse"></i>
+    <!-- 2. NEURAL WHISPER HUD (ADMIN OVERLAY) -->
+    <div id="whisper-hud" class="glass p-12 border-l-[15px] border-cyan-400 shadow-2xl">
+        <div class="flex items-center gap-10">
+            <div class="p-5 bg-cyan-400/10 rounded-full">
+                <i data-lucide="zap" class="w-16 h-16 text-cyan-400 animate-bounce"></i>
+            </div>
             <div>
-                <p class="text-cyan-400 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Neural Whisper // Command Hub</p>
-                <h1 id="whisper-txt" class="text-4xl font-['Orbitron'] font-black italic uppercase text-white"></h1>
+                <p class="text-cyan-400 text-[11px] font-black uppercase tracking-[0.5em] mb-3">Neural Whisper // Command Directive</p>
+                <h1 id="whisper-txt" class="text-5xl font-['Orbitron'] font-black italic uppercase text-white leading-tight"></h1>
             </div>
         </div>
     </div>
 
-    <!-- 3. LOCKED STATE -->
-    <div id="view-lock" class="h-screen flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,_#071a2e_0%,_#000_100%)]">
-        <h1 id="station-id-display" class="pc-id-bg text-[12rem] font-black text-white/5 absolute top-10">...</h1>
+    <!-- 3. LOCKED STATE (STANDBY) -->
+    <div id="view-lock" class="h-screen flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,_#0a192f_0%,_#000_100%)]">
+        <h1 id="station-id-display" class="pc-id-watermark text-[18rem] font-black text-white/5 absolute top-5">...</h1>
         
         <div class="z-10 text-center">
-            <div class="qr-box inline-block mb-10">
+            <div class="qr-box inline-block mb-12">
                 <div class="scan-line"></div>
                 <div id="qr-container"></div>
             </div>
             
-            <h2 class="text-2xl font-['Orbitron'] font-black text-cyan-400 mb-2 uppercase italic animate-pulse">Station Locked</h2>
-            <p class="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px]">Scan Security Token with Authorized Node</p>
+            <h2 class="text-3xl font-['Orbitron'] font-black text-cyan-400 mb-3 uppercase italic animate-flicker tracking-widest">Station Locked</h2>
+            <p class="text-slate-500 font-bold uppercase tracking-[0.4em] text-[11px]">Synchronize with Authorized Mobile Node</p>
         </div>
 
-        <div class="absolute bottom-10 flex gap-8 opacity-20">
-            <div class="flex items-center gap-2"><div class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div><span class="text-[8px] font-bold uppercase">CCTV Active</span></div>
-            <div class="flex items-center gap-2"><div class="w-2 h-2 bg-cyan-400 rounded-full"></div><span class="text-[8px] font-bold uppercase">Station Bound</span></div>
+        <div class="absolute bottom-12 flex gap-12 opacity-30">
+            <div class="flex items-center gap-3"><div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></div><span class="text-[9px] font-black uppercase tracking-widest">CCTV Pulse Active</span></div>
+            <div class="flex items-center gap-3"><div class="w-2.5 h-2.5 bg-cyan-400 rounded-full"></div><span class="text-[9px] font-black uppercase tracking-widest">Hardware Bound</span></div>
         </div>
     </div>
 
-    <!-- 4. ACTIVE SESSION -->
+    <!-- 4. ACTIVE SESSION (AUTHORIZED) -->
     <div id="view-active" class="hidden h-screen flex flex-col items-center justify-center bg-[#000]">
-        <div class="glass p-16 flex items-center gap-12 border-l-[12px] border-emerald-500 max-w-5xl shadow-[0_0_100px_rgba(16,185,129,0.1)]">
-            <img id="u-photo" src="" class="w-56 h-56 rounded-full border-4 border-emerald-500/50 object-cover">
+        <div class="glass p-20 flex items-center gap-16 border-l-[15px] border-emerald-500 max-w-6xl shadow-[0_0_120px_rgba(16,185,129,0.15)]">
+            <img id="u-photo" src="" class="w-64 h-64 rounded-full border-4 border-emerald-500/50 object-cover shadow-2xl">
             <div>
-                <p class="text-emerald-500 font-['Orbitron'] font-black text-[14px] mb-4 tracking-[0.5em]">SESSION SYNCHRONIZED</p>
-                <h1 id="u-name" class="text-8xl font-['Orbitron'] font-black uppercase italic mb-6">...</h1>
-                <div class="flex items-center gap-6 text-slate-500 font-black text-sm uppercase tracking-widest">
-                    <span id="session-time" class="text-white">00:00:00</span>
-                    <span class="text-slate-800">|</span>
+                <p class="text-emerald-500 font-['Orbitron'] font-black text-[16px] mb-6 tracking-[0.6em]">SESSION AUTHORIZED</p>
+                <h1 id="u-name" class="text-[6rem] font-['Orbitron'] font-black uppercase italic mb-8 leading-none">...</h1>
+                <div class="flex items-center gap-8 text-slate-500 font-black text-lg uppercase tracking-widest">
+                    <span id="session-time" class="text-white bg-white/5 px-6 py-2 rounded-xl">00:00:00</span>
+                    <span class="text-slate-800">/</span>
                     <span id="pc-id-active" class="text-cyan-400">...</span>
                 </div>
             </div>
         </div>
-        <p class="mt-12 text-slate-800 font-bold text-[9px] uppercase tracking-[1em]">Department of Computer Science // Sovereign Terminal</p>
+        <p class="mt-16 text-slate-800 font-bold text-[11px] uppercase tracking-[1.2em] animate-pulse">Sovereign Institutional Terminal // Alpha v815</p>
     </div>
 
     <script>
-        // MASTER CONFIG
+        // MASTER CONFIGURATION
         const API = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
         let PC_ID = localStorage.getItem('csync_station_binding');
         let IS_OCCUPIED = false;
@@ -106,20 +116,21 @@
             init() {
                 lucide.createIcons();
                 
-                // 1. Check Binding
+                // 1. Hardware Binding Check
                 if (!PC_ID) {
                     this.showSetup();
                     return;
                 }
 
-                // 2. Start Logic
+                // 2. Initialize Terminal
                 document.getElementById('station-id-display').innerText = PC_ID;
                 document.getElementById('pc-id-active').innerText = PC_ID;
                 this.rotateQR();
                 this.poll();
                 
-                setInterval(() => this.rotateQR(), 10000); 
-                setInterval(() => this.cctvPulse(), 8000); 
+                // 3. System Loops
+                setInterval(() => this.rotateQR(), 10000); // New QR every 10s
+                setInterval(() => this.cctvPulse(), 8000);  // New Snapshot every 8s
             },
 
             showSetup() {
@@ -139,9 +150,9 @@
 
             bindHardware() {
                 const selected = document.getElementById('setup-id-select').value;
-                if (!selected) return alert("Select a System ID.");
+                if (!selected) return alert("System Error: Please select a Station ID.");
                 
-                if (confirm(`Confirm: Bind this hardware as Station ${selected}?`)) {
+                if (confirm(`CRITICAL: Bind this computer as Station ${selected}?`)) {
                     localStorage.setItem('csync_station_binding', selected);
                     location.reload();
                 }
@@ -153,14 +164,15 @@
                 try {
                     const res = await fetch(`${API}?action=get_kiosk_token&sysId=${PC_ID}`);
                     const token = await res.text();
-                    document.getElementById('qr-container').innerHTML = "";
-                    new QRCode(document.getElementById('qr-container'), {
+                    const qrContainer = document.getElementById('qr-container');
+                    qrContainer.innerHTML = "";
+                    new QRCode(qrContainer, {
                         text: JSON.stringify({ id: PC_ID, auth: token }),
                         width: 320, height: 320,
                         colorDark: "#000", colorLight: "#fff",
                         correctLevel: QRCode.CorrectLevel.H
                     });
-                } catch (e) {}
+                } catch (e) { console.error("Neural Link Drop."); }
             },
 
             async poll() {
@@ -168,25 +180,36 @@
                     const res = await fetch(`${API}?action=kiosk_poll&sysId=${PC_ID}`);
                     const data = await res.json();
 
+                    // Handle Admin Whispers
                     if (data.whisper) this.showWhisper(data.whisper);
 
+                    // Handle Session Management
                     if (data.status === "AUTHORIZED" && !IS_OCCUPIED) {
                         this.unlock(data);
                     } else if (data.status === "IDLE" && IS_OCCUPIED) {
-                        location.reload(); 
+                        location.reload(); // Hard reset terminal
                     }
                 } catch (e) {}
                 setTimeout(() => this.poll(), 4000);
             },
 
+            // CCTV PULSE (TRANSMISSION)
             async cctvPulse() {
                 if (!IS_OCCUPIED) return;
                 try {
-                    const canvas = await html2canvas(document.body, { scale: 0.15, logging: false });
+                    // Optimized capture for low latency
+                    const canvas = await html2canvas(document.body, { 
+                        scale: 0.12, 
+                        logging: false, 
+                        useCORS: true 
+                    });
+                    const frame = canvas.toDataURL('image/jpeg', 0.1);
+                    
+                    // Fire-and-forget push
                     fetch(API, {
                         method: 'POST',
                         mode: 'no-cors',
-                        body: JSON.stringify({ action: 'push_frame', pcId: PC_ID, frame: canvas.toDataURL('image/jpeg', 0.1) })
+                        body: JSON.stringify({ action: 'push_frame', pcId: PC_ID, frame: frame })
                     });
                 } catch (e) {}
             },
@@ -197,7 +220,7 @@
                 document.getElementById('view-active').style.display = 'flex';
                 document.getElementById('u-photo').src = u.profilePic;
                 document.getElementById('u-name').innerText = u.name;
-                this.speak(`Handshake successful. Welcome ${u.name}. System ${PC_ID} is now yours.`);
+                this.speak(`Handshake successful. Welcome ${u.name}. Station ${PC_ID} is now authorized for your session.`);
                 this.startTimer();
             },
 
@@ -205,14 +228,16 @@
                 const hud = document.getElementById('whisper-hud');
                 document.getElementById('whisper-txt').innerText = msg;
                 hud.style.display = 'block';
-                this.speak(`Command Hub message: ${msg}`);
+                this.speak(`Incoming Admin Directive: ${msg}`);
                 setTimeout(() => hud.style.display = 'none', 12000);
             },
 
             speak(txt) {
                 window.speechSynthesis.cancel();
-                const msg = new SpeechSynthesisUtterance(txt.replace(/\bDr\./g, 'Doctor'));
-                msg.rate = 0.85; msg.pitch = 0.8;
+                // Pronunciation repair
+                const audio = txt.replace(/\bDr\./g, 'Doctor').replace(/\bGDC\b/g, 'G-D-C');
+                const msg = new SpeechSynthesisUtterance(audio);
+                msg.rate = 0.9; msg.pitch = 0.85; // Technical, calm voice
                 window.speechSynthesis.speak(msg);
             },
 
