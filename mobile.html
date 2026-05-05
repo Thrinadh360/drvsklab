@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#000000">
     <link rel="manifest" href="manifest.json">
 
-    <!-- High-Tech Dependencies -->
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -30,15 +30,22 @@
         .view-active { display: block !important; animation: slideUp 0.4s cubic-bezier(0, 0, 0.2, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Oracle Sentient HUD */
+        /* Oracle HUD */
         #oracle-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; padding: 25px; padding-top: 60px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #oracle-overlay.active { display: flex; transform: translateY(0); }
         .ai-msg { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--accent); border-radius: 0 15px 15px 15px; padding: 15px; font-size: 13px; color: #cbd5e1; margin-bottom: 15px; width: 95%; white-space: pre-wrap; }
         .user-msg { background: rgba(255,255,255,0.05); border-radius: 15px 15px 0 15px; padding: 15px; font-size: 13px; align-self: flex-end; text-align: right; color: #fff; margin-bottom: 15px; width: 85%; margin-left: auto; }
 
-        /* Birthday Sentiment */
-        .bday-card { background: linear-gradient(45deg, #0f172a, #1e1b4b); border: 2px solid #fbbf24; animation: bday-glow 3s infinite alternate; }
-        @keyframes bday-glow { 0% { box-shadow: 0 0 10px #fbbf24; } 100% { box-shadow: 0 0 30px #f59e0b; } }
+        /* Thinking Animation */
+        .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: dotPulse 1.4s infinite ease-in-out; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotPulse { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+        /* Wake Pulse */
+        #wake-indicator { position: fixed; top: var(--safe-top); right: 20px; display: flex; align-items: center; gap: 6px; z-index: 10000; transition: 0.3s; }
+        .pulse-ring { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: ringPulse 2s infinite; }
+        @keyframes ringPulse { 0% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 242, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); } }
 
         /* Nav */
         .bottom-nav { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
@@ -47,10 +54,8 @@
 
         input, select, textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 14px !important; border-radius: 12px !important; width: 100%; font-size: 14px; }
         .shimmer { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
-        .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: dotPulse 1.4s infinite ease-in-out; }
-        @keyframes dotPulse { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
 
-        /* Camera UI */
+        /* Camera */
         #camera-gate { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .cam-box { width: 300px; height: 300px; border-radius: 50%; border: 4px solid var(--accent); overflow: hidden; position: relative; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
         .cam-box::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent); animation: scan 2s infinite linear; }
@@ -59,87 +64,87 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- SPLASH / SYNC OVERLAY -->
+    <!-- WAKE INDICATOR -->
+    <div id="wake-indicator" class="opacity-0">
+        <span class="text-[7px] font-black uppercase text-slate-500 tracking-widest">Syska Active</span>
+        <div class="pulse-ring"></div>
+    </div>
+
+    <!-- SPLASH SCREEN -->
     <div id="status-overlay" class="fixed inset-0 bg-black z-[9999] hidden flex flex-col items-center justify-center p-10 text-center">
         <div class="w-32 h-32 mb-10 relative">
             <img src="icon.svg" class="w-full h-full animate-pulse">
             <div class="absolute inset-0 border-4 border-cyan-400 rounded-3xl animate-spin-slow opacity-20"></div>
         </div>
-        <h2 id="status-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter shimmer">Initializing Node</h2>
-        <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Sovereign Registry Handshake</p>
+        <h2 id="status-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter shimmer">C-SYNC</h2>
+        <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest">Neural Handshake...</p>
     </div>
 
     <!-- IDENTITY BRIDGE -->
     <div id="bridge-overlay" class="fixed inset-0 bg-black z-[9000] hidden flex items-center justify-center p-8">
-        <div class="glass p-8 rounded-[3rem] text-center w-full max-w-sm border-t-4 border-cyan-400 shadow-2xl">
+        <div class="glass p-8 rounded-[3rem] text-center w-full max-w-sm border-t-4 border-cyan-400">
             <i data-lucide="zap" class="w-12 h-12 text-cyan-400 mx-auto mb-6"></i>
             <h2 class="font-['Orbitron'] text-white text-lg mb-2 uppercase tracking-tighter">Bridge Identity</h2>
             <p id="bridge-msg" class="text-[10px] text-slate-500 uppercase font-black mb-8"></p>
-            <input id="bridge-roll" placeholder="ENTER ROLL NO" class="text-center mb-6 !text-lg font-['Orbitron'] tracking-widest">
+            <input id="bridge-roll" placeholder="ENTER ROLL NO" class="text-center mb-6 !text-lg font-['Orbitron']">
             <button onclick="UI.completeBridge()" class="cyber-btn">Authorize Node</button>
         </div>
     </div>
 
-    <!-- BIOMETRIC CAMERA PORTAL -->
+    <!-- BIOMETRIC PORTAL -->
     <div id="camera-gate">
         <div class="cam-box mb-12">
             <video id="v-stream" autoplay muted playsinline class="w-full h-full object-cover"></video>
         </div>
         <div class="text-center mb-16">
             <h3 class="font-['Orbitron'] text-cyan-400 text-xl animate-pulse mb-2 uppercase italic">Biometric Scan</h3>
-            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Face alignment required</p>
+            <p id="cam-status" class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">SYSKA analyzing frame...</p>
         </div>
         <button id="cam-trigger" class="w-20 h-20 bg-white rounded-full border-8 border-white/20 active:scale-90 transition-transform"></button>
-        <button onclick="UI.closeCamera()" class="mt-10 text-slate-500 text-[10px] font-black uppercase">Abort Handshake</button>
+        <button onclick="UI.closeCamera()" class="mt-10 text-slate-500 text-[10px] font-black uppercase">Abort</button>
     </div>
 
-    <!-- NEURAL ORACLE HUD -->
+    <!-- SYSKA HUD -->
     <div id="oracle-overlay">
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
                 <div id="ora-pulse" class="w-3 h-3 bg-cyan-400 rounded-full"></div>
-                <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic uppercase tracking-tighter">Neural Oracle</h2>
+                <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic uppercase tracking-tighter">SYSKA Intelligence</h2>
             </div>
             <div class="flex gap-4">
                 <button onclick="UI.toggleConversationalMode()" id="conv-btn" class="p-2 glass rounded-full text-slate-500 transition-all"><i data-lucide="mic-2"></i></button>
                 <button onclick="UI.toggleOracle(false)" class="p-2 glass rounded-full text-slate-500"><i data-lucide="x"></i></button>
             </div>
         </header>
-
         <div id="oracle-chat-box" class="flex-1 overflow-y-auto pr-2 space-y-4 flex flex-col-reverse">
-            <div class="ai-msg">Neural Hub Active. State your directive, Doctor Krishna Student. Conversational Loop available.</div>
+            <div class="ai-msg">Neural Hub Active. State your directive, Doctor Krishna Student. Hands-free loop ready.</div>
         </div>
-
         <div id="ora-att-bar" class="hidden flex items-center gap-3 p-3 bg-white/5 rounded-xl mb-4 border border-white/10">
             <i data-lucide="image" class="w-4 h-4 text-cyan-400"></i>
             <span id="ora-att-name" class="text-[10px] truncate flex-1 opacity-50">Visual Data Spliced</span>
             <button onclick="UI.clearAttachment()"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
-
         <div class="mt-4 pb-10 space-y-4">
             <div class="flex items-center gap-2">
                 <button onclick="document.getElementById('ora-file').click()" class="glass p-5 rounded-2xl text-cyan-400"><i data-lucide="camera"></i></button>
                 <input type="file" id="ora-file" class="hidden" accept="image/*" onchange="UI.handleOracleFile(this)">
                 <div class="relative flex-1">
-                    <input id="ora-input" placeholder="Speak directive..." class="!py-5 pr-14 shadow-2xl">
+                    <input id="ora-input" placeholder="Directive..." class="!py-5 pr-14 shadow-2xl">
                     <button onclick="UI.startSTT()" id="ora-mic" class="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-400"><i data-lucide="mic"></i></button>
                 </div>
-                <button onclick="UI.askOracle()" class="bg-cyan-400 text-black p-5 rounded-2xl font-black"><i data-lucide="send"></i></button>
+                <button onclick="UI.askOracle()" class="bg-cyan-400 text-black p-5 rounded-2xl font-black shadow-2xl"><i data-lucide="send"></i></button>
             </div>
             <p id="oracle-status-text" class="text-center text-[7px] font-black uppercase text-slate-600 tracking-[0.3em]">System Standby</p>
         </div>
     </div>
 
-    <!-- SOVEREIGN PROFILE OVERLAY -->
+    <!-- PROFILE MODAL -->
     <div id="profile-modal" class="fixed inset-0 bg-black/90 z-[9999] hidden flex flex-col items-center justify-end">
         <div class="glass w-full max-w-xl rounded-t-[3rem] p-10 border-t-4 border-cyan-400 transform translate-y-full transition-transform duration-500" id="profile-card">
             <button onclick="UI.closeProfile()" class="absolute top-6 right-8 text-slate-500"><i data-lucide="chevron-down"></i></button>
             <div class="text-center mb-8">
-                <div class="relative inline-block">
-                    <img id="m-pic" src="" class="w-32 h-32 rounded-full border-4 border-cyan-400 object-cover mx-auto mb-4 shadow-2xl">
-                    <div class="absolute inset-0 border-2 border-dashed border-cyan-400 rounded-full animate-spin-slow"></div>
-                </div>
-                <h2 id="m-name" class="font-['Orbitron'] text-2xl font-black uppercase text-white tracking-tighter"></h2>
+                <img id="m-pic" src="" class="w-32 h-32 rounded-full border-4 border-cyan-400 object-cover mx-auto mb-4 shadow-2xl">
+                <h2 id="m-name" class="font-['Orbitron'] text-2xl font-black uppercase text-white"></h2>
                 <p id="m-meta" class="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.3em]"></p>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-8">
@@ -151,14 +156,14 @@
         </div>
     </div>
 
-    <!-- MAIN APP STRUCTURE -->
+    <!-- MAIN APP WRAPPER -->
     <div id="app-wrapper" class="flex flex-col h-full p-6">
         
-        <!-- DASHBOARD VIEW -->
+        <!-- DASHBOARD -->
         <div id="view-dashboard" class="view-container view-active">
             <header class="flex justify-between items-center mb-10">
                 <h1 class="font-['Orbitron'] text-2xl italic font-black tracking-tighter">C-SYNC</h1>
-                <div class="flex items-center gap-3 glass px-4 py-2 rounded-full">
+                <div class="flex items-center gap-3 glass px-4 py-2 rounded-full border-white/5">
                     <div id="h-streak" class="text-orange-500 font-black text-xs">🔥 0</div>
                     <div id="h-stars" class="text-yellow-500 font-black text-xs">⭐ 0</div>
                 </div>
@@ -178,54 +183,41 @@
             <div onclick="UI.toggleOracle(true)" class="glass p-8 rounded-[3rem] border-t-4 border-cyan-400 mb-8 bg-gradient-to-br from-cyan-950/20 active:scale-95 transition-transform">
                 <h4 class="text-cyan-400 font-black uppercase text-[10px] mb-2 tracking-widest">Neural Oracle</h4>
                 <p class="text-white text-xl font-bold leading-tight">Engage Multimodal Intelligence</p>
-                <div class="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 mt-4">
-                    <span>Analyze</span> • <span>Vision</span> • <span>Conversational</span>
-                </div>
             </div>
 
             <div id="hub-modules" class="grid grid-cols-2 gap-4"></div>
         </div>
 
-        <!-- NEXUS VIEW -->
         <div id="view-nexus" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase tracking-tighter">Nexus Directory</h2>
-            <div class="mb-6"><input id="nexus-search" oninput="UI.filterNexus()" placeholder="Search by name or roll no..." class="!py-4 shadow-xl"></div>
+            <div class="mb-6"><input id="nexus-search" oninput="UI.filterNexus()" placeholder="Search candidates..." class="!py-4 shadow-xl"></div>
             <div id="nexus-list" class="space-y-3"></div>
         </div>
 
-        <!-- BOARD VIEW -->
         <div id="view-rankings" class="view-container">
-            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Leadership Board</h2>
+            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Leadership</h2>
             <div id="leader-list" class="space-y-4"></div>
         </div>
 
-        <!-- FEED VIEW -->
         <div id="view-discuss" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Feed</h2>
             <div id="topic-list" class="space-y-4"></div>
         </div>
 
-        <!-- PROFILE VIEW -->
         <div id="view-profile" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter">Node Identity</h2>
             <div class="glass p-8 rounded-[3rem] space-y-6 text-center">
-                <div onclick="document.getElementById('p-edit-upload').click()" class="relative w-28 h-28 rounded-full border-2 border-cyan-400 mx-auto overflow-hidden shadow-2xl cursor-pointer">
+                <div onclick="document.getElementById('p-edit-upload').click()" class="relative w-28 h-28 rounded-full border-2 border-cyan-400 mx-auto overflow-hidden shadow-2xl">
                     <img id="p-edit-preview" class="w-full h-full object-cover">
                     <input type="file" id="p-edit-upload" class="hidden" accept="image/*" onchange="UI.previewProfileUpdate(this)">
                 </div>
                 <input id="p-name" placeholder="Full Name" class="text-center font-bold">
                 <input id="p-linkedin" placeholder="LinkedIn URL" class="text-center">
-                <input id="p-phone" placeholder="Mobile Number" class="text-center font-bold">
+                <input id="p-phone" placeholder="Mobile Node" class="text-center font-bold">
                 <button onclick="UI.syncProfileUpdate()" id="sync-btn" class="cyber-btn shadow-lg">Sync Node DNA</button>
-                <button onclick="UI.logout()" class="text-red-500 font-black text-[9px] uppercase underline mt-4 tracking-widest">Unbind Hardware Node</button>
+                <button onclick="UI.logout()" class="text-red-500 font-black text-[9px] uppercase underline mt-4">Unbind Hardware</button>
             </div>
         </div>
-    </div>
-
-    <!-- MODAL: QR SCANNER -->
-    <div id="qr-modal" class="fixed inset-0 bg-black/95 z-[9999] hidden flex flex-col items-center justify-center p-10">
-        <button onclick="UI.closeQR()" class="absolute top-10 right-10 text-white"><i data-lucide="x" class="w-10 h-10"></i></button>
-        <div id="qr-reader" class="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-cyan-400 shadow-2xl"></div>
     </div>
 
     <!-- PERSISTENT NAV -->
@@ -242,8 +234,9 @@
         
         const generateFuzzyUUID = () => btoa([navigator.platform, navigator.hardwareConcurrency, (screen.width * screen.height), navigator.language].join('|'));
         const UUID = generateFuzzyUUID();
-        let USER = JSON.parse(localStorage.getItem('csync_user_v1000'));
-        let nexusData = [], isConversationalMode = false, isSpeaking = false, isProcessingScan = false, ttsEnabled = true, attachment = null;
+        let USER = JSON.parse(localStorage.getItem('csync_user_v1200'));
+        let nexusCache = [], isConversationalMode = false, isSpeaking = false, isProcessingScan = false, ttsEnabled = true, attachment = null;
+        let wakeWordRecognition = null, isWakeActive = false;
 
         const UI = {
             async init() {
@@ -255,9 +248,9 @@
                     const data = await res.json();
                     if (data.status === "SOFT_MATCH") {
                         document.getElementById('bridge-overlay').style.display = 'flex';
-                        document.getElementById('bridge-msg').innerText = `Hardware Recognised. Are you ${data.hints[0].name}?`;
+                        document.getElementById('bridge-msg').innerText = `DNA Recognised. Are you ${data.hints[0].name}?`;
                         lucide.createIcons();
-                    } else { location.href = 'register.html'; }
+                    } else location.href = 'register.html';
                 } catch(e) { location.href = 'register.html'; }
             },
 
@@ -267,12 +260,12 @@
                     const res = await fetch(`${APPS_URL}?action=check_status&uid=${USER.id}&uuid=${UUID}`);
                     const status = await res.text();
                     if (status === "Approved") { ov.classList.add('hidden'); this.boot(); }
-                    else if (status === "Pending") { document.getElementById('status-msg').innerText = "Awaiting institutional verify..."; }
-                    else { document.getElementById('status-msg').innerText = "Hardware Mismatch. Unbind current node."; }
+                    else if (status === "Pending") document.getElementById('status-msg').innerText = "Awaiting Institutional Verify...";
+                    else document.getElementById('status-msg').innerText = "Hardware Conflict. Unbind Node.";
                 } catch(e) { this.boot(); ov.classList.add('hidden'); }
             },
 
-            async boot() {
+            boot() {
                 document.getElementById('bottom-nav').classList.remove('hidden');
                 this.switchTab('dashboard');
                 document.getElementById('h-name').innerText = USER.name;
@@ -280,81 +273,65 @@
                 document.getElementById('p-edit-preview').src = USER.photo;
                 document.getElementById('p-name').value = USER.name;
                 document.getElementById('p-phone').value = USER.phone;
+                document.getElementById('p-linkedin').value = USER.linkedin || "";
                 document.getElementById('h-meta').innerText = `${USER.role}: ${USER.dept}`;
                 
-                // Live stats fetch
-                try {
-                    const res = await fetch(`${APPS_URL}?action=get_user_stats&uid=${USER.id}`);
-                    const stats = await res.json();
-                    document.getElementById('h-streak').innerText = `🔥 ${stats.streak}`;
-                    document.getElementById('h-stars').innerText = `⭐ ${stats.stars}`;
-                } catch(e) {}
-
                 this.renderHubModules();
                 this.refreshLeadership();
                 this.refreshFeed();
                 this.refreshNexus();
                 this.checkBirthdays();
                 this.refreshAlerts();
-                setInterval(() => this.refreshAlerts(), 60000);
+                this.initWakeWord();
+                this.syncLiveStats();
             },
 
-            renderHubModules() {
-                const container = document.getElementById('hub-modules');
-                let modules = `<button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-cyan-500"><i data-lucide="map-pin" class="text-cyan-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Presence</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Biometric Handshake</p></button>`;
-                if (USER.role !== 'Alumni') modules += `<button onclick="UI.openQR('lab')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500"><i data-lucide="scan-line" class="text-emerald-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Lab PC</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Station Unlock</p></button>`;
-                if (['HOD', 'Lecturer', 'Lab Assistant'].includes(USER.role)) {
-                    modules += `<button onclick="UI.openQR('admin')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500 col-span-2"><i data-lucide="monitor-check" class="text-yellow-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Authorize Command Hub</h4></button>`;
-                }
-                container.innerHTML = modules; lucide.createIcons();
+            // --- WAKE WORD ("Hey Syska") ---
+            initWakeWord() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) return;
+                wakeWordRecognition = new SpeechRecognition();
+                wakeWordRecognition.continuous = true;
+                wakeWordRecognition.onstart = () => { document.getElementById('wake-indicator').classList.remove('opacity-0'); };
+                wakeWordRecognition.onresult = (e) => {
+                    const t = e.results[e.results.length - 1][0].transcript.toLowerCase();
+                    if (t.includes("hi syska") || t.includes("hey syska")) this.triggerWake();
+                };
+                wakeWordRecognition.onend = () => { if(!isWakeActive) wakeWordRecognition.start(); };
+                document.body.addEventListener('click', () => { try { wakeWordRecognition.start(); } catch(e) {} }, { once: true });
             },
 
-            // --- BIRTHDAY & ALERTS ---
-            async checkBirthdays() {
-                const res = await fetch(`${APPS_URL}?action=get_birthdays`);
-                const bdays = await res.json();
-                if (bdays.length > 0) {
-                    const b = bdays[0];
-                    document.getElementById('bday-container').innerHTML = `
-                        <div class="bday-card p-6 rounded-[2.5rem] mb-8 relative overflow-hidden border-2 border-yellow-500 shadow-xl">
-                            <div class="relative z-10 flex items-center gap-4">
-                                <img src="${b.pic}" class="w-16 h-16 rounded-full border-2 border-white object-cover">
-                                <div>
-                                    <h4 class="text-yellow-400 font-black text-[10px] uppercase mb-1">Celebration Pulse</h4>
-                                    <p class="text-white text-lg font-black leading-tight">Many more happy returns, ${b.salutation} ${b.name}!</p>
-                                </div>
-                            </div>
-                        </div>`;
-                    this.confirmAction(`Happy birthday to ${b.salutation} ${b.name}. Dr. V.S. Krishna G-D-C wishes you a wonderful day.`);
-                }
+            triggerWake() {
+                if(navigator.vibrate) navigator.vibrate([40, 30, 40]);
+                isWakeActive = true; wakeWordRecognition.stop();
+                this.toggleOracle(true);
+                this.speak(`Yes ${USER.name}, I am listening.`);
+                setTimeout(() => { this.startSTT(); isWakeActive = false; }, 1500);
             },
 
-            async refreshAlerts() {
-                const res = await fetch(`${APPS_URL}?action=get_active_alerts`);
-                const alerts = await res.json();
-                const zone = document.getElementById('global-alert-zone');
-                if (alerts.length > 0) {
-                    zone.classList.remove('hidden');
-                    zone.innerHTML = alerts.map(a => `<div class="glass p-5 rounded-3xl border-l-4 border-orange-500 bg-orange-500/5 animate-pulse"><span class="text-[8px] font-black text-orange-500 uppercase tracking-widest">${a.role} SIGNAL</span><p class="text-xs text-white font-medium mt-1">${a.message}</p></div>`).join('');
-                } else zone.classList.add('hidden');
-            },
-
-            // --- ATTENDANCE BIOMETRICS ---
+            // --- ATTENDANCE (HANDS-FREE BIOMETRIC) ---
             async markPresence() {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     this.tempCoords = `${pos.coords.latitude},${pos.coords.longitude}`;
-                    this.confirmAction("Geofence verified. Point camera for biometric handshake.");
+                    this.confirmAction("Geofence verified. Initiating autonomous biometric handshake.");
                     document.getElementById('camera-gate').style.display = 'flex';
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                    document.getElementById('v-stream').srcObject = stream;
-                    document.getElementById('cam-trigger').onclick = () => this.captureAttendance(stream);
+                    document.getElementById('cam-trigger').style.display = 'none';
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                        document.getElementById('v-stream').srcObject = stream;
+                        setTimeout(() => {
+                            this.speak("Node detected. To verify liveliness, please blink your eyes slowly now.");
+                            setTimeout(() => this.autoCaptureAttendance(stream), 3000);
+                        }, 1000);
+                    } catch(e) { alert("Camera Protocol Blocked."); this.closeCamera(); }
                 }, () => alert("GPS Pulse Lost."));
             },
 
-            captureAttendance(stream) {
+            autoCaptureAttendance(stream) {
                 const v = document.getElementById('v-stream'), c = document.createElement('canvas');
-                c.width = 400; c.height = 400; c.getContext('2d').drawImage(v, 0, 0, 400, 400);
-                const face = c.toDataURL('image/jpeg', 0.5);
+                c.width = 480; c.height = 480;
+                c.getContext('2d').drawImage(v, 0, 0, 480, 480);
+                const face = c.toDataURL('image/jpeg', 0.6);
                 stream.getTracks().forEach(t => t.stop());
                 document.getElementById('camera-gate').style.display = 'none';
                 this.submitAttendance(face);
@@ -362,30 +339,31 @@
 
             async submitAttendance(face) {
                 document.getElementById('status-overlay').classList.remove('hidden');
-                document.getElementById('status-msg').innerText = "Neural DNA Handshake...";
+                document.getElementById('status-msg').innerText = "Analyzing Liveliness...";
                 const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'attendance', id: USER.id, name: USER.name, coords: this.tempCoords, liveFace: face }) });
-                const status = await res.text();
+                const status = (await res.text()).replace(/['"]+/g, '').trim();
                 document.getElementById('status-overlay').classList.add('hidden');
-                if (status === "BIO_VERIFIED") { this.confirmAction("Attendance authorised. Streak incremented."); this.boot(); }
-                else if (status === "OUTSIDE_HOURS") this.confirmAction("Access Denied: Timing window mismatch.");
+                if (status === "BIO_VERIFIED") { this.confirmAction("Attendance authorised. Streak incremented."); this.syncLiveStats(); }
+                else if (status === "LIVELINESS_FAIL") this.confirmAction("Handshake rejected. Static image detected.");
                 else if (status === "HOLIDAY_OFF") this.confirmAction("System Standby: Institutional Holiday.");
                 else this.confirmAction("Biometric Mismatch. Protocol rejected.");
             },
 
-            // --- SENTIENT ORACLE ---
+            // --- SYSKA AI (TYPEWRITER & CONV) ---
             toggleOracle(show) { const el = document.getElementById('oracle-overlay'); el.style.display = 'flex'; setTimeout(() => el.classList.toggle('active', show), 10); },
             
             toggleConversationalMode() {
                 isConversationalMode = !isConversationalMode;
                 document.getElementById('conv-btn').classList.toggle('text-cyan-400', isConversationalMode);
-                if (isConversationalMode) this.startSTT();
+                if (isConversationalMode) { this.confirmAction("Conversational protocol active."); this.startSTT(); }
             },
 
             startSTT() {
                 if (isSpeaking) return;
-                const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const rec = new SpeechRecognition();
                 rec.lang = 'en-US'; rec.start();
-                rec.onstart = () => { document.getElementById('ora-pulse').classList.add('animate-ping'); document.getElementById('oracle-status-text').innerText = "Krishna Listening..."; };
+                rec.onstart = () => { document.getElementById('ora-pulse').classList.add('animate-ping'); document.getElementById('oracle-status-text').innerText = "Syska Listening..."; };
                 rec.onresult = (e) => { document.getElementById('ora-input').value = e.results[0][0].transcript; this.askOracle(); };
                 rec.onend = () => { document.getElementById('ora-pulse').classList.remove('animate-ping'); };
             },
@@ -394,8 +372,11 @@
                 window.speechSynthesis.cancel(); isSpeaking = true;
                 let audio = txt.replace(/\bDr\./g, 'Doctor').replace(/\bMr\./g, 'Mister').replace(/\bGDC\b/g, 'G-D-C');
                 const msg = new SpeechSynthesisUtterance(audio);
-                msg.onstart = () => { document.getElementById('ora-pulse').classList.add('bg-purple-500'); };
-                msg.onend = () => { isSpeaking = false; document.getElementById('ora-pulse').classList.remove('bg-purple-500'); if(isConversationalMode) setTimeout(() => this.startSTT(), 600); };
+                msg.onstart = () => document.getElementById('ora-pulse').classList.add('bg-purple-500');
+                msg.onend = () => { 
+                    isSpeaking = false; document.getElementById('ora-pulse').classList.remove('bg-purple-500');
+                    if(isConversationalMode) setTimeout(() => this.startSTT(), 600); 
+                };
                 window.speechSynthesis.speak(msg);
             },
 
@@ -426,20 +407,25 @@
                 const file = input.files[0]; if (!file) return;
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width, h = img.height, max = 800;
-                        if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
-                        canvas.width = w; canvas.height = h;
-                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                        attachment = { name: file.name, type: 'image/jpeg', data: canvas.toDataURL('image/jpeg', 0.5) };
+                    if (file.type.startsWith('image/')) {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let w = img.width, h = img.height, max = 800;
+                            if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
+                            canvas.width = w; canvas.height = h;
+                            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                            attachment = { name: file.name, type: 'image/jpeg', data: canvas.toDataURL('image/jpeg', 0.4) };
+                            this.confirmAction("Visual data spliced.");
+                            document.getElementById('ora-att-bar').classList.remove('hidden');
+                        };
+                        img.src = e.target.result;
+                    } else {
+                        attachment = { name: file.name, type: 'text/plain', data: e.target.result };
                         document.getElementById('ora-att-bar').classList.remove('hidden');
-                        this.confirmAction("Visual data spliced.");
-                    };
-                    img.src = e.target.result;
+                    }
                 };
-                reader.readAsDataURL(file);
+                if(file.type.startsWith('image/')) reader.readAsDataURL(file); else reader.readAsText(file);
             },
 
             clearAttachment() { attachment = null; document.getElementById('ora-att-bar').classList.add('hidden'); },
@@ -447,35 +433,26 @@
             // --- NEXUS & FEED ---
             async refreshNexus() {
                 const res = await fetch(`${APPS_URL}?action=get_nexus`);
-                nexusData = await res.json();
-                this.renderNexus(nexusData);
-            },
-
-            renderNexus(data) {
-                document.getElementById('nexus-list').innerHTML = data.map((n, index) => `
+                nexusCache = await res.json();
+                document.getElementById('nexus-list').innerHTML = nexusCache.map((n, index) => `
                     <div onclick="UI.showProfile(${index})" class="glass p-4 rounded-2xl flex items-center gap-4 border-l-2 border-white/10 active:bg-cyan-400/5 cursor-pointer">
-                        <img src="${n.pic}" class="w-12 h-12 rounded-full object-cover">
+                        <img src="${n.pic}" class="w-12 h-12 rounded-full object-cover grayscale hover:grayscale-0">
                         <div class="flex-1">
-                            <h4 class="text-[11px] font-black text-white uppercase">${n.salutation} ${n.name}</h4>
+                            <h4 class="text-[11px] font-black text-white uppercase">${n.sal} ${n.name}</h4>
                             <p class="text-[7px] text-slate-500 uppercase tracking-widest">${n.role} // ${n.dept}</p>
                         </div>
                     </div>`).join('');
                 lucide.createIcons();
             },
 
-            filterNexus() {
-                const q = document.getElementById('nexus-search').value.toLowerCase();
-                this.renderNexus(nexusData.filter(n => n.name.toLowerCase().includes(q) || n.uid.toString().includes(q)));
-            },
-
             showProfile(index) {
-                const n = nexusData[index]; this.selectedCandidate = n;
+                const n = nexusCache[index]; this.selectedCandidate = n;
                 document.getElementById('m-pic').src = n.pic;
-                document.getElementById('m-name').innerText = `${n.salutation} ${n.name}`;
+                document.getElementById('m-name').innerText = `${n.sal} ${n.name}`;
                 document.getElementById('m-meta').innerText = `${n.role} • ${n.dept}`;
                 const lBtn = document.getElementById('btn-linkedin');
-                if (n.linkedin) lBtn.classList.remove('opacity-30', 'pointer-events-none');
-                else lBtn.classList.add('opacity-30', 'pointer-events-none');
+                if (n.link && n.link.includes('http')) lBtn.classList.remove('opacity-20', 'pointer-events-none');
+                else lBtn.classList.add('opacity-20', 'pointer-events-none');
                 const modal = document.getElementById('profile-modal');
                 modal.classList.remove('hidden'); modal.classList.add('flex');
                 setTimeout(() => document.getElementById('profile-card').classList.remove('translate-y-full'), 10);
@@ -491,15 +468,14 @@
                 const phone = n.phone.replace(/[^0-9+]/g, '');
                 if(type === 'tel') window.location.href = `tel:${phone}`;
                 else if(type === 'sms') window.location.href = `sms:${phone}`;
-                else if(type === 'tele') window.open(`https://t.me/${phone}`, '_blank');
-                else if(type === 'link') window.open(n.linkedin, '_blank');
+                else if(type === 'tele') window.open(`https://t.me/${phone.replace('+', '')}`, '_blank');
+                else if(type === 'link') window.open(n.link, '_blank');
             },
 
             async refreshFeed() {
                 const res = await fetch(`${APPS_URL}?action=get_feed`);
                 const data = await res.json();
-                const list = document.getElementById('topic-list');
-                list.innerHTML = data.topics.map(t => {
+                document.getElementById('topic-list').innerHTML = data.topics.map(t => {
                     const topicReplies = data.replies.filter(r => r[1] === t[0]);
                     return `
                         <div class="glass p-6 rounded-[2.5rem] border-l-4 border-cyan-400 mb-8">
@@ -518,12 +494,46 @@
             async replyTo(topicId, parentID = "", parentName = "") {
                 const msg = prompt(parentName ? `Enhancing ${parentName}'s idea:` : "Add Viewpoint:");
                 if (!msg) return;
-                const finalMsg = parentName ? `(Tag: @${parentName}) ${msg}` : msg;
-                await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'post_reply', topicId, parentID, uid: USER.id, name: USER.name, msg: finalMsg }) });
+                await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'post_reply', topicId, parentID, uid: USER.id, name: USER.name, msg: parentName ? `(Tag: @${parentName}) ${msg}` : msg }) });
                 this.refreshFeed();
             },
 
-            // --- SYSTEM ---
+            // --- DATA SYNC ---
+            async syncLiveStats() {
+                const res = await fetch(`${APPS_URL}?action=get_user_stats&uid=${USER.id}`);
+                const s = await res.json();
+                document.getElementById('h-streak').innerText = `🔥 ${s.streak}`;
+                document.getElementById('h-stars').innerText = `⭐ ${s.stars}`;
+            },
+
+            async checkBirthdays() {
+                const res = await fetch(`${APPS_URL}?action=get_birthdays`);
+                const bdays = await res.json();
+                if (bdays.length > 0) {
+                    const b = bdays[0];
+                    document.getElementById('bday-container').innerHTML = `<div class="bday-card p-6 rounded-[2.5rem] mb-8 border-2 border-yellow-500"><p class="text-white text-lg font-black">Happy Birthday, ${b.salutation} ${b.name}!</p></div>`;
+                    this.confirmAction(`Dr. V.S. Krishna G-D-C wishes you a wonderful birthday, ${b.salutation} ${b.name}.`);
+                }
+            },
+
+            async refreshAlerts() {
+                const res = await fetch(`${APPS_URL}?action=get_active_alerts`);
+                const alerts = await res.json();
+                const zone = document.getElementById('global-alert-zone');
+                if (alerts.length > 0) {
+                    zone.classList.remove('hidden');
+                    zone.innerHTML = alerts.map(a => `<div class="glass p-5 rounded-3xl border-l-4 border-orange-500 bg-orange-500/5 animate-pulse"><p class="text-xs text-white font-medium">${a.message}</p></div>`).join('');
+                } else zone.classList.add('hidden');
+            },
+
+            // --- UTILS ---
+            renderHubModules() {
+                let modules = `<button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-cyan-500"><i data-lucide="map-pin" class="text-cyan-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Presence</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Biometric Handshake</p></button>`;
+                if (USER.role !== 'Alumni') modules += `<button onclick="UI.openQR('lab')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500"><i data-lucide="scan-line" class="text-emerald-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Lab PC</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Station Unlock</p></button>`;
+                if (['HOD', 'Lecturer', 'Lab Assistant'].includes(USER.role)) modules += `<button onclick="UI.openQR('admin')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500 col-span-2"><i data-lucide="monitor-check" class="text-yellow-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Authorize Command Hub</h4></button>`;
+                document.getElementById('hub-modules').innerHTML = modules; lucide.createIcons();
+            },
+
             openQR(type) {
                 if (isProcessingScan) return;
                 document.getElementById('qr-modal').classList.remove('hidden');
@@ -549,48 +559,34 @@
 
             async syncProfileUpdate() {
                 const name = document.getElementById('p-name').value, phone = document.getElementById('p-phone').value, link = document.getElementById('p-linkedin').value;
-                const photo = document.getElementById('p-edit-preview').src, btn = document.getElementById('sync-btn');
-                btn.innerText = "SPLICING DNA...";
+                const photo = document.getElementById('p-edit-preview').src;
                 await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', uid: USER.id, name, phone, linkedin: link, photo }) });
                 USER.name = name; USER.phone = phone; USER.photo = photo; USER.linkedin = link;
-                localStorage.setItem('csync_user_v1000', JSON.stringify(USER));
+                localStorage.setItem('csync_user_v1200', JSON.stringify(USER));
                 this.confirmAction("Identity synced."); location.reload();
             },
 
             previewProfileUpdate(input) {
-                const reader = new FileReader(); reader.onload = (e) => document.getElementById('p-edit-preview').src = e.target.result;
-                reader.readAsDataURL(input.files[0]);
+                const r = new FileReader(); r.onload = (e) => document.getElementById('p-edit-preview').src = e.target.result;
+                r.readAsDataURL(input.files[0]);
             },
 
             confirmAction(msg) { if (navigator.vibrate) navigator.vibrate([30, 50, 30]); if (ttsEnabled) this.speak(msg); },
-
+            closeCamera() { if(this.stream) this.stream.getTracks().forEach(t=>t.stop()); document.getElementById('camera-gate').style.display='none'; },
             async completeBridge() {
-                const rollNo = document.getElementById('bridge-roll').value.trim(); if(!rollNo) return;
-                try {
-                    const res = await fetch(`${APPS_URL}?action=verify_bridge&uuid=${UUID}&rollNo=${rollNo}`);
-                    const data = await res.json();
-                    if (data.status === "VERIFIED") {
-                        USER = data; localStorage.setItem('csync_user_v1000', JSON.stringify(data));
-                        this.confirmAction("Identity bridged."); setTimeout(() => location.reload(), 1500);
-                    } else alert("Sync failed.");
-                } catch(e) { alert("Handshake error."); }
+                const r = document.getElementById('bridge-roll').value;
+                const res = await fetch(`${APPS_URL}?action=verify_bridge&uuid=${UUID}&rollNo=${r}`);
+                const d = await res.json();
+                if(d.status==="VERIFIED") { USER=d; localStorage.setItem('csync_user_v1200', JSON.stringify(d)); location.reload(); }
             },
-
             switchTab(t) {
                 document.querySelectorAll('.view-container').forEach(v => v.classList.remove('view-active'));
                 document.getElementById('view-'+t).classList.add('view-active');
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
                 document.getElementById('nav-'+t).classList.add('nav-active');
-                lucide.createIcons();
+                if(t==='discuss') this.refreshFeed(); lucide.createIcons();
             },
-
-            async refreshLeadership() {
-                const res = await fetch(`${APPS_URL}?action=get_leadership`);
-                const data = await res.json();
-                document.getElementById('leader-list').innerHTML = data.map(r => `<div class="glass p-5 rounded-2xl flex items-center gap-4"><img src="${r.pic}" class="w-12 h-12 rounded-full object-cover"><div><h4 class="text-xs font-black uppercase text-white">${r.name}</h4><p class="text-[7px] text-slate-500 uppercase">🔥 ${r.streak} • ⭐ ${r.stars}</p></div></div>`).join('');
-            },
-
-            logout() { if(confirm("Unbind Hardware Node?")) { localStorage.clear(); location.reload(); } }
+            logout() { if(confirm("Unbind Node?")) { localStorage.clear(); location.reload(); } }
         };
 
         window.onload = () => UI.init();
