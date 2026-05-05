@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Shield -->
+  <rect width="512" height="512" rx="120" fill="black"/>
+  
+  <!-- Outer Sovereign Ring (Rotating Pulse) -->
+  <circle cx="256" cy="256" r="200" stroke="#00f2ff" stroke-width="8" stroke-dasharray="80 40" stroke-linecap="round">
+    <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="10s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Hexagonal Core (Institutional Strength) -->
+  <path d="M256 120L373.785 188V324L256 392L138.215 324V188L256 120Z" stroke="#00f2ff" stroke-width="20" stroke-linejoin="round" fill="rgba(0, 242, 255, 0.05)"/>
+
+  <!-- Stylized "C" Node (Data Splicing) -->
+  <path d="M310 210C300 190 280 180 256 180C210 180 180 215 180 256C180 297 210 332 256 332C280 332 300 322 310 302" stroke="white" stroke-width="25" stroke-linecap="round"/>
+  
+  <!-- The AI Pulse (Sentience) -->
+  <circle cx="256" cy="256" r="25" fill="#00f2ff">
+    <animate attributeName="r" values="20;30;20" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" />
+  </circle>
+
+  <!-- Circuit Trace -->
+  <path d="M256 120V150M256 362V392M138 324L160 310M373 188L350 202" stroke="#00f2ff" stroke-width="8" stroke-linecap="round"/>
+</svg>
