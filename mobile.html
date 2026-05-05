@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>C-Sync Sovereign Node</title>
     
-    <!-- PWA & Native Meta -->
+    <!-- PWA Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
@@ -15,10 +15,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --accent: #00f2ff; --bg: #000000; --card: rgba(15, 23, 42, 0.7); --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
+        :root { --accent: #00f2ff; --bg: #000000; --card: rgba(15, 23, 42, 0.7); --safe-top: env(safe-area-inset-top); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: white; margin: 0; height: 100dvh; overflow: hidden; user-select: none; padding-top: var(--safe-top); }
         
@@ -31,55 +31,40 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Oracle HUD */
-        #oracle-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; padding: 25px; padding-top: 60px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        #oracle-overlay { position: fixed; inset: 0; background: #000; z-index: 9000; display: none; flex-direction: column; padding: 25px; padding-top: 60px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #oracle-overlay.active { display: flex; transform: translateY(0); }
         .ai-msg { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--accent); border-radius: 0 15px 15px 15px; padding: 15px; font-size: 13px; color: #cbd5e1; margin-bottom: 15px; width: 95%; white-space: pre-wrap; line-height: 1.6; }
         .user-msg { background: rgba(255,255,255,0.05); border-radius: 15px 15px 0 15px; padding: 15px; font-size: 13px; align-self: flex-end; text-align: right; color: #fff; margin-bottom: 15px; width: 85%; margin-left: auto; }
 
-        /* Thinking Animation */
-        .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: dotPulse 1.4s infinite ease-in-out; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes dotPulse { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
-
-        /* Wake Pulse */
+        /* Background Pulse */
         #wake-indicator { position: fixed; top: var(--safe-top); right: 20px; display: flex; align-items: center; gap: 6px; z-index: 10000; transition: 0.3s; margin-top: 10px; }
         .pulse-ring { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: ringPulse 2s infinite; }
         @keyframes ringPulse { 0% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 242, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); } }
 
-        /* Birthday Sentience */
+        /* Camera Portal */
+        #camera-gate { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .cam-box { width: 320px; height: 320px; border-radius: 50%; border: 4px solid var(--accent); overflow: hidden; position: relative; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
+        .cam-box::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent); animation: scan 2s infinite linear; z-index: 10; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: dotPulse 1.4s infinite ease-in-out; }
+        @keyframes dotPulse { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
+        
         .bday-card { background: linear-gradient(45deg, #0f172a, #1e1b4b); border: 2px solid #fbbf24; animation: bday-glow 3s infinite alternate; }
         @keyframes bday-glow { 0% { box-shadow: 0 0 10px #fbbf24; } 100% { box-shadow: 0 0 30px #f59e0b; } }
-
-        /* Nav */
-        .bottom-nav { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; background: rgba(10,11,30,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); padding-bottom: calc(var(--safe-bottom) / 2); }
-        .nav-item { color: #475569; display: flex; flex-direction: column; align-items: center; font-size: 8px; font-weight: 800; transition: 0.3s; }
-        .nav-active { color: var(--accent); filter: drop-shadow(0 0 8px var(--accent)); transform: translateY(-3px); }
-
-        input, select, textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; padding: 14px !important; border-radius: 12px !important; width: 100%; font-size: 14px; }
-        .shimmer { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
-        
-        /* Camera Portal */
-        #camera-gate { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .cam-box { width: 320px; height: 320px; border-radius: 50%; border: 4px solid var(--accent); overflow: hidden; position: relative; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
-        .cam-box::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent); animation: scan 2.5s infinite linear; z-index: 10; }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <!-- WAKE INDICATOR -->
     <div id="wake-indicator" class="opacity-0">
-        <span class="text-[7px] font-black uppercase text-slate-500 tracking-[0.3em]">Syska Active</span>
+        <span class="text-[7px] font-black uppercase text-slate-500 tracking-[0.3em]">Syska Listening</span>
         <div class="pulse-ring"></div>
     </div>
 
-    <!-- SPLASH SCREEN -->
+    <!-- STATUS OVERLAY -->
     <div id="status-overlay" class="fixed inset-0 bg-black z-[9999] hidden flex flex-col items-center justify-center p-10 text-center">
-        <div class="w-32 h-32 mb-10 relative">
-            <img src="icon.svg" class="w-full h-full animate-pulse">
-            <div class="absolute inset-0 border-4 border-cyan-400 rounded-3xl animate-spin-slow opacity-20"></div>
-        </div>
+        <div class="w-32 h-32 mb-10 relative"><img src="icon.svg" class="w-full h-full animate-pulse"></div>
         <h2 id="status-title" class="font-['Orbitron'] text-cyan-400 text-xl mb-4 uppercase tracking-tighter shimmer">C-SYNC</h2>
         <p id="status-msg" class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Neural Handshake...</p>
     </div>
@@ -97,14 +82,12 @@
 
     <!-- BIOMETRIC PORTAL -->
     <div id="camera-gate">
-        <div class="cam-box mb-12">
-            <video id="v-stream" autoplay muted playsinline class="w-full h-full object-cover"></video>
-        </div>
+        <div class="cam-box mb-12"><video id="v-stream" autoplay muted playsinline class="w-full h-full object-cover"></video></div>
         <div class="text-center mb-16 px-10">
             <h3 class="font-['Orbitron'] text-cyan-400 text-xl animate-pulse mb-2 uppercase italic">Biometric Scan</h3>
-            <p id="cam-status" class="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-relaxed">SYSKA is verifying node liveliness...</p>
+            <p id="cam-status" class="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-relaxed">SYSKA verifying liveliness...</p>
         </div>
-        <button onclick="UI.closeCamera()" class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Abort Handshake</button>
+        <button onclick="UI.closeCamera()" class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Abort</button>
     </div>
 
     <!-- SYSKA HUD -->
@@ -120,7 +103,7 @@
             </div>
         </header>
         <div id="oracle-chat-box" class="flex-1 overflow-y-auto pr-2 space-y-4 flex flex-col-reverse">
-            <div class="ai-msg">Neural Hub Active. State your directive, Doctor Krishna Student. Conversational Loop ready.</div>
+            <div class="ai-msg">Neural Hub Active. State your directive, Doctor Krishna Student. Hands-free mode ready.</div>
         </div>
         <div id="ora-att-bar" class="hidden flex items-center gap-3 p-3 bg-white/5 rounded-xl mb-4 border border-white/10">
             <i data-lucide="image" class="w-4 h-4 text-cyan-400"></i>
@@ -141,7 +124,7 @@
         </div>
     </div>
 
-    <!-- NEXUS PROFILE MODAL -->
+    <!-- PROFILE MODAL -->
     <div id="profile-modal" class="fixed inset-0 bg-black/90 z-[9999] hidden flex flex-col items-center justify-end">
         <div class="glass w-full max-w-xl rounded-t-[3rem] p-10 border-t-4 border-cyan-400 transform translate-y-full transition-transform duration-500" id="profile-card">
             <button onclick="UI.closeProfile()" class="absolute top-6 right-8 text-slate-500"><i data-lucide="chevron-down"></i></button>
@@ -151,8 +134,8 @@
                 <p id="m-meta" class="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.3em]"></p>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-8">
-                <button onclick="UI.comm('tel')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-emerald-500"><i data-lucide="phone" class="text-emerald-500"></i><span class="text-[9px] font-black uppercase">Voice</span></button>
-                <button onclick="UI.comm('sms')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-cyan-500"><i data-lucide="message-square" class="text-cyan-500"></i><span class="text-[9px] font-black uppercase">Text</span></button>
+                <button onclick="UI.comm('tel')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-emerald-500"><i data-lucide="phone" class="text-emerald-500"></i><span class="text-[9px] font-black uppercase">Voice Call</span></button>
+                <button onclick="UI.comm('sms')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-cyan-500"><i data-lucide="message-square" class="text-cyan-500"></i><span class="text-[9px] font-black uppercase">Text Message</span></button>
                 <button onclick="UI.comm('tele')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-blue-500"><i data-lucide="send" class="text-blue-500"></i><span class="text-[9px] font-black uppercase">Telegram</span></button>
                 <button id="btn-linkedin" onclick="UI.comm('link')" class="glass p-5 rounded-2xl flex flex-col items-center gap-2 border-l-2 border-indigo-500"><i data-lucide="linkedin" class="text-indigo-500"></i><span class="text-[9px] font-black uppercase">LinkedIn</span></button>
             </div>
@@ -161,8 +144,7 @@
 
     <!-- MAIN APP STRUCTURE -->
     <div id="app-wrapper" class="flex flex-col h-full">
-        
-        <!-- DASHBOARD VIEW -->
+        <!-- DASHBOARD -->
         <div id="view-dashboard" class="view-container view-active">
             <header class="flex justify-between items-center mb-10 mt-4">
                 <h1 class="font-['Orbitron'] text-2xl italic font-black tracking-tighter">C-SYNC</h1>
@@ -171,11 +153,8 @@
                     <div id="h-stars" class="text-yellow-500 font-black text-xs">⭐ 0</div>
                 </div>
             </header>
-
             <div id="global-alert-zone" class="hidden space-y-4 mb-8"></div>
             <div id="bday-container"></div>
-
-            <!-- IDENTITY BENTO -->
             <div class="glass p-6 rounded-[2.5rem] mb-8 flex items-center gap-5 border-l-4 border-cyan-400 shimmer">
                 <img id="h-avatar" class="w-16 h-16 rounded-full border-2 border-white/10 object-cover shadow-2xl">
                 <div>
@@ -183,42 +162,30 @@
                     <p id="h-meta" class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Initialising Node</p>
                 </div>
             </div>
-
-            <!-- SYSKA TRIGGER -->
             <div onclick="UI.toggleOracle(true)" class="glass p-8 rounded-[3rem] border-t-4 border-cyan-400 mb-8 bg-gradient-to-br from-cyan-950/20 active:scale-95 transition-transform shadow-2xl">
-                <div class="flex justify-between items-start mb-2">
-                    <h4 class="text-cyan-400 font-black uppercase text-[10px] tracking-widest">Neural Oracle</h4>
-                    <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                </div>
-                <p class="text-white text-xl font-bold leading-tight">Engage SYSKA AI Intelligence</p>
-                <div class="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 mt-6 tracking-widest">
-                    <span>Analyze</span> • <span>Vision</span> • <span>"Hey Syska"</span>
-                </div>
+                <h4 class="text-cyan-400 font-black uppercase text-[10px] mb-2 tracking-widest">Neural Oracle</h4>
+                <p class="text-white text-xl font-bold leading-tight">Engage Multimodal Intelligence</p>
+                <div class="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500 mt-6 tracking-widest"><span>Analyze</span> • <span>Vision</span> • <span>"Hey Syska"</span></div>
             </div>
-
             <div id="hub-modules" class="grid grid-cols-2 gap-4"></div>
         </div>
 
-        <!-- NEXUS VIEW -->
         <div id="view-nexus" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-6 uppercase tracking-tighter mt-4">Nexus Directory</h2>
             <div class="mb-6"><input id="nexus-search" oninput="UI.filterNexus()" placeholder="Search candidates..." class="!py-4 shadow-xl"></div>
             <div id="nexus-list" class="space-y-3"></div>
         </div>
 
-        <!-- BOARD VIEW -->
         <div id="view-rankings" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter mt-4">Leadership</h2>
             <div id="leader-list" class="space-y-4"></div>
         </div>
 
-        <!-- FEED VIEW -->
         <div id="view-discuss" class="view-container">
-            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter mt-4">Sovereign Feed</h2>
+            <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter mt-4">Feed</h2>
             <div id="topic-list" class="space-y-4"></div>
         </div>
 
-        <!-- PROFILE VIEW -->
         <div id="view-profile" class="view-container">
             <h2 class="font-['Orbitron'] text-cyan-400 text-xl italic mb-8 uppercase tracking-tighter mt-4">Node Identity</h2>
             <div class="glass p-8 rounded-[3rem] space-y-6 text-center">
@@ -228,21 +195,14 @@
                 </div>
                 <input id="p-name" placeholder="Full Name" class="text-center font-bold">
                 <input id="p-linkedin" placeholder="LinkedIn URL" class="text-center">
-                <input id="p-phone" placeholder="Mobile Number" class="text-center font-bold">
+                <input id="p-phone" placeholder="Mobile Node" class="text-center font-bold">
                 <button onclick="UI.syncProfileUpdate()" id="sync-btn" class="cyber-btn shadow-lg">Sync Node DNA</button>
-                <button onclick="UI.logout()" class="text-red-500 font-black text-[9px] uppercase underline mt-4 tracking-widest">Unbind Hardware Node</button>
+                <button onclick="UI.logout()" class="text-red-500 font-black text-[9px] uppercase underline mt-4">Unbind Hardware</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: QR SCANNER -->
-    <div id="qr-modal" class="fixed inset-0 bg-black/95 z-[9999] hidden flex flex-col items-center justify-center p-10">
-        <button onclick="UI.closeQR()" class="absolute top-10 right-10 text-white"><i data-lucide="x" class="w-10 h-10"></i></button>
-        <div id="qr-reader" class="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-cyan-400 shadow-2xl"></div>
-        <p class="text-cyan-400 font-['Orbitron'] mt-8 animate-pulse text-xs uppercase tracking-widest text-center">Handshake Pulse Active</p>
-    </div>
-
-    <!-- PERSISTENT NAV -->
+    <!-- NAV -->
     <nav id="bottom-nav" class="bottom-nav hidden">
         <button onclick="UI.switchTab('dashboard')" class="nav-item nav-active" id="nav-dashboard"><i data-lucide="shield"></i><span>HUB</span></button>
         <button onclick="UI.switchTab('nexus')" class="nav-item" id="nav-nexus"><i data-lucide="users"></i><span>NEXUS</span></button>
@@ -254,7 +214,6 @@
     <script>
         const APPS_URL = "https://script.google.com/macros/s/AKfycbySW9SpdS5gJQ86RVbkjmFD4Y7kOe0BQW1X86escKtDcDtBLaaU9v_VEmvBnodNcRp8eg/exec";
         
-        // --- FUZZY HARDWARE FINGERPRINTING ---
         const generateFuzzyUUID = () => btoa([navigator.platform, navigator.hardwareConcurrency, (screen.width * screen.height), navigator.language].join('|'));
         const UUID = generateFuzzyUUID();
         let USER = JSON.parse(localStorage.getItem('csync_user_v1200'));
@@ -265,7 +224,6 @@
             async init() {
                 lucide.createIcons();
                 if (USER) { this.checkStatus(); return; }
-
                 try {
                     const res = await fetch(`${APPS_URL}?action=identify_device&uuid=${UUID}`);
                     const data = await res.json();
@@ -307,144 +265,151 @@
                 this.refreshAlerts();
                 this.initWakeWord();
                 this.syncLiveStats();
-                setInterval(() => this.refreshAlerts(), 60000);
             },
 
-            // --- WAKE WORD ("Hey Syska") ---
+            // --- WAKE WORD ("Hey Syska") REINFORCED ---
             initWakeWord() {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 if (!SpeechRecognition) return;
                 wakeWordRecognition = new SpeechRecognition();
                 wakeWordRecognition.continuous = true;
-                wakeWordRecognition.onstart = () => { document.getElementById('wake-indicator').classList.remove('opacity-0'); };
+                wakeWordRecognition.lang = 'en-US';
+                
+                wakeWordRecognition.onstart = () => { 
+                    document.getElementById('wake-indicator').classList.replace('opacity-0', 'opacity-100');
+                    console.log("SYSKA: Background Listener Active.");
+                };
+                
                 wakeWordRecognition.onresult = (e) => {
                     const t = e.results[e.results.length - 1][0].transcript.toLowerCase();
-                    if (t.includes("hi syska") || t.includes("hey syska")) this.triggerWake();
+                    if (t.includes("hi syska") || t.includes("hey syska")) {
+                        this.triggerWake();
+                    }
                 };
-                wakeWordRecognition.onend = () => { if(!isWakeActive) wakeWordRecognition.start(); };
-                document.body.addEventListener('click', () => { try { wakeWordRecognition.start(); } catch(e) {} }, { once: true });
+
+                wakeWordRecognition.onend = () => {
+                    if(!isWakeActive) {
+                        try { wakeWordRecognition.start(); } catch(err) {}
+                    }
+                };
+
+                // CRITICAL: Must trigger on first click to unlock audio context
+                document.body.addEventListener('click', () => {
+                    try { 
+                        wakeWordRecognition.start(); 
+                        this.speak("Neural Link Ready.");
+                    } catch(e) {}
+                }, { once: true });
             },
 
             triggerWake() {
                 if(navigator.vibrate) navigator.vibrate([40, 30, 40]);
-                isWakeActive = true; wakeWordRecognition.stop();
+                isWakeActive = true; 
+                wakeWordRecognition.stop(); 
                 this.toggleOracle(true);
-                this.speak(`Yes ${USER.name}, I am here.`);
-                setTimeout(() => { this.startSTT(); isWakeActive = false; }, 1500);
+                const greets = [`Yes ${USER.name}, how can I help?`, "Sovereign node active. Listening.", "Syska intelligence ready."];
+                this.speak(greets[Math.floor(Math.random()*greets.length)]);
+                setTimeout(() => { this.startSTT(); isWakeActive = false; }, 1800);
             },
 
-            // --- ATTENDANCE (AUTONOMOUS BIOMETRIC) ---
+            // --- ATTENDANCE REINFORCED ---
             async markPresence() {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     this.tempCoords = `${pos.coords.latitude},${pos.coords.longitude}`;
-                    this.confirmAction("Geofence verified. Point camera for biometric handshake.");
-                    document.getElementById('camera-gate').style.display = 'flex';
-                    document.getElementById('cam-trigger').style.display = 'none';
+                    const gate = document.getElementById('camera-gate');
+                    gate.style.display = 'flex';
+                    document.getElementById('cam-status').innerText = "Initializing media stream...";
                     try {
-                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 1280, height: 720 } });
-                        document.getElementById('v-stream').srcObject = stream;
-                        
-                        let count = 5;
-                        const timer = setInterval(() => {
-                            if (count > 0) {
-                                document.getElementById('cam-status').innerText = `SYSKA Capturing DNA in ${count}...`;
-                                if (navigator.vibrate) navigator.vibrate(20);
-                                count--;
-                            } else {
-                                clearInterval(timer);
-                                this.autoCaptureAttendance(stream);
-                            }
+                        this.activeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 640, height: 640 }, audio: false });
+                        document.getElementById('v-stream').srcObject = this.activeStream;
+                        this.confirmAction("Geofence confirmed. Autonomous handshake in 5 seconds.");
+                        let c = 5;
+                        const t = setInterval(() => {
+                            if(c > 0) { document.getElementById('cam-status').innerText = `SYSKA capturing DNA in ${c}...`; c--; }
+                            else { clearInterval(t); this.autoCaptureAttendance(); }
                         }, 1000);
-                    } catch(e) { alert("Camera protocol blocked."); this.closeCamera(); }
-                }, () => alert("GPS Pulse Lost. Ensure location is ON."));
+                    } catch(e) { alert("Biometric Hub Error."); this.closeCamera(); }
+                }, () => alert("GPS Pulse Lost."), { enableHighAccuracy: true });
             },
 
-            autoCaptureAttendance(stream) {
+            autoCaptureAttendance() {
                 const v = document.getElementById('v-stream'), c = document.createElement('canvas');
-                const size = Math.min(v.videoWidth, v.videoHeight);
                 c.width = 640; c.height = 640;
                 const ctx = c.getContext('2d');
+                const size = Math.min(v.videoWidth, v.videoHeight);
                 ctx.drawImage(v, (v.videoWidth-size)/2, (v.videoHeight-size)/2, size, size, 0, 0, 640, 640);
                 const face = c.toDataURL('image/jpeg', 0.8);
-                
                 document.body.style.filter = "brightness(3)";
                 setTimeout(() => {
                     document.body.style.filter = "none";
-                    document.getElementById('camera-gate').style.display = 'none';
-                    stream.getTracks().forEach(t => t.stop());
+                    this.closeCamera();
                     this.submitAttendance(face);
-                }, 150);
+                }, 200);
             },
 
             async submitAttendance(face) {
                 document.getElementById('status-overlay').classList.remove('hidden');
-                document.getElementById('status-msg').innerText = "Analyzing Biometric Liveliness...";
+                document.getElementById('status-msg').innerText = "Analyzing Liveliness...";
                 const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'attendance', id: USER.id, name: USER.name, coords: this.tempCoords, liveFace: face }) });
                 const status = (await res.text()).replace(/['"]+/g, '').trim();
                 document.getElementById('status-overlay').classList.add('hidden');
-                
-                if (status === "BIO_VERIFIED") { this.confirmAction("Identity confirmed. Attendance authorized."); this.syncLiveStats(); }
+                if (status === "BIO_VERIFIED") { this.confirmAction("Attendance authorised. Streak incremented."); this.syncLiveStats(); }
                 else if (status === "LIVELINESS_FAIL") this.confirmAction("Handshake rejected. Static image detected.");
-                else if (status === "OUTSIDE_HOURS") this.confirmAction("Access Denied: Attendance window mismatch.");
                 else if (status === "HOLIDAY_OFF") this.confirmAction("System Standby: Institutional Holiday.");
                 else this.confirmAction("Biometric Mismatch. Protocol rejected.");
             },
 
-            // --- SYSKA AI (TYPEWRITER & CONVERSATIONAL) ---
+            // --- SYSKA ORACLE ---
             toggleOracle(show) { const el = document.getElementById('oracle-overlay'); el.style.display = 'flex'; setTimeout(() => el.classList.toggle('active', show), 10); },
             
             toggleConversationalMode() {
                 isConversationalMode = !isConversationalMode;
                 document.getElementById('conv-btn').classList.toggle('text-cyan-400', isConversationalMode);
-                document.getElementById('conv-btn').classList.toggle('bg-cyan-400/10', isConversationalMode);
-                if (isConversationalMode) { this.confirmAction("Conversational protocol engaged."); this.startSTT(); }
+                if (isConversationalMode) { this.confirmAction("Conversational protocol active."); this.startSTT(); }
             },
 
             startSTT() {
                 if (isSpeaking) return;
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                const rec = new SpeechRecognition();
+                const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
                 rec.lang = 'en-US'; rec.start();
-                rec.onstart = () => { document.getElementById('ora-pulse').classList.add('animate-ping', 'bg-cyan-400'); document.getElementById('oracle-status-text').innerText = "Syska Listening..."; };
+                rec.onstart = () => { document.getElementById('ora-pulse').classList.add('animate-ping'); document.getElementById('oracle-status-text').innerText = "Syska Listening..."; };
                 rec.onresult = (e) => { document.getElementById('ora-input').value = e.results[e.results.length-1][0].transcript; this.askOracle(); };
                 rec.onend = () => { document.getElementById('ora-pulse').classList.remove('animate-ping'); };
             },
 
             speak(txt) {
                 window.speechSynthesis.cancel(); isSpeaking = true;
-                let audio = txt.replace(/\bDr\./g, 'Doctor').replace(/\bMr\./g, 'Mister').replace(/\bGDC\b/g, 'G-D-C');
+                const audio = txt.replace(/\bDr\./g, 'Doctor').replace(/\bMr\./g, 'Mister').replace(/\bGDC\b/g, 'G-D-C');
                 const msg = new SpeechSynthesisUtterance(audio);
                 msg.onstart = () => document.getElementById('ora-pulse').classList.add('bg-purple-500');
                 msg.onend = () => { 
                     isSpeaking = false; document.getElementById('ora-pulse').classList.remove('bg-purple-500');
-                    document.getElementById('oracle-status-text').innerText = "System Standby";
                     if(isConversationalMode) setTimeout(() => this.startSTT(), 700); 
                 };
                 window.speechSynthesis.speak(msg);
             },
 
             typeWriter(text, elementId) {
-                let i = 0; const container = document.getElementById(elementId); container.innerHTML = "";
-                const type = () => { if (i < text.length) { container.innerHTML += text.charAt(i); i++; setTimeout(type, 12); } };
-                type();
+                let i = 0; const c = document.getElementById(elementId); c.innerHTML = "";
+                const t = () => { if (i < text.length) { c.innerHTML += text.charAt(i); i++; setTimeout(t, 12); } };
+                t();
             },
 
             async askOracle() {
                 const q = document.getElementById('ora-input').value; if (!q && !attachment) return;
                 const box = document.getElementById('oracle-chat-box');
-                box.insertAdjacentHTML('afterbegin', `<div class="user-msg">${q || "Visual context scan requested."}</div>`);
+                box.insertAdjacentHTML('afterbegin', `<div class="user-msg">${q || "Visual Scan"}</div>`);
                 document.getElementById('ora-input').value = "";
                 const tid = "ai-" + Date.now();
                 box.insertAdjacentHTML('afterbegin', `<div class="ai-msg" id="${tid}"><div class="flex gap-1"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`);
                 box.scrollTop = 0;
-
                 try {
                     const res = await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'oracle_query', query: q, user: USER.name, role: USER.role, attachment }) });
                     const text = (await res.text()).replace(/^"|"$/g, '');
                     this.typeWriter(text, tid);
                     if(ttsEnabled) this.speak(text);
                     this.clearAttachment();
-                } catch(e) { document.getElementById(tid).innerText = "Neural Hub Timeout."; }
+                } catch(e) { document.getElementById(tid).innerText = "Hub Timeout."; }
             },
 
             handleOracleFile(input) {
@@ -454,14 +419,14 @@
                     if (file.type.startsWith('image/')) {
                         const img = new Image();
                         img.onload = () => {
-                            const canvas = document.createElement('canvas');
+                            const cvs = document.createElement('canvas');
                             let w = img.width, h = img.height, max = 800;
                             if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
-                            canvas.width = w; canvas.height = h;
-                            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                            attachment = { name: file.name, type: 'image/jpeg', data: canvas.toDataURL('image/jpeg', 0.4) };
+                            cvs.width = w; cvs.height = h;
+                            cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+                            attachment = { name: file.name, type: 'image/jpeg', data: cvs.toDataURL('image/jpeg', 0.4) };
                             document.getElementById('ora-att-bar').classList.remove('hidden');
-                            this.confirmAction("Visual data spliced for analysis.");
+                            this.confirmAction("Visual data spliced.");
                         };
                         img.src = e.target.result;
                     } else {
@@ -479,7 +444,7 @@
                 const res = await fetch(`${APPS_URL}?action=get_nexus`);
                 nexusCache = await res.json();
                 document.getElementById('nexus-list').innerHTML = nexusCache.map((n, index) => `
-                    <div onclick="UI.showProfile(${index})" class="glass p-4 rounded-2xl flex items-center gap-4 border-l-2 border-white/10 active:bg-cyan-400/5 transition-all">
+                    <div onclick="UI.showProfile(${index})" class="glass p-4 rounded-2xl flex items-center gap-4 border-l-2 border-white/10 active:bg-cyan-400/5 cursor-pointer">
                         <img src="${n.pic}" class="w-12 h-12 rounded-full object-cover grayscale hover:grayscale-0 shadow-lg">
                         <div class="flex-1">
                             <h4 class="text-[11px] font-black text-white uppercase">${n.sal} ${n.name}</h4>
@@ -503,10 +468,7 @@
                 setTimeout(() => document.getElementById('profile-card').classList.remove('translate-y-full'), 10);
             },
 
-            closeProfile() {
-                document.getElementById('profile-card').classList.add('translate-y-full');
-                setTimeout(() => document.getElementById('profile-modal').classList.add('hidden'), 500);
-            },
+            closeProfile() { document.getElementById('profile-card').classList.add('translate-y-full'); setTimeout(() => document.getElementById('profile-modal').classList.remove('flex'), 500); },
 
             comm(type) {
                 const n = this.selectedCandidate; if (!n) return;
@@ -522,17 +484,15 @@
                 const data = await res.json();
                 document.getElementById('topic-list').innerHTML = data.topics.map(t => {
                     const rps = data.replies.filter(r => r[1] === t[0]);
-                    return `
-                        <div class="glass p-6 rounded-[2.5rem] border-l-4 border-cyan-400 mb-8 shadow-xl">
-                            <p class="text-[8px] text-slate-500 uppercase font-black mb-2">Ref: ${t[0]} • ${t[2]}</p>
-                            <h4 class="text-xs font-black text-white mb-2 uppercase tracking-tight">${t[4]}</h4>
-                            <p class="text-[10px] text-slate-400 mb-4 leading-relaxed">${t[5]}</p>
-                            <div class="space-y-3 mb-4 pl-4 border-l border-white/5">
-                                ${rps.map(r => `<div class="bg-white/5 p-3 rounded-xl"><p class="text-[7px] text-cyan-400 font-black mb-1">${r[5]}:</p><p class="text-[10px] text-slate-300">${r[6]}</p>
-                                <button onclick="UI.replyTo('${t[0]}', '${r[0]}', '${r[5]}')" class="text-[6px] text-slate-500 uppercase mt-2 underline tracking-widest">Enhance Idea</button></div>`).join('')}
-                            </div>
-                            <button onclick="UI.replyTo('${t[0]}')" class="cyber-btn !py-2 !text-[8px]">Add Viewpoint</button>
-                        </div>`;
+                    return `<div class="glass p-6 rounded-[2.5rem] border-l-4 border-cyan-400 mb-8">
+                        <p class="text-[8px] text-slate-500 uppercase font-black mb-2">Staff: ${t[2]}</p>
+                        <h4 class="text-xs font-black text-white mb-2 uppercase">${t[4]}</h4>
+                        <p class="text-[10px] text-slate-400 mb-4">${t[5]}</p>
+                        <div class="space-y-3 mb-4 pl-4 border-l border-white/5">
+                            ${rps.map(r => `<div class="bg-white/5 p-3 rounded-xl"><p class="text-[7px] text-cyan-400 font-black mb-1">${r[5]}:</p><p class="text-[10px] text-slate-300">${r[6]}</p><button onclick="UI.replyTo('${t[0]}', '${r[0]}', '${r[5]}')" class="text-[6px] text-slate-500 uppercase mt-2 underline">Enhance idea</button></div>`).join('')}
+                        </div>
+                        <button onclick="UI.replyTo('${t[0]}')" class="cyber-btn !py-2 !text-[8px]">Add Viewpoint</button>
+                    </div>`;
                 }).join('');
             },
 
@@ -558,14 +518,8 @@
                 const bdays = await res.json();
                 if (bdays.length > 0) {
                     const b = bdays[0];
-                    document.getElementById('bday-container').innerHTML = `
-                        <div class="bday-card p-6 rounded-[2.5rem] mb-8 relative overflow-hidden border-2 border-yellow-500 shadow-2xl">
-                            <div class="relative z-10 flex items-center gap-4">
-                                <img src="${b.pic}" class="w-16 h-16 rounded-full border-2 border-white object-cover shadow-lg">
-                                <div><h4 class="text-yellow-400 font-black text-[10px] uppercase mb-1">Celebration Pulse</h4><p class="text-white text-lg font-black leading-tight">Many more happy returns, ${b.salutation} ${b.name}!</p></div>
-                            </div>
-                        </div>`;
-                    this.confirmAction(`Dr. V.S. Krishna G-D-C wishes you a wonderful birthday, ${b.salutation} ${b.name}.`);
+                    document.getElementById('bday-container').innerHTML = `<div class="bday-card p-6 rounded-[2.5rem] mb-8 border-2 border-yellow-500 shadow-xl"><p class="text-white text-lg font-black leading-tight">Many more happy returns, ${b.salutation} ${b.name}!</p></div>`;
+                    this.confirmAction(`Sovereign Hub wishes you a wonderful birthday, ${b.salutation} ${b.name}.`);
                 }
             },
 
@@ -581,8 +535,8 @@
 
             renderHubModules() {
                 let modules = `<button onclick="UI.markPresence()" class="glass p-6 rounded-[2rem] text-left border-l-4 border-cyan-500 shadow-xl"><i data-lucide="map-pin" class="text-cyan-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Presence</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Biometric Handshake</p></button>`;
-                if (USER.role !== 'Alumni') modules += `<button onclick="UI.openQR('lab')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500 shadow-xl"><i data-lucide="scan-line" class="text-emerald-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Lab PC</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Station Unlock</p></button>`;
-                if (['HOD', 'Lecturer', 'Lab Assistant'].includes(USER.role)) modules += `<button onclick="UI.openQR('admin')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500 col-span-2 shadow-xl"><i data-lucide="monitor-check" class="text-yellow-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Authorize Command Hub</h4></button>`;
+                if (USER.role !== 'Alumni') modules += `<button onclick="UI.openQR('lab')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-emerald-500 shadow-xl"><i data-lucide="scan-line" class="text-emerald-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Lab PC</h4><p class="text-[7px] text-slate-500 font-bold uppercase mt-1">Unlock Station</p></button>`;
+                if (['HOD', 'Lecturer', 'Lab Assistant'].includes(USER.role)) modules += `<button onclick="UI.openQR('admin')" class="glass p-6 rounded-[2rem] text-left border-l-4 border-yellow-500 col-span-2 shadow-xl"><i data-lucide="monitor-check" class="text-yellow-500 w-5 h-5 mb-3"></i><h4 class="text-[10px] font-black uppercase text-white">Command Hub Auth</h4></button>`;
                 document.getElementById('hub-modules').innerHTML = modules; lucide.createIcons();
             },
 
@@ -610,9 +564,7 @@
             closeQR() { if(this.scanner) this.scanner.stop().catch(()=>{}); document.getElementById('qr-modal').classList.add('hidden'); },
 
             async syncProfileUpdate() {
-                const name = document.getElementById('p-name').value, phone = document.getElementById('p-phone').value, link = document.getElementById('p-linkedin').value;
-                const photo = document.getElementById('p-edit-preview').src, btn = document.getElementById('sync-btn');
-                btn.innerText = "SPLICING DNA...";
+                const name = document.getElementById('p-name').value, phone = document.getElementById('p-phone').value, link = document.getElementById('p-linkedin').value, photo = document.getElementById('p-edit-preview').src;
                 await fetch(APPS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', uid: USER.id, name, phone, linkedin: link, photo }) });
                 USER.name = name; USER.phone = phone; USER.photo = photo; USER.linkedin = link;
                 localStorage.setItem('csync_user_v1200', JSON.stringify(USER));
@@ -620,14 +572,12 @@
             },
 
             previewProfileUpdate(input) {
-                const reader = new FileReader(); reader.onload = (e) => document.getElementById('p-edit-preview').src = e.target.result;
-                reader.readAsDataURL(input.files[0]);
+                const r = new FileReader(); r.onload = (e) => document.getElementById('p-edit-preview').src = e.target.result;
+                r.readAsDataURL(input.files[0]);
             },
 
             confirmAction(msg) { if (navigator.vibrate) navigator.vibrate([30, 50, 30]); if (ttsEnabled) this.speak(msg); },
-            filterNexus() { const q = document.getElementById('nexus-search').value.toLowerCase(); this.renderNexus(nexusCache.filter(n => n.name.toLowerCase().includes(q) || n.uid.toString().includes(q))); },
-            renderNexus(d) { /* Re-used from refreshNexus rendering */ },
-            closeCamera() { if(this.stream) this.stream.getTracks().forEach(t=>t.stop()); document.getElementById('camera-gate').style.display='none'; },
+            closeCamera() { if(this.activeStream) this.activeStream.getTracks().forEach(t=>t.stop()); document.getElementById('camera-gate').style.display='none'; },
             async completeBridge() {
                 const r = document.getElementById('bridge-roll').value;
                 const res = await fetch(`${APPS_URL}?action=verify_bridge&uuid=${UUID}&rollNo=${r}`);
